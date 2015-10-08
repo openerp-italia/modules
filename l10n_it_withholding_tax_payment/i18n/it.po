@@ -1,0 +1,213 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* openforce_withholding_tax_move_payment
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 7.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-03-24 11:45+0000\n"
+"PO-Revision-Date: 2015-03-24 11:45+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#: model:ir.model,name:openforce_withholding_tax_move_payment.model_withholding_tax_move
+#. module: openforce_withholding_tax_move_payment
+msgid "Withholding Tax Move"
+msgstr "Voci ritenuta"
+
+#: selection:withholding.tax.move.payment,state:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Confirmed"
+msgstr "Confermato"
+
+#: view:wizard.wt.move.payment.create:0
+#. module: openforce_withholding_tax_move_payment
+msgid "WT Moves"
+msgstr "Voci Ritenuta"
+
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Confirm"
+msgstr "Conferma"
+
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Tot"
+msgstr "Tot"
+
+#: code:addons/openforce_withholding_tax_move_payment/account.py:134
+#. module: openforce_withholding_tax_move_payment
+#, python-format
+msgid "Datas required for account move creation:                         Date payment, journal, account"
+msgstr "Dati obbligatori per la creazione della registrazione contaibile:Data pagamento, sezionale, conto"
+
+#: selection:withholding.tax.move.payment,state:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Draft"
+msgstr "Bozza"
+
+#: field:withholding.tax.move.payment,move_id:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Account move"
+msgstr "Account move"
+
+#: model:ir.actions.act_window,name:openforce_withholding_tax_move_payment.wizard_wt_move_payment_create_action
+#: view:wizard.wt.move.payment.create:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Create Move Payment"
+msgstr "Crea Movimento Contabile"
+
+#: code:addons/openforce_withholding_tax_move_payment/account.py:157
+#. module: openforce_withholding_tax_move_payment
+#, python-format
+msgid "Withholding Tax Payment %s"
+msgstr "Vers. Ritenuta %s"
+
+#: field:withholding.tax.move.payment,state:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Status"
+msgstr "Stato"
+
+#: model:ir.model,name:openforce_withholding_tax_move_payment.model_wizard_wt_move_payment_create
+#. module: openforce_withholding_tax_move_payment
+msgid "WT wizard create move payment"
+msgstr "WT wizard create move payment"
+
+#: field:withholding.tax.move.payment,journal_id:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Journal"
+msgstr "Sezionale"
+
+#: code:addons/openforce_withholding_tax_move_payment/account.py:102
+#. module: openforce_withholding_tax_move_payment
+#, python-format
+msgid "Wt move alredy in a move payment!                         Move paym. %s -Ref WT: %s - %s - %s"
+msgstr "La voce di ritenuta è contenuta già in un versamento"
+
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Set to Draft"
+msgstr "Imposta a Bozza"
+
+#: code:addons/openforce_withholding_tax_move_payment/account.py:141
+#: code:addons/openforce_withholding_tax_move_payment/account.py:176
+#. module: openforce_withholding_tax_move_payment
+#, python-format
+msgid "Withholding Tax Payment"
+msgstr "Versamenti Ritenuta"
+
+#: field:withholding.tax.move.payment,date_stop:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Date Stop"
+msgstr "Data Fine"
+
+#: field:withholding.tax.move.payment,date:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Date"
+msgstr "Data"
+
+#: view:wizard.wt.move.payment.create:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Generate"
+msgstr "Genera"
+
+#: field:withholding.tax.move.payment,account_id:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Account"
+msgstr "Conto"
+
+#: field:withholding.tax.move.payment,name:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Name"
+msgstr "Nome"
+
+#: code:addons/openforce_withholding_tax_move_payment/account.py:96
+#. module: openforce_withholding_tax_move_payment
+#, python-format
+msgid "Wt move alredy paid! - %s - %s - %s"
+msgstr "Voce Ritenuta già versata! - %s - %s - %s"
+
+#: field:withholding.tax.move.payment,line_ids:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Lines"
+msgstr "Lines"
+
+#: model:ir.actions.act_window,name:openforce_withholding_tax_move_payment.action_of_withholding_tax_move_payment
+#. module: openforce_withholding_tax_move_payment
+msgid "Withhoulding Tax Move Payment"
+msgstr "Withhoulding Tax Move Payment"
+
+#: model:ir.model,name:openforce_withholding_tax_move_payment.model_withholding_tax_move_payment
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Withholding Tax Move Payment"
+msgstr "Versamenti Ritenuta"
+
+#: code:addons/openforce_withholding_tax_move_payment/account.py:95
+#: code:addons/openforce_withholding_tax_move_payment/account.py:101
+#: code:addons/openforce_withholding_tax_move_payment/account.py:133
+#. module: openforce_withholding_tax_move_payment
+#, python-format
+msgid "Error!"
+msgstr "Errore!"
+
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Create Account Move"
+msgstr "Crea Registrazione Contabile"
+
+#: field:withholding.tax.move.payment,date_start:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Date Start"
+msgstr "Data Inizio"
+
+#: field:wizard.wt.move.payment.create,wt_move_ids:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Wt Moves"
+msgstr "Voci di Ritenuta"
+
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Period"
+msgstr "Periodo"
+
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Account Setting"
+msgstr "Contabilità"
+
+#: field:withholding.tax.move.payment,amount:0
+#. module: openforce_withholding_tax_move_payment
+msgid "WT amount"
+msgstr "Importo Ritenuta"
+
+#: view:withholding.tax.move.payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Withholding Move Payment"
+msgstr "Versamenti Ritenuta"
+
+#: model:ir.ui.menu,name:openforce_withholding_tax_move_payment.menu_of_withholding_tax_move_payment
+#. module: openforce_withholding_tax_move_payment
+msgid "WT Move Payments"
+msgstr "Versamenti Ritenuta"
+
+#: view:wizard.wt.move.payment.create:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Cancel"
+msgstr "Cancella"
+
+#: field:withholding.tax.move.payment,date_payment:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Date Payment"
+msgstr "Data Pagamento"
+
+#: field:withholding.tax.move,wt_move_payment_id:0
+#. module: openforce_withholding_tax_move_payment
+msgid "Move Payment"
+msgstr "Versamento Ritenuta"
+
