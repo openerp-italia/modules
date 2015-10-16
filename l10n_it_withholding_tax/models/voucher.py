@@ -62,9 +62,12 @@ class account_voucher(orm.Model):
                         line['amount_residual_withholding_tax']
                 
                 # Redistribuite amount
+                extra_amount = 0
                 for line in lines:
                     if tot_amount <= 0:
                         break
+                    save_amount = line['amount']
+                    line['amount'] += extra_amount
                     if line['amount'] > (line['amount_unreconciled'] \
                                     - line['amount_residual_withholding_tax']):
                         line['amount'] = line['amount_unreconciled'] \
@@ -72,6 +75,7 @@ class account_voucher(orm.Model):
                         line['amount'] = round(
                             line['amount'], dp_obj.precision_get(cr, uid, 
                                                                  'Account'))
+                    extra_amount += (save_amount - line['amount'])
                     tot_amount -= line['amount'] 
             # Allocate WT 
             for line in lines:
