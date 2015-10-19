@@ -214,7 +214,7 @@ class account_invoice(models.Model):
         self.compute_all_withholding_tax()
         return res
     
-    @api.onchange('fiscal_position', 'withholding_tax')
+    @api.onchange('fiscal_position')
     def onchange_fiscal_position(self):
         use_wt = False
         if self.fiscal_position and self.fiscal_position.withholding_tax_ids:
