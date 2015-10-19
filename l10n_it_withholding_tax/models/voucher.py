@@ -491,7 +491,7 @@ class withholding_tax_voucher_line(orm.Model):
         '''
         wt_statement_obj = self.pool['withholding.tax.statement']
         wt_move_obj = self.pool['withholding.tax.move']
-        wt_invoice_obj = self.pool['account.invoice.withholding.tax']
+        payment_term_obj = self.pool['account.payment.term']
         for wt_v_line in self.browse(cr, uid, ids):
              # Search statemnt of competence
             domain = [('move_id', '=', 
@@ -503,7 +503,15 @@ class withholding_tax_voucher_line(orm.Model):
                 wt_st_id = wt_st_ids[0]
             else:
                 wt_st_id = False
-            
+            # Date maturity
+            # TODO : split wt moves for payment with more lines
+            payment_lines = payment_term_obj.compute(
+                        cr, uid, wt_v_line.withholding_tax_id.payment_term.id, 
+                        wt_v_line.amount, 
+                        wt_v_line.voucher_line_id.voucher_id.date or False, 
+                        context=context)  
+            if payment_lines:
+                p_date_maturity = payment_lines[0][0]  
             # Create move if doesn't exist
             domain = [('wt_voucher_line_id', '=', wt_v_line.id),
                       ('move_line_id', '=', False)]
@@ -518,6 +526,7 @@ class withholding_tax_voucher_line(orm.Model):
                 'account_move_id': 
                     wt_v_line.voucher_line_id.voucher_id.move_id.id,
                 'date_maturity': 
+                    p_date_maturity or
                     wt_v_line.voucher_line_id.move_line_id.date_maturity            
                 }
             if not wt_move_ids:
