@@ -45,8 +45,6 @@ class spesometro_comunicazione_export_file(models.TransientModel):
         filename = statement._get_file_name()
         # file = self.env['account.intrastat.statement'].\
         #     browse(statement_id).generate_file_export()
-        import pdb
-        pdb.set_trace()
         out = base64.encodestring(file)
         #out = file
         
