@@ -95,13 +95,13 @@ class withholding_tax_move_payment(orm.Model):
         for wt_move in wt_move_obj.browse(cr, uid, move_ids):
             if wt_move.state == 'paid' :
                 raise orm.except_orm(_('Error!'),
-                        _("Wt move alredy paid! - %s - %s - %s") 
+                        _("Wt move already paid! - %s - %s - %s") 
                         % (wt_move.partner_id.name, 
                            wt_move.date,
                            str(wt_move.amount) ))
             if wt_move.wt_move_payment_id:
                 raise orm.except_orm(_('Error!'),
-                        _("Wt move alredy in a move payment! \
+                        _("Wt move already in a move payment! \
                         Move paym. %s -Ref WT: %s - %s - %s") 
                         % (str(wt_move.wt_move_payment_id.id),
                            wt_move.partner_id.name, 
