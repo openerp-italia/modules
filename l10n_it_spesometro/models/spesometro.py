@@ -776,13 +776,21 @@ class spesometro_comunicazione(models.Model):
         for line in self.line_FA_ids:
             # Converto saldi negativi x casi di importi estrapolati dalla 
             # contabilità
-            if line.attive_imponibile_non_esente < 0:
-                line.attive_imponibile_non_esente = \
-                    line.attive_imponibile_non_esente * -1 
+            importo_test = 0
+            if line.attive_imponibile_non_esente:
+                if line.attive_imponibile_non_esente < 0:
+                    line.attive_imponibile_non_esente = \
+                        line.attive_imponibile_non_esente * -1 
+                importo_test = line.attive_imponibile_non_esente
+            if line.passive_imponibile_non_esente:
+                if line.passive_imponibile_non_esente < 0:
+                    line.passive_imponibile_non_esente = \
+                        line.passive_imponibile_non_esente * -1 
+                importo_test = line.passive_imponibile_non_esente
             if configurazione.quadro_fa_limite_importo :
-                if line.attive_imponibile_non_esente \
-                    and (line.attive_imponibile_non_esente < \
-                         configurazione.quadro_fa_limite_importo):
+                if importo_test \
+                    and (importo_test < \
+                        configurazione.quadro_fa_limite_importo):
                     line.unlink()
         
         for line in self.line_SA_ids:
