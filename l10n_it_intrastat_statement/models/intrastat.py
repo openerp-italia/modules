@@ -927,6 +927,13 @@ class account_intrastat_statement_sale_section1(models.Model):
     
     @api.model
     def _prepare_export_line(self):
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Sale Section 1') 
+                % (self.partner_id.name,))
+            
         rcd = ''
         # Codice dello Stato membro dell’acquirente
         self.country_partner_id.with_context(control_ISO_code=True).\
@@ -1036,7 +1043,12 @@ class account_intrastat_statement_sale_section2(models.Model):
     
     @api.model
     def _prepare_export_line(self):
-        # controls
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Sale Section 2') 
+                % (self.partner_id.name,))
         # .. year ref
         if not self.year_id:
             raise ValidationError(
@@ -1152,6 +1164,13 @@ class account_intrastat_statement_sale_section3(models.Model):
     
     @api.model
     def _prepare_export_line(self):
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Sale Section 3') 
+                % (self.partner_id.name,))
+        
         rcd = ''
         # Codice dello Stato membro dell’acquirente
         self.country_partner_id.with_context(control_ISO_code=True).\
@@ -1253,7 +1272,12 @@ class account_intrastat_statement_sale_section4(models.Model):
     
     @api.model
     def _prepare_export_line(self):
-        # controls
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Sale Section 4') 
+                % (self.partner_id.name,))
         # .. year ref
         if not self.year_id:
             raise ValidationError(
@@ -1429,6 +1453,13 @@ class account_intrastat_statement_purchase_section1(models.Model):
     
     @api.model
     def _prepare_export_line(self):
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Purchase Section 1') 
+                % (self.partner_id.name,))
+        
         rcd = ''
         # Codice dello Stato membro del fornitore
         self.country_partner_id.with_context(control_ISO_code=True).\
@@ -1551,7 +1582,12 @@ class account_intrastat_statement_purchase_section2(models.Model):
     
     @api.model
     def _prepare_export_line(self):
-        # controls
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Purchase Section 2') 
+                % (self.partner_id.name,))
         # .. year ref
         if not self.year_id:
             raise ValidationError(
@@ -1675,6 +1711,13 @@ class account_intrastat_statement_purchase_section3(models.Model):
     
     @api.model
     def _prepare_export_line(self):
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Purchase Section 3') 
+                % (self.partner_id.name,))
+            
         rcd = ''
         # Codice dello Stato membro del fornitore
         self.country_partner_id.with_context(control_ISO_code=True).\
@@ -1788,7 +1831,12 @@ class account_intrastat_statement_purchase_section4(models.Model):
     
     @api.model
     def _prepare_export_line(self):
-        # controls
+        # Controls
+        # .. Vat code
+        if not self.vat_code:
+            raise ValidationError(
+                _('Missing Vat code for %s in Purchase Section 4') 
+                % (self.partner_id.name,))
         # .. year ref
         if not self.year_id:
             raise ValidationError(
