@@ -387,7 +387,7 @@ class account_intrastat_statement(models.Model):
         rcd += '{:4s}'.format("")
         # Codice fiscale o numero partita IVA o codice spedizioniere del 
         #     richiedente (utente autorizzato)
-        rcd += '{:16s}'.format(self.vat_taxpayer)
+        rcd += '{:16s}'.format(self.vat_taxpayer.replace(' ', ''))
         #Progressivo sede utente autorizzato
         prg = self._get_progressive_interchange()
         rcd += '{:3s}'.format(str(prg).zfill(3))
@@ -933,7 +933,7 @@ class account_intrastat_statement_sale_section1(models.Model):
             intrastat_validate()
         rcd += '{:2s}'.format(self.country_partner_id.code or '')
         # Codice IVA dell’acquirente
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Codice della natura della transazione
@@ -1070,7 +1070,7 @@ class account_intrastat_statement_sale_section2(models.Model):
         # Codice dello Stato membro dell’acquirente
         rcd += '{:2s}'.format(self.country_partner_id.code or '')
         # Codice IVA dell’acquirente
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Segno da attribuire alle variazioni da X(1) apportare
         rcd += '{:1s}'.format(self.sign_variation or '')
         # Ammontare delle operazioni in euro
@@ -1158,7 +1158,7 @@ class account_intrastat_statement_sale_section3(models.Model):
             intrastat_validate()
         rcd += '{:2s}'.format(self.country_partner_id.code or '')
         # Codice IVA del fornitore
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Numero Fattura
@@ -1287,7 +1287,7 @@ class account_intrastat_statement_sale_section4(models.Model):
                 _('Partner without Country') )
         rcd += '{:2s}'.format(country_id.code or '')
         # Codice IVA dell’acquirente
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Numero Fattura
@@ -1435,7 +1435,7 @@ class account_intrastat_statement_purchase_section1(models.Model):
             intrastat_validate()
         rcd += '{:2s}'.format(self.country_partner_id.code or '')
         # Codice IVA del fornitore
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Ammontare delle operazioni in valuta
@@ -1584,7 +1584,7 @@ class account_intrastat_statement_purchase_section2(models.Model):
             intrastat_validate()
         rcd += '{:2s}'.format(self.country_partner_id.code or '')
         # Codice IVA del fornitore
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Segno da attribuire alle variazioni da X(1) apportare
         rcd += '{:1s}'.format(self.sign_variation or '')
         # Ammontare delle operazioni in euro
@@ -1681,7 +1681,7 @@ class account_intrastat_statement_purchase_section3(models.Model):
             intrastat_validate()
         rcd += '{:2s}'.format(self.country_partner_id.code or '')
         # Codice IVA del fornitore
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Ammontare delle operazioni in valuta
@@ -1822,7 +1822,7 @@ class account_intrastat_statement_purchase_section4(models.Model):
                 _('Partner without Country') )
         rcd += '{:2s}'.format(country_id.code or '')
         # Codice IVA dell’acquirente
-        rcd += '{:12s}'.format(self.vat_code or '')
+        rcd += '{:12s}'.format(self.vat_code.replace(' ', '') or '')
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Ammontare delle operazioni in valuta
