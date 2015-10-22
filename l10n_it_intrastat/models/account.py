@@ -293,6 +293,10 @@ class account_invoice(models.Model):
             if not 'intrastat_code_id' in intrastat_data \
                 or intrastat_data['intrastat_type'] == 'exclude':
                 continue
+            # Free lines 
+            if self.company_id.intrastat_exclude_free_line \
+                and not line.price_subtotal:
+                continue
             # lines to split at the end
             if intrastat_data['intrastat_type'] == 'misc':
                 lines_to_split.append(line)
