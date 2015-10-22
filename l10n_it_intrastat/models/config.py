@@ -35,8 +35,9 @@ class res_company(models.Model):
         ('gross', 'Gross weight'),
         ('net', 'Net weight'),
         ], 'Weight from Product', default='net', required=True)
-    intrastat_additional_unit_from_weight = fields.Boolean(
-        string='Additional Unit from Weight', default=True)
+    intrastat_additional_unit_from = fields.Selection(
+        [('quantity', 'Quantity'),('weight', 'Weight'),('none', 'None')],
+        string='Additional Unit of Measure FROM', default='weight')
     intrastat_ua_code = fields.Char(string="User ID (UA Code)", size=4)
     intrastat_delegated_vat = fields.Char(string="Delegated person VAT",
                                           size=16)

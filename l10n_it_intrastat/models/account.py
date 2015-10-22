@@ -65,6 +65,10 @@ class account_invoice_line(models.Model):
         product_template = self.product_id.product_tmpl_id
         # Code competence
         intrastat_data = product_template.get_intrastat_data()
+        intrastat_code = False
+        if intrastat_data['intrastat_code_id']:
+            intrastat_code = self.env['report.intrastat.code'].browse(
+                intrastat_data['intrastat_code_id'])
         res.update({'intrastat_code_id': intrastat_data['intrastat_code_id']})
         # Type
         res.update({'intrastat_code_type': intrastat_data['intrastat_type']})
@@ -105,7 +109,20 @@ class account_invoice_line(models.Model):
         else:
             weight_kg = weight_line
         res.update({'weight_kg': weight_kg})
-        res.update({'additional_units': weight_kg})
+        # Additional Units
+        additional_units = False
+        # Priority : 1. Intrastat Code  2. Company
+        if intrastat_code and intrastat_code.additional_unit_from:
+            if intrastat_code.additional_unit_from == 'weight':
+                additional_units = weight_kg
+            elif intrastat_code.additional_unit_from == 'quantity':
+                additional_units = self.quantity 
+        elif company_id.intrastat_additional_unit_from:
+            if company_id.intrastat_additional_unit_from == 'weight':
+                additional_units = weight_kg
+            elif company_id.intrastat_additional_unit_from == 'quantity':
+                additional_units = self.quantity 
+        res.update({'additional_units': additional_units})
         # Transport
         if self.invoice_id.type in ('out_invoice', 'out_refund'):
             res.update({
@@ -512,7 +529,8 @@ class account_invoice_intrastat(models.Model):
                                 
     @api.onchange('weight_kg')
     def change_weight_kg(self):
-        if self.invoice_id.company_id.intrastat_additional_unit_from_weight:
+        if self.invoice_id.company_id.intrastat_additional_unit_from ==\
+             'weight':
             self.additional_units = self.weight_kg
     
     @api.onchange('amount_euro')

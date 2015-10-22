@@ -44,6 +44,9 @@ class report_intrastat_code(models.Model):
     active = fields.Boolean(default=True)
     additional_unit_required = fields.Boolean(default=False,
         string='Unit of Measure Additional Required')
+    additional_unit_from = fields.Selection(
+        [('quantity', 'Quantity'),('weight', 'Weight'),('none', 'None')], 
+        string='Additional Unit of Measure FROM')
     additional_unit_uom_id = fields.Many2one('product.uom', 
         string='Unit of Measure Additional')
     type = fields.Selection(
