@@ -1018,6 +1018,10 @@ class account_intrastat_statement_sale_section2(models.Model):
     def _prepare_statement_line(self, inv_intra_line):
         company_id = self._context.get(
             'company_id', self.env.user.company_id)
+        # sign_variation
+        sign_variation = False
+        if inv_intra_line.invoice_id.type in ['out_refund']:
+            sign_variation = '-'
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
@@ -1027,6 +1031,7 @@ class account_intrastat_statement_sale_section2(models.Model):
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
             'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'sign_variation': sign_variation,
             'transation_nature_id': (
                 inv_intra_line.transation_nature_id and
                 inv_intra_line.transation_nature_id.id) or (
@@ -1556,6 +1561,10 @@ class account_intrastat_statement_purchase_section2(models.Model):
     def _prepare_statement_line(self, inv_intra_line):
         company_id = self._context.get(
             'company_id', self.env.user.company_id)
+        # sign_variation
+        sign_variation = False
+        if inv_intra_line.invoice_id.type in ['in_refund']:
+            sign_variation = '-'
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
@@ -1564,6 +1573,7 @@ class account_intrastat_statement_purchase_section2(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
+            'sign_variation': sign_variation,
             'amount_euro': round(inv_intra_line.amount_euro) or 0,
             'amount_currency': round(inv_intra_line.amount_currency) or 0,
             'transation_nature_id': (
