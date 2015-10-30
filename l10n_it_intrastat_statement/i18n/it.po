@@ -373,7 +373,7 @@ msgstr "INTRASTAT Dichiarazione"
 #: selection:account.intrastat.statement.sale.section4,supply_method:0
 #. module: l10n_it_intrastat_statement
 msgid "Instant"
-msgstr "Instant"
+msgstr "Istantanea"
 
 #: field:account.intrastat.statement.purchase.section1,intrastat_code_id:0
 #: field:account.intrastat.statement.purchase.section2,intrastat_code_id:0
@@ -545,7 +545,7 @@ msgstr "Periodo Normale"
 #. module: l10n_it_intrastat_statement
 #, python-format
 msgid "Nothing to export"
-msgstr "Nothing to export"
+msgstr "Nulla da Esportare"
 
 #: field:account.intrastat.statement,number:0
 #. module: l10n_it_intrastat_statement
@@ -620,13 +620,13 @@ msgstr "Periodo"
 #. module: l10n_it_intrastat_statement
 #, python-format
 msgid "Period Not Valid! Range accepted: from 1 to 12"
-msgstr "Period Not Valid! Range accepted: from 1 to 12"
+msgstr "Periodo non valido: ammesso solo da 1 a 12"
 
 #: code:addons/l10n_it_intrastat_statement/models/intrastat.py:824
 #. module: l10n_it_intrastat_statement
 #, python-format
 msgid "Period Not Valid! Range accepted: from 1 to 4"
-msgstr "Period Not Valid! Range accepted: from 1 to 4"
+msgstr "Periodo non valido: ammesso solo da 1 a 4"
 
 #: field:account.intrastat.statement,period_type:0
 #. module: l10n_it_intrastat_statement
@@ -716,7 +716,7 @@ msgstr "Ricalcola"
 #: selection:account.intrastat.statement.sale.section4,supply_method:0
 #. module: l10n_it_intrastat_statement
 msgid "Repeatedly"
-msgstr "Repeatedly"
+msgstr "A più riprese"
 
 #: view:account.intrastat.statement:l10n_it_intrastat_statement.account_intrastat_statement_form_view
 #: view:account.intrastat.statement:l10n_it_intrastat_statement.view_search_account_intrastat_statement
@@ -808,7 +808,7 @@ msgstr "Statement Sequence"
 #. module: l10n_it_intrastat_statement
 #, python-format
 msgid "Statement without lines"
-msgstr "Statement without lines"
+msgstr "Dichiarazione senza linee"
 
 #: selection:account.intrastat.statement,intrastat_type_data:0
 #. module: l10n_it_intrastat_statement
@@ -889,7 +889,7 @@ msgstr "Values accepted:        - Month : From 1 to 12         - Quarterly: From
 #: field:account.intrastat.statement.sale.section4,vat_code:0
 #. module: l10n_it_intrastat_statement
 msgid "Vat Code Customer"
-msgstr "Vat Code Customer"
+msgstr "Codice IVA Partner"
 
 #: field:account.intrastat.statement.purchase.section1,vat_code:0
 #: field:account.intrastat.statement.purchase.section2,vat_code:0
@@ -897,17 +897,17 @@ msgstr "Vat Code Customer"
 #: field:account.intrastat.statement.purchase.section4,vat_code:0
 #. module: l10n_it_intrastat_statement
 msgid "Vat Code Partner"
-msgstr "Vat Code Partner"
+msgstr "Partita IVA partner"
 
 #: field:account.intrastat.statement,vat_delegate:0
 #. module: l10n_it_intrastat_statement
 msgid "Vat delegate"
-msgstr "Vat delegate"
+msgstr "Partita IVA delegato"
 
 #: field:account.intrastat.statement,vat_taxpayer:0
 #. module: l10n_it_intrastat_statement
 msgid "Vat taxpayer"
-msgstr "Vat taxpayer"
+msgstr "Partita IVA obbligato"
 
 #: field:account.intrastat.statement.purchase.section1,weight_kg:0
 #: field:account.intrastat.statement.sale.section1,weight_kg:0
@@ -919,24 +919,24 @@ msgstr "Peso kg"
 #: field:account.intrastat.statement,fiscalyear_id:0
 #. module: l10n_it_intrastat_statement
 msgid "Year"
-msgstr "Year"
+msgstr "Anno"
 
 #: field:account.intrastat.statement.purchase.section2,year_id:0
 #: field:account.intrastat.statement.sale.section2,year_id:0
 #. module: l10n_it_intrastat_statement
 msgid "Year Ref of Refund"
-msgstr "Year Ref of Refund"
+msgstr "Anno di riferimento della rettifica"
 
 #: field:account.intrastat.statement.purchase.section4,year_id:0
 #: field:account.intrastat.statement.sale.section4,year_id:0
 #. module: l10n_it_intrastat_statement
 msgid "Year Ref of Variation"
-msgstr "Year Ref of Variation"
+msgstr "Anno di riferimento della rettifica"
 
 #: selection:account.intrastat.export.file,state:0
 #. module: l10n_it_intrastat_statement
 msgid "choose"
-msgstr "choose"
+msgstr "Scelta"
 
 #: selection:account.intrastat.export.file,state:0
 #. module: l10n_it_intrastat_statement
