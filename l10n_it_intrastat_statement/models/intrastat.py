@@ -48,6 +48,12 @@ class account_intrastat_statement(models.Model):
             return vat
         else:
             return False
+        
+    @api.model
+    def _default_custom(self):
+        company_id = self.env.user.company_id
+        if company_id:
+            return company_id.intrastat_custom_id 
 
     @api.one
     @api.depends('sale_section1_ids.amount_euro')
@@ -186,7 +192,8 @@ class account_intrastat_statement(models.Model):
         ('0', 'None of the above cases'),
         ], 'Special Cases', required=True, default="0")
     custom_id = fields.Many2one(
-        'account.intrastat.custom', string='Custom', required=True)
+        'account.intrastat.custom', string='Custom', required=True,
+        default=_default_custom)
     sale = fields.Boolean(string='Sale', default=True)
     purchase = fields.Boolean(string='Purchase', default=True)
 

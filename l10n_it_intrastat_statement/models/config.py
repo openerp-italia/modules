@@ -21,28 +21,13 @@
 #
 ##############################################################################
 
-{
-    'name': 'Account - Intrastat Declaration',
-    'version': '0.1',
-    'category': 'Account',
-    'description': """
-    Intrastat Declaration and export file.
-    """,
-    'author': 'Openforce di Alessandro Camilli per Apulia Software srl',
-    'website': 'http://apuliasoftware.it/',
-    'license': 'AGPL-3',
-    "depends": [
-        'l10n_it_intrastat',
-        ],
-    "data": [
-        'data/sequence.xml',
-        'security/ir.model.access.csv',
-        'wizard/export_file_view.xml',
-        'views/config.xml',
-        'views/intrastat.xml',
-        ],
-    "demo": [],
-    "active": False,
-    "installable": True
-}
+from openerp import models, fields, api
 
+
+class res_company(models.Model):
+    _inherit = 'res.company'
+    
+    intrastat_custom_id = fields.Many2one(
+        'account.intrastat.custom', string='Custom'
+        )
+    
