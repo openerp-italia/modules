@@ -1,36 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-    
-    	<!--
+
+        <!--
         PARTNER
          -->
-    	<record id="view_spesometro_partner_form" model="ir.ui.view">
+        <record id="view_spesometro_partner_form" model="ir.ui.view">
             <field name="name">view.spesometro.partner.form</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="groups_id" eval="[(4, ref('account.group_account_invoice'))]"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='bank_ids']" position="after">
                     <group string="Comunicazione art.21" colspan="4">
-	                    <group colspan="2">
-		                	<field name="spesometro_escludi"/>
-		                	<field name="spesometro_operazione" attrs="{'invisible': [('spesometro_escludi', '=', True)]}"/>
-		                	<field name="spesometro_operazione_tipo_importo" attrs="{'invisible': [('spesometro_escludi', '=', True),('spesometro_operazione', 'not IN', ('BL1','BL2','BL3') )], 'required': [('spesometro_operazione', 'IN', ('BL1','BL2','BL3') )]}"/>
-		                	<field name="spesometro_tipo_servizio" attrs="{'invisible': [('spesometro_operazione_tipo_importo', '!=', 'NS')], 'required': [('spesometro_operazione_tipo_importo', '=', 'NS')]}"/>
-		                </group>
-		                <group>
-		                	<field name="spesometro_IVA_non_esposta" attrs="{'invisible': ['|', ('spesometro_escludi', '=', True), ('spesometro_operazione', '!=', 'FA')]}" />
-		                </group>
-		                <group>
-		                	<field name="spesometro_leasing" attrs="{'invisible': [('spesometro_escludi', '=', True)]}" />
-		                </group>
-	                </group>
-           		</xpath>
+                        <group colspan="2">
+                            <field name="spesometro_escludi"/>
+                            <field name="spesometro_operazione" attrs="{'invisible': [('spesometro_escludi', '=', True)]}"/>
+                            <field name="spesometro_operazione_tipo_importo" attrs="{'invisible': [('spesometro_escludi', '=', True),('spesometro_operazione', 'not IN', ('BL1','BL2','BL3') )], 'required': [('spesometro_operazione', 'IN', ('BL1','BL2','BL3') )]}"/>
+                            <field name="spesometro_tipo_servizio" attrs="{'invisible': [('spesometro_operazione_tipo_importo', '!=', 'NS')], 'required': [('spesometro_operazione_tipo_importo', '=', 'NS')]}"/>
+                        </group>
+                        <group>
+                            <field name="spesometro_IVA_non_esposta" attrs="{'invisible': ['|', ('spesometro_escludi', '=', True), ('spesometro_operazione', '!=', 'FA')]}" />
+                        </group>
+                        <group>
+                            <field name="spesometro_leasing" attrs="{'invisible': [('spesometro_escludi', '=', True)]}" />
+                        </group>
+                    </group>
+                </xpath>
             </field>
-		</record>
-		
-		
-		<!--
+        </record>
+
+
+        <!--
         COUNTRY
          -->
         <record id="view_spesometro_res_country_form" model="ir.ui.view">
@@ -40,21 +41,21 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='address_format']" position="after">
                     <group>
-	                	<field name="codice_stato_agenzia_entrate"/>
-	                </group>
-           		</xpath>
+                        <field name="codice_stato_agenzia_entrate"/>
+                    </group>
+                </xpath>
             </field>
-		</record>
-		<record id="view_spesometro_res_country_tree" model="ir.ui.view">
+        </record>
+        <record id="view_spesometro_res_country_tree" model="ir.ui.view">
             <field name="name">view.spesometro.res.country.tree</field>
             <field name="model">res.country</field>
             <field name="inherit_id" ref="base.view_country_tree"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='code']" position="after">
-	                	<field name="codice_stato_agenzia_entrate"/>
-           		</xpath>
+                        <field name="codice_stato_agenzia_entrate"/>
+                </xpath>
             </field>
-		</record>
-		
+        </record>
+
     </data>
 </openerp>
