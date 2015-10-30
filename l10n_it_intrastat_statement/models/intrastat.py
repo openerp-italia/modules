@@ -1222,8 +1222,7 @@ class account_intrastat_statement_sale_section4(models.Model):
     year_id = fields.Many2one('account.fiscalyear', 
                            string='Year Ref of Variation')
     protocol = fields.Integer(string='Protocol number', size=6)
-    progressive_to_modify_id =  fields.Many2one(
-        'account.intrastat.statement.sale.section1', 'Progressive to Modify')
+    progressive_to_modify = fields.Integer('Progressive to Modify')
     partner_id = fields.Many2one('res.partner', string='Partner')
     country_partner_id = fields.Many2one('res.country',
                                           string='Country Partner')
@@ -1785,6 +1784,7 @@ class account_intrastat_statement_purchase_section4(models.Model):
     progressive_to_modify_id = fields.Many2one(
         'account.intrastat.statement.purchase.section1',
         'Progressive to Modify')
+    progressive_to_modify = fields.Integer('Progressive to Modify')
     partner_id = fields.Many2one('res.partner', string='Partner')
     country_partner_id = fields.Many2one('res.country',
                                           string='Country Partner')

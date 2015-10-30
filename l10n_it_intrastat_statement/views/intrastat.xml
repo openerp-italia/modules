@@ -253,7 +253,7 @@
 		                	<field name="custom_id" required="1"/>
 		                	<field name="year_id" required="1"/>
 		                	<field name="protocol" required="1"/>
-		                	<field name="progressive_to_modify_id" required="1"/>
+		                	<field name="progressive_to_modify" required="1"/>
 						</group>
 					</group>
 					<newline/>
@@ -473,7 +473,7 @@
 		                	<field name="custom_id" required="1"/>
 		                	<field name="year_id" required="1"/>
 		                	<field name="protocol" required="1"/>
-		                	<field name="progressive_to_modify_id" required="1" />
+		                	<field name="progressive_to_modify" required="1" />
 						</group>
 					</group>
 					<newline/>
