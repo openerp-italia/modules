@@ -1286,7 +1286,35 @@ class account_intrastat_statement_sale_section4(models.Model):
         if not self.year_id:
             raise ValidationError(
                 _('Missing Year Ref on Sale Section 4'))
-            
+        # .. custom_id
+        if not self.custom_id:
+            raise ValidationError(
+                _('Missing custom on Sale Section 4'))
+        # .. Protocol
+        if not self.protocol:
+            raise ValidationError(
+                _('Missing protocol on Sale Section 4'))
+        # .. Progressive to modity
+        if not self.progressive_to_modify:
+            raise ValidationError(
+                _('Missing Progressive to modity on Sale Section 4'))
+        # .. Invoice
+        if (not self.invoice_number) or (not self.invoice_date):
+            raise ValidationError(
+                _('Missing Invoice data on Sale Section 4'))
+        # .. Supply method
+        if not self.supply_method:
+            raise ValidationError(
+                _('Missing Supply method on Sale Section 4'))
+        # .. payment_method
+        if not self.payment_method:
+            raise ValidationError(
+                _('Missing Payment method on Sale Section 4'))
+        # .. country_payment_id
+        if not self.country_payment_id:
+            raise ValidationError(
+                _('Missing Country Payment on Sale Section 4'))
+                
         rcd = ''
         # Codice della sezione doganale in cui è stato registrata la 
         # dichiarazione da rettificare
@@ -1851,6 +1879,34 @@ class account_intrastat_statement_purchase_section4(models.Model):
         if not self.year_id:
             raise ValidationError(
                 _('Missing Year Ref on Purchase Section 4'))
+        # .. custom_id
+        if not self.custom_id:
+            raise ValidationError(
+                _('Missing custom on Purchase Section 4'))
+        # .. Protocol
+        if not self.protocol:
+            raise ValidationError(
+                _('Missing protocol on Purchase Section 4'))
+        # .. Progressive to modity
+        if not self.progressive_to_modify:
+            raise ValidationError(
+                _('Missing Progressive to modity on Purchase Section 4'))
+        # .. Invoice
+        if (not self.invoice_number) or (not self.invoice_date):
+            raise ValidationError(
+                _('Missing Invoice data on Purchase Section 4'))
+        # .. Supply method
+        if not self.supply_method:
+            raise ValidationError(
+                _('Missing Supply method on Purchase Section 4'))
+        # .. payment_method
+        if not self.payment_method:
+            raise ValidationError(
+                _('Missing Payment method on Purchase Section 4'))
+        # .. country_payment_id
+        if not self.country_payment_id:
+            raise ValidationError(
+                _('Missing Country Payment on Purchase Section 4'))
         
         rcd = ''
         # Codice della sezione doganale in cui è stato registrata la 
