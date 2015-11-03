@@ -259,6 +259,9 @@ class account_invoice(models.Model):
     intrastat_line_ids = fields.One2many(
         'account.invoice.intrastat', 'invoice_id', string='Intrastat',
         readonly=True, states={'draft': [('readonly', False)]}, copy=True)
+    intrastat_refund_period_id = fields.Many2one('account.period',
+        readonly=True, states={'draft': [('readonly', False)]}, copy=True, 
+        string='Period Ref of Refund')
     
     @api.onchange('fiscal_position')
     def change_fiscal_position(self):

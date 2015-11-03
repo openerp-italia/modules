@@ -39,6 +39,10 @@
                             </group>
                             <newline/>
                             <group>
+                            <field name="intrastat_refund_period_id" attrs="{'invisible': [('type', 'in', ['out_invoice', 'in_invoice'] )]}"/>
+                            </group>
+                            <newline/>
+                            <group>
                             <field name="intrastat_line_ids" nolabel="1"/>
                             </group>
                         </group>
@@ -66,6 +70,10 @@
                         <group>
                         	<group>
                         		<button name="compute_intrastat_lines" states="draft,sent" string="Recompute Intrastat Lines" type="object"/>
+                            </group>
+                            <newline/>
+                            <group>
+                            <field name="intrastat_refund_period_id" attrs="{'invisible': [('type', 'in', ['out_invoice', 'in_invoice'] )]}"/>
                             </group>
                             <newline/>
                             <group>

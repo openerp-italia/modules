@@ -302,6 +302,33 @@ class account_intrastat_statement(models.Model):
         self.recompute_sequence_lines()
         return res;
     
+    @api.model
+    def _get_period_ref(self, period):
+        res = {
+            'year_id' : False, 
+            'quarterly' : False,
+            'month' : False 
+        }
+        if not period:
+            return res
+        # Year
+        res.update({'year_id' : period.fiscalyear_id.id})
+        
+        date_obj = datetime.strptime(period.date_start, '%Y-%m-%d')
+        # Monht/quaterly
+        if self.period_number == 'T':
+            if date_obj.month in [1,2,3]:
+                res.update({'quarterly' : 1})
+            elif date_obj.month in [4,5,6]:
+                res.update({'quarterly' : 2})
+            elif date_obj.month in [7,8,9]:
+                res.update({'quarterly' : 3})
+            elif date_obj.month in [10,11,12]:
+                res.update({'quarterly' : 4})
+        else:
+            res.update({'month' : date_obj.month})
+        
+        return res
 
     @api.one
     def _normalize_statement(self):
@@ -647,6 +674,7 @@ class account_intrastat_statement(models.Model):
         # Unlink existing lines
         self._unlink_sections()
         # Setting period
+        period_statement_ids = []
         date_start_year = datetime.strptime(self.fiscalyear_id.date_start, 
                                             '%Y-%m-%d')
         if self.period_type == 'M':
@@ -658,21 +686,33 @@ class account_intrastat_statement(models.Model):
                                         self.period_number + 1, 
                                         1)
             period_date_stop = period_date_work - timedelta(days = 1)
-            
+            # Period compentence 
+            period_statement_ids.append(
+                self.env['account.period'].find(period_date_start).id)
         else:
             if self.period_number == 1:
                 period_date_start = datetime(date_start_year.year, 1, 1)
+                period_date_medium = datetime(date_start_year.year, 2, 1)
                 period_date_stop = datetime(date_start_year.year, 3, 31)
             elif self.period_number == 2:
                 period_date_start = datetime(date_start_year.year, 3, 1)
+                period_date_medium = datetime(date_start_year.year, 4, 1)
                 period_date_stop = datetime(date_start_year.year, 6, 30)
             elif self.period_number == 3:
                 period_date_start = datetime(date_start_year.year, 7, 1)
+                period_date_medium = datetime(date_start_year.year, 8, 1)
                 period_date_stop = datetime(date_start_year.year, 9, 30)
             elif self.period_number == 4:
                 period_date_start = datetime(date_start_year.year, 10, 1)
+                period_date_medium = datetime(date_start_year.year, 11, 1)
                 period_date_stop = datetime(date_start_year.year, 12, 31)
-                
+            # Period compentence
+            period_statement_ids.append(
+                self.env['account.period'].find(period_date_start).id)
+            period_statement_ids.append(
+                self.env['account.period'].find(period_date_medium).id)
+            period_statement_ids.append(
+                self.env['account.period'].find(period_date_stop).id)
         # Search intrastat lines
         domain = [('move_id.date', '>=', period_date_start),
                   ('move_id.date', '<=', period_date_stop),
@@ -693,6 +733,7 @@ class account_intrastat_statement(models.Model):
         statement_lines_purchase_s2 = []
         statement_lines_purchase_s3 = []
         statement_lines_purchase_s4 = []
+        
         for inv in self.env['account.invoice'].search(domain):
             print inv.name
             for inv_intra_line in inv.intrastat_line_ids:
@@ -806,7 +847,66 @@ class account_intrastat_statement(models.Model):
             'purchase_section3_ids' : statement_lines_purchase_s3,
             'purchase_section4_ids' : statement_lines_purchase_s4,
             })
+        
+        # Group refund to sale lines if they have the same period of ref
+        for line in self.sale_section2_ids:
+            to_ref_obj = self.env['account.intrastat.statement.sale.section1']
+            self.refund_line(line, to_ref_obj)
+        for line in self.sale_section4_ids:
+            to_ref_obj = self.env['account.intrastat.statement.sale.section3']
+            self.refund_line(line, to_ref_obj)
+        for line in self.purchase_section2_ids:
+            to_ref_obj = \
+                self.env['account.intrastat.statement.purchase.section1']
+            self.refund_line(line, to_ref_obj)
+        for line in self.purchase_section4_ids:
+            to_ref_obj = \
+                self.env['account.intrastat.statement.purchase.section3']
+            self.refund_line(line, to_ref_obj)
+            
         return True
+    
+    @api.model
+    def refund_line(self, line, to_ref_obj):
+        '''
+        Refund line into sale if period ref si the same of the statemnt
+        '''
+        to_refund = False
+        if line.year_id.id == self.fiscalyear_id.id:
+            if self.period_type == 'M' \
+                and line.month == self.period_number:
+                to_refund = True 
+                
+            if self.period_type == 'T' \
+                and line.quarterly == self.period_number:
+                to_refund = True
+        # Execute refund
+        if to_refund:
+            domain = [('statement_id', '=', self.id),
+                      ('partner_id', '=', line.partner_id.id),
+                      ('intrastat_code_id', '=', line.intrastat_code_id.id)]
+            line_to_refund = to_ref_obj.search(domain, limit=1)
+            if line_to_refund:
+                if line_to_refund.amount_euro < line.amount_euro:
+                    raise ValidationError(
+                        _('Invoice and refund in the same period with \
+                            refound > invoice for partner %s') %
+                                            (line.partner_id.name))
+                val = {
+                    'amount_euro' : line_to_refund.amount_euro \
+                        - line.amount_euro
+                }
+                if 'statistic_amount_euro' in line_to_refund:
+                    val['statistic_amount_euro'] = \
+                        line_to_refund.statistic_amount_euro \
+                        - line.statistic_amount_euro
+                if 'amount_currency' in line_to_refund:
+                    val['amount_currency'] = line_to_refund.amount_currency \
+                        - line.amount_currency
+                
+                line_to_refund.write(val)
+                line.unlink()
+        
         
     @api.onchange('company_id')
     def change_company_id(self):
@@ -1029,8 +1129,15 @@ class account_intrastat_statement_sale_section2(models.Model):
         sign_variation = False
         if inv_intra_line.invoice_id.type in ['out_refund']:
             sign_variation = '-'
+        # Period Ref
+        ref_period = self.statement_id._get_period_ref(
+            inv_intra_line.invoice_id.intrastat_refund_period_id)
+             
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
+            'month' : ref_period and ref_period['month'] or False,
+            'quarterly' : ref_period and ref_period['quarterly'] or False,
+            'year_id' : ref_period and ref_period['year_id'] or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
             'country_partner_id': inv_intra_line.country_partner_id.id or False,
             'vat_code':
@@ -1226,6 +1333,8 @@ class account_intrastat_statement_sale_section4(models.Model):
         readonly=True, ondelete="cascade")
     sequence = fields.Integer(string='Progressive')
     custom_id = fields.Many2one('account.intrastat.custom', 'Custom')
+    month = fields.Integer(string='Month Ref of Refund')
+    quarterly = fields.Integer(string='Quarterly Ref of Refund')
     year_id = fields.Many2one('account.fiscalyear', 
                            string='Year Ref of Variation')
     protocol = fields.Integer(string='Protocol number', size=6)
@@ -1263,8 +1372,15 @@ class account_intrastat_statement_sale_section4(models.Model):
     
     @api.model
     def _prepare_statement_line(self, inv_intra_line):
+        # Period Ref
+        ref_period = self.statement_id._get_period_ref(
+            inv_intra_line.invoice_id.intrastat_refund_period_id)
+        
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
+            'month' : ref_period and ref_period['month'] or False,
+            'quarterly' : ref_period and ref_period['quarterly'] or False,
+            'year_id' : ref_period and ref_period['year_id'] or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
             'country_partner_id': inv_intra_line.country_partner_id.id or False,
             'vat_code':
@@ -1599,9 +1715,16 @@ class account_intrastat_statement_purchase_section2(models.Model):
         sign_variation = False
         if inv_intra_line.invoice_id.type in ['in_refund']:
             sign_variation = '-'
+        # Period Ref
+        ref_period = self.statement_id._get_period_ref(
+            inv_intra_line.invoice_id.intrastat_refund_period_id)
+        
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
+            'month' : ref_period and ref_period['month'] or False,
+            'quarterly' : ref_period and ref_period['quarterly'] or False,
+            'year_id' : ref_period and ref_period['year_id'] or False,
             'country_partner_id': inv_intra_line.country_partner_id.id or False,
             'vat_code':
                 inv_intra_line.invoice_id.partner_id.vat \
@@ -1813,6 +1936,8 @@ class account_intrastat_statement_purchase_section4(models.Model):
                                    ondelete="cascade")
     sequence = fields.Integer(string='Progressive')
     custom_id = fields.Many2one('account.intrastat.custom', 'Custom')
+    month = fields.Integer(string='Month Ref of Refund')
+    quarterly = fields.Integer(string='Quarterly Ref of Refund')
     year_id = fields.Many2one('account.fiscalyear',
                            string='Year Ref of Variation')
     protocol = fields.Integer(string='Protocol number', size=6)
@@ -1855,9 +1980,16 @@ class account_intrastat_statement_purchase_section4(models.Model):
     
     @api.model
     def _prepare_statement_line(self, inv_intra_line):
+        # Period Ref
+        ref_period = self.statement_id._get_period_ref(
+            inv_intra_line.invoice_id.intrastat_refund_period_id)
+        
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
+            'month' : ref_period and ref_period['month'] or False,
+            'quarterly' : ref_period and ref_period['quarterly'] or False,
+            'year_id' : ref_period and ref_period['year_id'] or False,
             'country_partner_id': inv_intra_line.country_partner_id.id or False,
             'vat_code':
                 inv_intra_line.invoice_id.partner_id.vat \
