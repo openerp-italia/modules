@@ -295,25 +295,15 @@ class account_invoice_withholding_tax(models.Model):
         self.withholding_tax = use_wt
     
     @api.onchange('withholding_tax_id')
-    #def onchange_withholding_tax_id(self, cr, uid, ids, withholding_tax_id, invoice_line_ids):
     def onchange_withholding_tax_id(self):
-        
         res = {}
-        tot_invoice = 0
-        
-        for inv_line in self.invoice_line_ids:
+        if self.withholding_tax_id:
+            tot_invoice = 0
+            for inv_line in self.invoice_id.invoice_line:
                 tot_invoice += inv_line.price_subtotal
-        '''
-            if line[1]:
-                line_inv = invoice_line_obj.browse(cr, uid, line[1])
-                price_subtotal = line_inv.price_subtotal
-            else:
-                price_subtotal = invoice_line_obj.compute_amount_line(cr, uid, line[2])
-            tot_invoice += price_subtotal'''
-            
-        tax = self.env['withholding.tax'].compute_amount(tot_invoice, 
-                                                         invoice_id=None)
-        self.base = tax['base']
-        self.tax = tax['tax']
+            tax = self.withholding_tax_id.compute_amount(tot_invoice, 
+                                                             invoice_id=None)
+            self.base = tax['base']
+            self.tax = tax['tax']
         
         

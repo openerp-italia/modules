@@ -25,7 +25,7 @@
 				            </tree>
 				            <form>
 				                <group colspan="2">
-					                <field name="withholding_tax_id" on_change="onchange_withholding_tax_id(withholding_tax_id, parent.invoice_line)"/>
+					                <field name="withholding_tax_id"/>
 					            	<field name="base"/>
 					            	<field name="tax"/>
 				            	</group>
@@ -66,7 +66,7 @@
 			            </tree>
 			            <form>
 			                <group colspan="2">
-				                <field name="withholding_tax_id" on_change="onchange_withholding_tax_id(withholding_tax_id, parent.invoice_line)"/>
+				                <field name="withholding_tax_id" />
 				            	<field name="base"/>
 				            	<field name="tax"/>
 			            	</group>
