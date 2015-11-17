@@ -125,10 +125,12 @@ class account_invoice(models.Model):
     @api.depends('withholding_tax_line')
     def _amount_withholding_tax(self):
         res = {}
+        dp_obj = self.env['decimal.precision']
         for invoice in self:
             withholding_tax_amount = 0.0
             for wt_line in invoice.withholding_tax_line:
-                withholding_tax_amount += wt_line.tax
+                withholding_tax_amount += round(wt_line.tax, 
+                                                dp_obj.precision_get('Account'))
             invoice.amount_net_pay = invoice.amount_total - \
                 withholding_tax_amount
             invoice.withholding_tax_amount = withholding_tax_amount
