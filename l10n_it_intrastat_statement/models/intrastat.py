@@ -980,8 +980,9 @@ class account_intrastat_statement_sale_section1(models.Model):
             
     @api.onchange('weight_kg')
     def change_weight_kg(self):
-        if self.statement_id.company_id.intrastat_additional_unit_from_weight:
-            self.additional_units = self.weight_kg 
+        if self.statement_id.company_id.intrastat_additional_unit_from == \
+            'weight':
+            self.additional_units = self.weight_kg
         
     @api.model
     def _prepare_statement_line(self, inv_intra_line):
@@ -1538,7 +1539,8 @@ class account_intrastat_statement_purchase_section1(models.Model):
     
     @api.onchange('weight_kg')
     def change_weight_kg(self):
-        if self.statement_id.company_id.intrastat_additional_unit_from_weight:
+        if self.statement_id.company_id.intrastat_additional_unit_from == \
+            'weight':
             self.additional_units = self.weight_kg
     
     @api.onchange('partner_id')
