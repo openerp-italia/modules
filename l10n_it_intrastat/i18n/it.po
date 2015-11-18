@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-10-22 13:28+0000\n"
-"PO-Revision-Date: 2015-10-22 13:28+0000\n"
+"POT-Creation-Date: 2015-11-18 10:44+0000\n"
+"PO-Revision-Date: 2015-11-18 10:44+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -314,22 +314,22 @@ msgstr "Data fine"
 #: view:res.company:l10n_it_intrastat.view_intrastat_company_form
 #. module: l10n_it_intrastat
 msgid "Default purchase values"
-msgstr "Default purchase values"
+msgstr "Default Acquisti"
 
 #: view:res.company:l10n_it_intrastat.view_intrastat_company_form
 #. module: l10n_it_intrastat
 msgid "Default sale values"
-msgstr "Default sale values"
+msgstr "Default Vendite"
 
 #: field:res.company,intrastat_delegated_name:0
 #. module: l10n_it_intrastat
 msgid "Delegated person"
-msgstr "Persona Delegata"
+msgstr "Delegato"
 
 #: field:res.company,intrastat_delegated_vat:0
 #. module: l10n_it_intrastat
 msgid "Delegated person VAT"
-msgstr "Persona delegata P.IVA"
+msgstr "P.IVA degato"
 
 #: field:account.intrastat.statement.purchase.section1,delivery_code_id:0
 #: field:account.intrastat.statement.sale.section1,delivery_code_id:0
@@ -446,7 +446,7 @@ msgstr "INTRASTAT Classificazione"
 #: selection:account.invoice.intrastat,supply_method:0
 #. module: l10n_it_intrastat
 msgid "Instant"
-msgstr "Instant"
+msgstr "istantanea"
 
 #: view:account.fiscal.position:l10n_it_intrastat.view_intrastat_account_position_form
 #: view:account.invoice:l10n_it_intrastat.account_intrastat_invoice_form
@@ -717,6 +717,11 @@ msgstr "Termine di pagamento"
 msgid "Period"
 msgstr "Periodo"
 
+#: field:account.invoice,intrastat_refund_period_id:0
+#. module: l10n_it_intrastat
+msgid "Period Ref of Refund"
+msgstr "Periodo da Rettificae"
+
 #: field:account.intrastat.statement,period_type:0
 #. module: l10n_it_intrastat
 msgid "Period Type"
@@ -738,7 +743,6 @@ msgid "Product Template"
 msgstr "Modello Prodotto"
 
 #: field:account.intrastat.statement.purchase.section4,progressive_to_modify_id:0
-#: field:account.intrastat.statement.sale.section4,progressive_to_modify_id:0
 #. module: l10n_it_intrastat
 msgid "Progressive to Modify"
 msgstr "Progressivo della sezione 3 da rettificare"
@@ -810,7 +814,7 @@ msgstr "Acquisti sez.4"
 #: selection:res.company,intrastat_additional_unit_from:0
 #. module: l10n_it_intrastat
 msgid "Quantity"
-msgstr "Quantity"
+msgstr "Quantità"
 
 #: selection:account.intrastat.statement,period_type:0
 #. module: l10n_it_intrastat
@@ -836,7 +840,7 @@ msgstr "Ricalcola Linee Intrastat"
 #: selection:account.invoice.intrastat,supply_method:0
 #. module: l10n_it_intrastat
 msgid "Repeatedly"
-msgstr "Repeatedly"
+msgstr "A più riprese"
 
 #: field:account.intrastat.statement,sale:0
 #. module: l10n_it_intrastat
@@ -971,7 +975,7 @@ msgstr "Modalità di erogazione"
 msgid "Total"
 msgstr "Totale"
 
-#: code:addons/l10n_it_intrastat/models/account.py:275
+#: code:addons/l10n_it_intrastat/models/account.py:278
 #. module: l10n_it_intrastat
 #, python-format
 msgid "Total Intrastat must be ugual to                        Total Invoice Untaxed"
@@ -1023,12 +1027,12 @@ msgstr "Unità di misura per Kg"
 #: field:res.company,intrastat_ua_code:0
 #. module: l10n_it_intrastat
 msgid "User ID (UA Code)"
-msgstr "User ID (UA Code)"
+msgstr "Codice UA"
 
 #: help:account.intrastat.statement,period_number:0
 #. module: l10n_it_intrastat
 msgid "Values accepted:        - Month : From 1 to 12         - Quarterly: From 1 to 4"
-msgstr "Values accepted:        - Month : From 1 to 12         - Quarterly: From 1 to 4"
+msgstr "Valori validi: -Mese: da 1 a 12         - Trimestre: da 1 a 4"
 
 #: field:account.intrastat.statement.sale.section1,vat_code:0
 #: field:account.intrastat.statement.sale.section2,vat_code:0
@@ -1036,7 +1040,7 @@ msgstr "Values accepted:        - Month : From 1 to 12         - Quarterly: From
 #: field:account.intrastat.statement.sale.section4,vat_code:0
 #. module: l10n_it_intrastat
 msgid "Vat Code Customer"
-msgstr "Vat Code Customer"
+msgstr "Codice IVA Cliente"
 
 #: field:account.intrastat.statement.purchase.section1,vat_code:0
 #: field:account.intrastat.statement.purchase.section2,vat_code:0
@@ -1044,22 +1048,22 @@ msgstr "Vat Code Customer"
 #: field:account.intrastat.statement.purchase.section4,vat_code:0
 #. module: l10n_it_intrastat
 msgid "Vat Code Partner"
-msgstr "Vat Code Partner"
+msgstr "Codice IVA Partner"
 
 #: field:account.intrastat.statement,vat_delegate:0
 #. module: l10n_it_intrastat
 msgid "Vat delegate"
-msgstr "Vat delegate"
+msgstr "P.IVA delegato"
 
 #: field:account.intrastat.statement,vat_taxpayer:0
 #. module: l10n_it_intrastat
 msgid "Vat taxpayer"
-msgstr "Vat taxpayer"
+msgstr "P.IVA contribuente"
 
 #: selection:res.company,intrastat_additional_unit_from:0
 #. module: l10n_it_intrastat
 msgid "Weight"
-msgstr "Weight"
+msgstr "Peso"
 
 #: field:res.company,intrastat_weight_from_product:0
 #. module: l10n_it_intrastat
@@ -1076,19 +1080,19 @@ msgstr "Peso kg"
 #: field:account.intrastat.statement,fiscalyear_id:0
 #. module: l10n_it_intrastat
 msgid "Year"
-msgstr "Year"
+msgstr "Anno"
 
 #: field:account.intrastat.statement.purchase.section2,year_id:0
 #: field:account.intrastat.statement.sale.section2,year_id:0
 #. module: l10n_it_intrastat
 msgid "Year Ref of Refund"
-msgstr "Year Ref of Refund"
+msgstr "Anno Rif. rettifica"
 
 #: field:account.intrastat.statement.purchase.section4,year_id:0
 #: field:account.intrastat.statement.sale.section4,year_id:0
 #. module: l10n_it_intrastat
 msgid "Year Ref of Variation"
-msgstr "Year Ref of Variation"
+msgstr "Anno Rif. di rettifica"
 
 #: selection:account.intrastat.export.file,state:0
 #. module: l10n_it_intrastat
