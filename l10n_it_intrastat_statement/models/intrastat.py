@@ -50,6 +50,14 @@ class account_intrastat_statement(models.Model):
             return False
         
     @api.model
+    def _default_vat_delegate(self):
+        company_id = self.env.user.company_id
+        if company_id:
+            return company_id.intrastat_delegated_vat
+        else:
+            return False 
+        
+    @api.model
     def _default_custom(self):
         company_id = self.env.user.company_id
         if company_id:
@@ -167,7 +175,8 @@ class account_intrastat_statement(models.Model):
         required=True)
     vat_taxpayer = fields.Char(
         string='Vat taxpayer', required=True, default=_default_company_vat)
-    vat_delegate = fields.Char(string='Vat delegate')
+    vat_delegate = fields.Char(string='Vat delegate', 
+                               default=_default_vat_delegate)
     fiscalyear_id = fields.Many2one(
         'account.fiscalyear', string='Year', required=True)
     period_type = fields.Selection([
