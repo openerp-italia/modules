@@ -24,6 +24,8 @@
                 	Richiedi i dati per la preparazione, compilazione ed export della dichiarazione 
                 	per l'agenzia delle dogane
                 	</h2>
+                	<field name="vat_delegate" invisible="1"/>
+                	<field name="name_delegate" invisible="1"/>
                 </form>
             </field>
         </record>
