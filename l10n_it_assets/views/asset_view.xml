@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+	<!--
+        Asset - Category 
+     -->
+     <record id="view_account_asset_category_form" model="ir.ui.view">
+       	<field name="name">account.asset.category.form</field>
+      	<field name="model">account.asset.category</field>
+        <field name="inherit_id" ref="account_asset_management.view_account_asset_category_form"/>
+        <field name="arch" type="xml">
+        	
+        	<xpath expr="//field[@name='active']" position="after">
+        		<field name="fiscal_different_method" />
+        		<field name="depreciation_property_id" widget="many2many_tags" />
+        	</xpath>
+        	
+        	<!-- Fiscal Methods-->
+            <xpath expr="//group[@string='Depreciation Method']" position="after">
+            	<group string="Fiscal Depreciation Dates" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
+	              <field name="fiscal_method_time" />
+	              <field name="fiscal_method_number" attrs="{'invisible':[('fiscal_method_time','=','end')], 'required':[('fiscal_method_time','in',['number','year'])]}"/>
+	              <field name="fiscal_method_period"/>
+	            </group>
+	            <group string="Fiscal Depreciation Method" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
+	              <field name="fiscal_method"/>
+	              <field name="fiscal_method_progress_factor" digits="(14, 4)" attrs="{'invisible':[('fiscal_method','=','linear')], 'required':[('fiscal_method','in',['degressive','degr-linear'])]}"/>
+	              <field name="fiscal_prorata" attrs="{'readonly':[('fiscal_method_time','!=','year')]}"/>
+	            </group>
+       		</xpath>
+        	
+     	</field>
+	</record>
+	
+	<!--
+        Asset 
+     -->
+     <record id="view_account_asset_asset_form" model="ir.ui.view">
+           <field name="name">account.asset.asset.form</field>
+           <field name="model">account.asset.asset</field>
+           <field name="inherit_id" ref="account_asset_management.view_account_asset_asset_form"/>
+           <field name="arch" type="xml">
+           		
+           		<xpath expr="//field[@name='value_residual']" position="after">
+	        		<field name="fiscal_value_depreciated" widget="monetary" options="{'currency_field': 'company_currency_id'}" 
+	        			attrs="{'invisible':['|',('type','=','view'),('fiscal_different_method','=', False)]}"/>
+	              	<field name="fiscal_value_residual" widget="monetary" options="{'currency_field': 'company_currency_id'}" 
+	              		attrs="{'invisible':['|',('type','=','view'),('fiscal_different_method','=', False)]}"/>
+	        	</xpath>
+	        	<xpath expr="//field[@name='purchase_value']" position="after">
+               		<field name="value_variation" />
+          		</xpath>
+           		<!-- Depreciation Property Form-->
+               <xpath expr="//field[@name='partner_id']" position="after">
+               		<field name="depreciation_property_id" widget="many2many_tags"/>
+               		<field name="fiscal_different_method" />
+          		</xpath>
+          		
+          		<!-- Depreciation Fiscal methods Form-->
+               <xpath expr="//separator[@string='Depreciation Method']/.." position="after">
+               		<group string="Fiscal Depreciation Dates" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
+		              <field name="fiscal_method_time" />
+		              <field name="fiscal_method_number" attrs="{'invisible':[('fiscal_method_time','=','end')], 'required':[('fiscal_method_time','in',['number','year'])]}"/>
+		              <field name="fiscal_method_period"/>
+		            </group>
+		            <group string="Fiscal Depreciation Method" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
+		              <field name="fiscal_method"/>
+		              <field name="fiscal_method_progress_factor" digits="(14, 4)" attrs="{'invisible':[('fiscal_method','=','linear')], 'required':[('fiscal_method','in',['degressive','degr-linear'])]}"/>
+		              <field name="fiscal_prorata" attrs="{'readonly':[('fiscal_method_time','!=','year')]}"/>
+		            </group>
+          		</xpath>
+           
+          		
+          		<!-- Depreciation line Form-->
+          		<xpath expr="//field[@name='depreciation_line_ids']/form/group//field[@name='amount']" position="after">
+          			<field name="amount_variation" readonly="1"/>
+          		</xpath>
+          		
+          		<!-- ... remove on_change for use new api-->
+          		<xpath expr="//field[@name='depreciation_line_ids']/form/group//field[@name='amount']" position="attributes">
+          			<attribute name="on_change"></attribute>
+          			<attribute name="context">{'remaining_value':remaining_value, 'depreciated_value':depreciated_value}</attribute>
+          		</xpath>
+          		<!-- Depreciation line Tree-->
+          			<!-- remove useless field -->
+          		<xpath expr="//field[@name='depreciation_line_ids']/tree/field[@name='depreciated_value']" position="replace">
+          		</xpath>
+          			<!-- field with new order -->
+          		<xpath expr="//field[@name='depreciation_line_ids']/tree/field[@name='amount']" position="before">
+          			<field name="amount_variation" readonly="1"/>
+          			<field name="asset_historical_value" readonly="1"/>
+          		</xpath>
+          		<xpath expr="//field[@name='depreciation_line_ids']/tree/field[@name='init_entry']" position="before">
+          			<field name="accumulated_depreciation"/>
+          		</xpath>
+          		
+	          	<!-- Depreciation line Fiscal Page-->
+               	<xpath expr="//page[@string='Depreciation Board']" position="after">
+	          		<page string="Depreciation Fiscal Board">
+	          		<header>
+	                  <button type="object" name="compute_depreciation_board" string="Compute" icon="terp-stock_format-scientific" colspan="2" attrs="{'invisible':[('state','in',['close','removed'])]}"/>
+	                </header>
+	                <field name="depreciation_line_fiscal_ids" mode="tree" options="{'reload_on_button': true}">
+	          			<tree string="Asset Lines" colors="blue:(move_check == False) and (init_entry == False)" create="false">
+		                    <field name="type"/>
+		                    <field name="line_date"/>
+		                    <field name="amount_variation"/>
+		                    <field name="asset_historical_value"/>
+		                    <field name="amount"/>
+		                    <field name="remaining_value"/>
+		                    <field name="accumulated_depreciation"/>
+		                    <field name="init_entry" string="Init"/>
+		                    <field name="move_check"/>
+		                  </tree>
+		                  <form string="Asset Line">
+		                    <group>
+		                      <group>
+		                        <!-- <field name="parent_state" invisible="1"/>
+		                        <field name="asset_value" invisible="1"/> -->
+		                        <field name="type"/>
+		                        <field name="name"/>
+		                        <field name="amount_variation" readonly="1"/>
+		                        <field name="amount" context="{'remaining_value':remaining_value, 'depreciated_value':depreciated_value}"/>
+		                        <field name="init_entry" attrs="{'readonly':[('type', '=', 'create')]}"/>
+		                        <field name="move_check"/>
+		                      </group>
+		                      <group>
+		                        <field name="line_date" />
+		                        <field name="depreciated_value" readonly="1"/>
+		                        <field name="remaining_value" readonly="1"/>
+		                        <field name="accumulated_depreciation" readonly="1"/>
+		                      </group>
+		                    </group>
+		                  </form>
+		            	</field>
+	          		</page>
+	          	</xpath>
+          		
+           </field>
+	</record>
+    
+	
+	<!--
+        Asset Property
+     -->
+     <record model="ir.ui.view" id="view_account_asset_property_tree">
+        <field name="name">account.asset.property.tree</field>
+        <field name="model">account.asset.property</field>
+        <field name="arch" type="xml">
+            <tree string="Asset property">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    
+    
+    <record model="ir.ui.view" id="view_account_asset_property_form">
+        <field name="name">account.asset.property.form</field>
+        <field name="model">account.asset.property</field>
+        <field name="arch" type="xml">
+            <form string="Asset property">
+                <header>
+                </header>
+                
+                <sheet>
+                	<group>
+                		<field name="name"/>
+                    </group>
+                    <group>
+                		<field name="fiscal_depreciation"/>
+                		<field name="normal_depreciation"/>
+                    </group>
+                    <newline/>
+                    <group string="Roles">
+	                    <field name="line_ids" nolabel="1">
+	                    	<tree string="Property Roles">
+	                    		<field name="name"/>
+	                    		<field name="line_number"/>
+	                    		<field name="coeff"/>
+	                    	</tree>
+	                    	<form string="Property Role">
+	                    		<group>
+	                    			<field name="name"/>
+	                    			<field name="line_number"/>
+	                    			<field name="coeff"/>
+	                    		</group>
+	                    	</form>
+	                    
+	                    </field>
+                    </group>
+                </sheet>
+                
+			</form>
+		</field>
+	</record>
+	
+	<record model="ir.actions.act_window" id="action_account_asset_property">
+        <field name="name">Asset Properties</field>
+        <field name="res_model">account.asset.property</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+	<menuitem parent="account_asset_management.menu_finance_config_assets" id="menu_action_account_asset_property" 
+		action="action_account_asset_property"/>
+		
+</data>
+</openerp>		
