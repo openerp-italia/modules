@@ -87,24 +87,22 @@
                                 <thead>
                                     <tr style="page-break-inside: avoid;">
                                         <th class="left_without_line">Data</th>
-                                        <th class="left_without_line">Variazioni</th>
-                                        <th class="left_without_line">Valore Storico Immobilizzazione</th>
-                                        <th class="right_without_line">Ammortamento</th>
-                                        <th class="left_without_line">Valore Residuo</th>
-                                        <th class="left_without_line">Valore Fondo</th>
-                                        <th class="left_without_line"></th>
+                                        <th class="pull-right">Variazioni</th>
+                                        <th class="pull-center">Valore Storico Immobilizzazione</th>
+                                        <th class="pull-right">Ammortamento</th>
+                                        <th class="pull-right">Valore Residuo</th>
+                                        <th class="pull-right">Valore Fondo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <t t-foreach="get_lines(data, asset)" t-as="line">
                                         <tr style="border:1px solid #fff; page-break-inside: avoid;">
-                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" t-esc="formatLang(line.line_date, date=True)"/></td>
-                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" t-esc="formatLang(line.amount_variation)"/></td>
-                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" t-esc="formatLang(line.asset_historical_value)"/></td>
-                                            <td class="right_without_line_bold"><div style="page-break-inside: avoid;" t-esc="formatLang(line.amount)"/></td>
-                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" t-esc="formatLang(line.remaining_value)"/></td>
-                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" t-esc="formatLang(line.accumulated_depreciation)"/></td>
-                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;"></div></td>
+                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" class="pull-right" t-esc="formatLang(line.line_date, date=True)"/></td>
+                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" class="pull-right" t-esc="formatLang(line.amount_variation)"/></td>
+                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" class="pull-right" t-esc="formatLang(line.asset_historical_value)"/></td>
+                                            <td class="right_without_line_bold"><div style="page-break-inside: avoid;" class="pull-right" t-esc="formatLang(line.amount)"/></td>
+                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" class="pull-right" t-esc="formatLang(line.remaining_value)"/></td>
+                                            <td class="left_without_line_bold"><div style="page-break-inside: avoid;" class="pull-right" t-esc="formatLang(line.accumulated_depreciation)"/></td>
                                         </tr>
                                     </t>
                                 </tbody>
