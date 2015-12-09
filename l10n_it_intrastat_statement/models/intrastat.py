@@ -701,10 +701,13 @@ class account_intrastat_statement(models.Model):
                                          self.period_number, 
                                          1)
             # Last date of month
-            period_date_work = datetime(date_start_year.year, 
-                                        self.period_number + 1, 
-                                        1)
-            period_date_stop = period_date_work - timedelta(days = 1)
+            if not self.period_number == 12:
+                period_date_work = datetime(date_start_year.year, 
+                                            self.period_number + 1, 
+                                            1)
+                period_date_stop = period_date_work - timedelta(days = 1)
+            else:
+                period_date_stop = datetime(date_start_year.year, 12, 31)
             # Period compentence 
             period_statement_ids.append(
                 self.env['account.period'].find(period_date_start).id)
