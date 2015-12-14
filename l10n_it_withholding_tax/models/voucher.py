@@ -113,10 +113,22 @@ class account_voucher(orm.Model):
                     
             return lines
         if partner_id:
-            lines_dr  = res['value']['line_dr_ids']
-            lines_dr = _compute_wt_values(lines_dr)
-            lines_cr  = res['value']['line_cr_ids']
-            lines_cr = _compute_wt_values(lines_cr)
+            # resolve lists of commands into lists of dicts
+            line_dr_ids_ctrl = res['value']['line_dr_ids']
+            line_dr_ids = []
+            for l in line_dr_ids_ctrl:
+                if isinstance(l, dict):
+                    line_dr_ids.append(l)
+            line_cr_ids_ctrl = res['value']['line_cr_ids']
+            line_cr_ids = []
+            for l in line_cr_ids_ctrl:
+                if isinstance(l, dict):
+                    line_cr_ids.append(l)
+            
+            lines_dr  = line_dr_ids
+            lines_dr = _compute_wt_values(line_dr_ids)
+            lines_cr  = line_cr_ids
+            lines_cr = _compute_wt_values(line_cr_ids)
         
         return res
     
