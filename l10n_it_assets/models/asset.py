@@ -255,7 +255,7 @@ class account_asset_asset(models.Model):
     fiscal_method_progress_factor = fields.Float(string='Degressive Factor',
         default=0.3, readonly=True, states={'draft': [('readonly', False)]})
     fiscal_method_time = fields.Selection(selection='_get_method_time',
-        required=True, readonly=True, states={'draft': [('readonly', False)]},
+        readonly=True, states={'draft': [('readonly', False)]},
         help="Choose the method to use to compute the dates and "
                  "number of depreciation lines.\n"
                  "  * Number of Years: Specify the number of years "
