@@ -291,6 +291,9 @@ class account_asset_asset(models.Model):
         if asset.type == 'normal':
             # Fiscal values from category
             vals = {
+                'depreciation_property_id': [(6, 0, \
+                    [x.id for x in \
+                     asset.category_id.depreciation_property_id])],
                 'fiscal_different_method' : \
                     asset.category_id.fiscal_different_method,
                 'fiscal_method' : asset.category_id.fiscal_method,
