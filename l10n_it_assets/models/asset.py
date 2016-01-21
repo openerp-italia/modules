@@ -1149,6 +1149,47 @@ class account_asset_depreciation_line(models.Model):
             self.remaining_value = self.asset_id.asset_value \
                 - self.depreciated_value - self.amount
     
+    @api.v7
+    def create_move(self, cr, uid, ids, context=None):
+        '''
+        recompute depreciation lines to align fiscal values
+        '''
+        asset_to_recompute = []
+        move_ids = super(account_asset_depreciation_line, self).\
+            create_move(cr, uid, ids, context)
+        # assets from move lines
+        domain = [('move_id', 'in', move_ids),
+                  ('asset_id', '!=', False)]
+        ml_ids = self.pool['account.move.line'].search(cr, uid, domain)
+        for ml in self.pool['account.move.line'].browse(cr, uid, ml_ids):
+            asset_to_recompute.append(ml.asset_id.id)
+        if asset_to_recompute:
+            self.pool['account.asset.asset'].\
+                compute_depreciation_board(cr, uid, asset_to_recompute, context)
+        return move_ids
+    
+    @api.v7
+    def unlink_move(self, cr, uid, ids, context=None):
+        '''
+        recompute depreciation lines to align fiscal values
+        '''
+        asset_to_recompute = []
+        move_ids = []
+        for dpl in self.browse(cr, uid, ids):
+            move_ids.append(dpl.move_id.id)
+        # before unlink search assets from move lines
+        domain = [('move_id', 'in', move_ids),
+                  ('asset_id', '!=', False)]
+        ml_ids = self.pool['account.move.line'].search(cr, uid, domain)
+        for ml in self.pool['account.move.line'].browse(cr, uid, ml_ids):
+            asset_to_recompute.append(ml.asset_id.id)
+        res = super(account_asset_depreciation_line, self).\
+            unlink_move(cr, uid, ids, context)
+        if asset_to_recompute:
+            self.pool['account.asset.asset'].\
+                compute_depreciation_board(cr, uid, asset_to_recompute, context)
+        return res
+    
 
 class account_asset_depreciation_line_fiscal(models.Model):
     _name = "account.asset.depreciation.line.fiscal"
