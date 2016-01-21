@@ -85,6 +85,11 @@ class account_asset_category(models.Model):
                 self.method_progress_factor 
             self.fiscal_method_time = self.method_time 
             self.fiscal_prorata = self.prorata
+    
+    def _get_method(self, cr, uid, context=None):
+        return[
+            ('linear', _('Linear')),
+        ]
 
 class account_asset_asset(models.Model):
     _inherit = "account.asset.asset"
