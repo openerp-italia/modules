@@ -105,7 +105,7 @@ class account_asset_asset(models.Model):
                 "FROM account_asset_depreciation_line_fiscal "
                 "WHERE asset_id in %s "
                 "AND type in ('depreciate','remove') "
-                "AND init_entry=TRUE ",
+                "AND move_check=TRUE ",
                 (tuple(child_ids),))
             value_depreciated = cr.fetchone()[0]
         else:
