@@ -216,6 +216,12 @@ class account_asset_asset(models.Model):
             inverse_name='asset_id',
             string="Depreciation Lines", readonly=True, 
             states={'draft': [('readonly', False)]})
+    method_period = fields.Selection(
+        selection=[('year', 'Year')],
+                    string='Period Length', required=True, default='year',
+                    readonly=True, states={'draft': [('readonly', False)]},
+                    help="Period length for the depreciation accounting \
+                    entries")
     fiscal_value_residual = fields.Float(
         string='Fiscal Residual Value', store=True, readonly=True,
         compute='_compute_depreciation_fiscal')
@@ -243,9 +249,7 @@ class account_asset_asset(models.Model):
             help="The number of years needed to depreciate your asset",
             )
     fiscal_method_period = fields.Selection(
-        selection=[('month', 'Month'), 
-                   ('quarter', 'Quarter'), 
-                   ('year', 'Year')],
+        selection=[('year', 'Year')],
                     string='Period Length', required=True, default='year',
                     readonly=True, states={'draft': [('readonly', False)]},
                     help="Period length for the depreciation accounting \
