@@ -21,7 +21,7 @@
 
 {
     'name': 'Italian Assets Management',
-    'version': '8.0.1.4',
+    'version': '8.0.1.5',
     'category': 'Localization/Italy',
     'description': """
         - Parallel Depreciation Board for fiscal values
