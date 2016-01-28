@@ -41,7 +41,7 @@ class account_asset_category(models.Model):
                  "Degressive becomes linear when the annual linear "
                  "depreciation exceeds the annual degressive depreciation")
     method_time = fields.Selection(selection='_get_method_time', required=True,
-        default='year',
+        default='percentage',
         help="Choose the method to use to compute the dates and "
                  "number of depreciation lines.\n"
                  "  * Number of Years: Specify the number of years "
@@ -51,7 +51,7 @@ class account_asset_category(models.Model):
                     string='Period Length', required=True, default='year',
                     help="Period length for the depreciation accounting \
                     entries")
-    
+    method_percentage = fields.Float(string='Percentage')
     depreciation_property_id = fields.Many2many('account.asset.property',
         'account_asset_category_property_rel', 'category_id', 'property_id',
         string='Category Depreciation Property')
@@ -78,6 +78,7 @@ class account_asset_category(models.Model):
                     string='Period Length', required=True, default='year',
                     help="Period length for the depreciation accounting \
                     entries")
+    fiscal_method_percentage = fields.Float(string='Percentage')
     fiscal_method_progress_factor = fields.Float(string='Degressive Factor',
         default=0.3)
     fiscal_method_time = fields.Selection(selection='_get_method_time',
@@ -101,6 +102,7 @@ class account_asset_category(models.Model):
         if not self.fiscal_different_method:
             self.fiscal_method = self.method 
             self.fiscal_method_number = self.method_number 
+            self.fiscal_method_percentage = self.method_percentage 
             self.fiscal_method_period = self.method_period 
             self.fiscal_method_progress_factor = \
                 self.method_progress_factor 
@@ -115,6 +117,7 @@ class account_asset_category(models.Model):
     def _get_method_time(self, cr, uid, context=None):
         return [
             ('year', _('Number of Years')),
+            ('percentage', _('Percentage')),
             # ('number', _('Number of Depreciations')),
             # ('end', _('Ending Date'))
         ]
@@ -255,6 +258,7 @@ class account_asset_asset(models.Model):
                     readonly=True, states={'draft': [('readonly', False)]},
                     help="Period length for the depreciation accounting \
                     entries")
+    method_percentage = fields.Float(string='Percentage')
     fiscal_value_residual = fields.Float(
         string='Fiscal Residual Value', store=True, readonly=True,
         compute='_compute_depreciation_fiscal')
@@ -287,6 +291,7 @@ class account_asset_asset(models.Model):
                     readonly=True, states={'draft': [('readonly', False)]},
                     help="Period length for the depreciation accounting \
                     entries")
+    fiscal_method_percentage = fields.Float(string='Percentage')
     fiscal_method_end = fields.Date(string='Ending Date', readonly=True,
         states={'draft': [('readonly', False)]})
     fiscal_method_progress_factor = fields.Float(string='Degressive Factor',
@@ -326,16 +331,19 @@ class account_asset_asset(models.Model):
             cr, uid, vals, context=context)
         asset = self.browse(cr, uid, asset_id, context)
         if asset.type == 'normal':
-            # Fiscal values from category
+            # Fiscal e other values from category
             vals = {
                 'depreciation_property_id': [(6, 0, \
                     [x.id for x in \
                      asset.category_id.depreciation_property_id])],
+                'method_percentage' : asset.category_id.method_percentage,
                 'fiscal_different_method' : \
                     asset.category_id.fiscal_different_method,
                 'fiscal_method' : asset.category_id.fiscal_method,
                 'fiscal_method_number' : asset.category_id.fiscal_method_number,
                 'fiscal_method_period' : asset.category_id.fiscal_method_period,
+                'fiscal_method_percentage' : \
+                    asset.category_id.fiscal_method_percentage,
                 'fiscal_method_progress_factor' : \
                     asset.category_id.fiscal_method_progress_factor,
                 'fiscal_method_time' : asset.category_id.fiscal_method_time,
@@ -414,16 +422,41 @@ class account_asset_asset(models.Model):
                                     depreciation_start_date, context=None):
         if context.get('fiscal_methods'):
             asset_method_number = asset.fiscal_method_number
+            asset_method_percentage = asset.fiscal_method_percentage
             asset_method_time = asset.fiscal_method_time
             asset_method_end = asset.fiscal_method_end
         else:
             asset_method_number = asset.method_number
+            asset_method_percentage = asset.method_percentage
             asset_method_time = asset.method_time
             asset_method_end = asset.method_end
             
         if asset_method_time == 'year':
             depreciation_stop_date = depreciation_start_date + \
                 relativedelta(years=asset_method_number, days=-1)
+        elif asset_method_time == 'percentage':
+            # The property with percentage: the lenght may be changed
+            years_number = 0
+            count = 0
+            i = 0
+            while count < 100:
+                i += 1
+                property_coeff = 1
+                for property in asset.depreciation_property_id:
+                    l_last = int(100 / asset_method_percentage + .5)
+                    role = property._compute_role(1, i, l_last)
+                    if role and role['coeff']:
+                        if context.get('fiscal_methods') and \
+                                role['fiscal_depreciation']:
+                            property_coeff = role['coeff']
+                        elif not context.get('fiscal_methods') and \
+                                role['normal_depreciation']:
+                            property_coeff = role['coeff']
+                count += (asset_method_percentage * property_coeff)
+                years_number += 1
+            depreciation_stop_date = depreciation_start_date + \
+                relativedelta(years=years_number, days=-1)
+            
         elif asset_method_time == 'number':
             if asset_method_period == 'month':
                 depreciation_stop_date = depreciation_start_date + \
@@ -450,6 +483,7 @@ class account_asset_asset(models.Model):
             asset_method = asset.fiscal_method
             asset_method_number = asset.fiscal_method_number
             asset_method_time = asset.fiscal_method_time
+            asset_method_percentage = asset.fiscal_method_percentage
             asset_method_end = asset.fiscal_method_end
             asset_method_period = asset.fiscal_method_period
             asset_method_progress_factor = asset.fiscal_method_progress_factor
@@ -457,17 +491,23 @@ class account_asset_asset(models.Model):
             asset_method = asset.method
             asset_method_number = asset.method_number
             asset_method_time = asset.method_time
+            asset_method_percentage = asset.method_percentage
             asset_method_end = asset.method_end
             asset_method_period = asset.method_period
             asset_method_progress_factor = asset.method_progress_factor
         # For variation recompute with remaining numbers
         if context.get('variation_asset_method_number'):
             asset_method_number = context.get('variation_asset_method_number')
-        if context.get('variation_amount_to_depr'):
-            amount_to_depr = context.get('variation_amount_to_depr')
+        if context.get('variation_fy_residual_amount'):
+            amount_to_depr = context.get('variation_fy_residual_amount')
+        if asset_method_time == 'percentage':
+            if context.get('variation_amount_to_depr'):
+                amount_to_depr = context.get('variation_amount_to_depr')
         
         if asset_method_time == 'year':
             divisor = asset_method_number
+        elif asset_method_time == 'percentage':
+            divisor = 100 / asset_method_percentage
         elif asset_method_time == 'number':
             if asset_method_period == 'month':
                 divisor = asset_method_number / 12.0
@@ -511,7 +551,9 @@ class account_asset_asset(models.Model):
                 l_last = len(table)
                 if (fiscal_method and property.fiscal_depreciation)\
                     or (not fiscal_method and property.normal_depreciation):
-                    role = property._compute_role(entry['fy_amount'], 
+                    role = property._compute_role(entry and \
+                                                  'fy_amount' in entry and \
+                                                  entry['fy_amount'] or 0, 
                                                   l,
                                                   l_last)
                     if role :
@@ -524,8 +566,12 @@ class account_asset_asset(models.Model):
         # ... Remove lines with amount 0
         table_with_amounts = []
         for entry in table:
+            '''
+            All lines because the property can add new periods 
             if entry['fy_amount'] > 0:
                 table_with_amounts.append(entry)
+            '''
+            table_with_amounts.append(entry)
         table = table_with_amounts
         return table
    
@@ -627,7 +673,8 @@ class account_asset_asset(models.Model):
 
         # step 2: calculate depreciation amount per fiscal year
         fy_residual_amount = residual_amount
-        i_max = len(table) - 1
+        #i_max = len(table) - 1
+        i_max = len(table)
         asset_sign = asset.asset_value >= 0 and 1 or -1
         for i, entry in enumerate(table):
             # Compute depreciation with amount variation
@@ -635,7 +682,8 @@ class account_asset_asset(models.Model):
             amount_to_depr += entry['amount_variation']
             context.update({
                 'variation_asset_method_number' : len(table) - i,
-                'variation_amount_to_depr' : fy_residual_amount
+                'variation_fy_residual_amount' : fy_residual_amount,
+                'variation_amount_to_depr' : amount_to_depr
                 })
             year_amount = self._compute_year_amount(
                 cr, uid, asset, amount_to_depr,
@@ -663,10 +711,10 @@ class account_asset_asset(models.Model):
                 'asset_historical_value': amount_to_depr,
             })
             fy_residual_amount -= fy_amount
-            if round(fy_residual_amount, digits) == 0:
-                break
+            #if round(fy_residual_amount, digits) == 0:
+            #    break
         i_max = i
-        table = table[:i_max + 1]
+        ##table = table[:i_max + 1]
         
         # step 3: Apply Property 
         table = self._compute_property(cr, uid, asset, table, context)
@@ -1337,6 +1385,8 @@ class account_asset_property(models.Model):
             role['amount'] = round(amount * p_line.coeff, 
                                    dp_obj.precision_get('Account'))
             role['coeff'] = p_line.coeff
+            role['fiscal_depreciation'] = p_line.property_id.fiscal_depreciation
+            role['normal_depreciation'] = p_line.property_id.normal_depreciation
             return role
         
         # Search for last line
@@ -1348,6 +1398,10 @@ class account_asset_property(models.Model):
                 role['amount'] = round(amount * p_line.coeff, 
                                    dp_obj.precision_get('Account'))
                 role['coeff'] = p_line.coeff
+                role['fiscal_depreciation'] = \
+                    p_line.property_id.fiscal_depreciation
+                role['normal_depreciation'] = \
+                    p_line.property_id.normal_depreciation
                 return role
         
         return role

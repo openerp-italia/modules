@@ -15,12 +15,20 @@
         		<field name="fiscal_different_method" />
         		<field name="depreciation_property_id" widget="many2many_tags" />
         	</xpath>
+        	<!-- Depreciation methods Form-->
+          		<xpath expr="//field[@name='method_number']" position="replace">
+          			<field name="method_number" attrs="{'invisible':[('method_time','in',['end','percentage'])], 'required':[('method_time','in',['number','year'])]}"/>
+          		</xpath>
+          		<xpath expr="//field[@name='method_period']" position="before">
+          			<field name="method_percentage" attrs="{'invisible':[('method_time','!=','percentage')], 'required':[('method_time','in',['percentage'])]}"/>
+          		</xpath>
         	
         	<!-- Fiscal Methods-->
             <xpath expr="//group[@string='Depreciation Method']" position="after">
             	<group string="Fiscal Depreciation Dates" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
 	              <field name="fiscal_method_time" />
-	              <field name="fiscal_method_number" attrs="{'invisible':[('fiscal_method_time','=','end')], 'required':[('fiscal_method_time','in',['number','year'])]}"/>
+	              <field name="fiscal_method_number" attrs="{'invisible':[('fiscal_method_time','in',['end','percentage'])], 'required':[('fiscal_method_time','in',['number','year'])]}"/>
+	              <field name="fiscal_method_percentage" attrs="{'invisible':[('fiscal_method_time','!=','percentage')], 'required':[('fiscal_method_time','in',['percentage'])]}"/>
 	              <field name="fiscal_method_period"/>
 	            </group>
 	            <group string="Fiscal Depreciation Method" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
@@ -56,12 +64,23 @@
                		<field name="depreciation_property_id" widget="many2many_tags"/>
                		<field name="fiscal_different_method" />
           		</xpath>
+          		<!-- Depreciation methods Form-->
+          		<xpath expr="//field[@name='method_end']" position="replace">
+          			<field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','in',['number','year','percentage'])]}"/>
+          		</xpath>
+          		<xpath expr="//field[@name='method_number']" position="replace">
+          			<field name="method_number" attrs="{'invisible':[('method_time','in',['end','percentage'])], 'required':[('method_time','in',['number','year'])]}"/>
+          		</xpath>
+          		<xpath expr="//field[@name='method_period']" position="before">
+          			<field name="method_percentage" attrs="{'invisible':[('method_time','!=','percentage')], 'required':[('method_time','in',['percentage'])]}"/>
+          		</xpath>
           		
           		<!-- Depreciation Fiscal methods Form-->
                <xpath expr="//separator[@string='Depreciation Method']/.." position="after">
                		<group string="Fiscal Depreciation Dates" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
-		              <field name="fiscal_method_time" />
-		              <field name="fiscal_method_number" attrs="{'invisible':[('fiscal_method_time','=','end')], 'required':[('fiscal_method_time','in',['number','year'])]}"/>
+		              <field name="fiscal_method_time" required="1"/>
+		              <field name="fiscal_method_number" attrs="{'invisible':[('fiscal_method_time','in',['end','percentage'])], 'required':[('fiscal_method_time','in',['number','year'])]}"/>
+		              <field name="fiscal_method_percentage" attrs="{'invisible':[('fiscal_method_time','!=','percentage')], 'required':[('fiscal_method_time','in',['percentage'])]}"/>
 		              <field name="fiscal_method_period"/>
 		            </group>
 		            <group string="Fiscal Depreciation Method" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
