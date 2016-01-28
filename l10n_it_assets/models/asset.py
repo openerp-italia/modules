@@ -29,6 +29,29 @@ from dateutil.relativedelta import relativedelta
 class account_asset_category(models.Model):
     _inherit = "account.asset.category"
     
+    method = fields.Selection(selection='_get_method', required=True,
+        default='linear',
+        help="Choose the method to use to compute "
+                 "the amount of depreciation lines.\n"
+                 "  * Linear: Calculated on basis of: "
+                 "Gross Value / Number of Depreciations\n"
+                 "  * Degressive: Calculated on basis of: "
+                 "Residual Value * Degressive Factor"
+                 "  * Degressive-Linear (only for Time Method = Year): "
+                 "Degressive becomes linear when the annual linear "
+                 "depreciation exceeds the annual degressive depreciation")
+    method_time = fields.Selection(selection='_get_method_time', required=True,
+        default='year',
+        help="Choose the method to use to compute the dates and "
+                 "number of depreciation lines.\n"
+                 "  * Number of Years: Specify the number of years "
+                 "for the depreciation.\n")
+    method_period = fields.Selection(
+        selection=[('year', 'Year')],
+                    string='Period Length', required=True, default='year',
+                    help="Period length for the depreciation accounting \
+                    entries")
+    
     depreciation_property_id = fields.Many2many('account.asset.property',
         'account_asset_category_property_rel', 'category_id', 'property_id',
         string='Category Depreciation Property')
@@ -51,9 +74,7 @@ class account_asset_category(models.Model):
             help="The number of years needed to depreciate your asset",
             default=5)
     fiscal_method_period = fields.Selection(
-        selection=[('month', 'Month'), 
-                   ('quarter', 'Quarter'), 
-                   ('year', 'Year')],
+        selection=[('year', 'Year')],
                     string='Period Length', required=True, default='year',
                     help="Period length for the depreciation accounting \
                     entries")
@@ -89,6 +110,13 @@ class account_asset_category(models.Model):
     def _get_method(self, cr, uid, context=None):
         return[
             ('linear', _('Linear')),
+        ]
+        
+    def _get_method_time(self, cr, uid, context=None):
+        return [
+            ('year', _('Number of Years')),
+            # ('number', _('Number of Depreciations')),
+            # ('end', _('Ending Date'))
         ]
 
 class account_asset_asset(models.Model):
