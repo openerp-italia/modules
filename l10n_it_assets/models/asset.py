@@ -565,7 +565,7 @@ class account_asset_asset(models.Model):
             if asset_date_start > fy_date_start:
                 asset_ref = asset.code and '%s (ref: %s)' \
                     % (asset.name, asset.code) or asset.name
-                raise orm.except_orm(
+                raise except_orm(
                     _('Error!'),
                     _("You cannot compute a depreciation table for an asset "
                       "starting in an undefined future fiscal year."
@@ -759,7 +759,7 @@ class account_asset_asset(models.Model):
                 else:       # other years: deviation in last period
                     lines[-1]['amount'] = period_amount - diff
         else:
-            raise orm.except_orm(
+            raise except_orm(
                 _('Programming Error!'),
                 _("Illegal value %s in asset.method_period.")
                 % asset_method_period)
@@ -839,7 +839,7 @@ class account_asset_asset(models.Model):
                     last_depreciation_line.line_date, '%Y-%m-%d')
                 last_date_in_table = table[-1]['lines'][-1]['date']
                 if last_date_in_table <= last_depreciation_date:
-                    raise orm.except_orm(
+                    raise except_orm(
                         _('Error!'),
                         _("The duration of the asset conflicts with the "
                           "posted depreciation table entry dates."))
@@ -1018,7 +1018,7 @@ class account_asset_asset(models.Model):
                     last_depreciation_line.line_date, '%Y-%m-%d')
                 last_date_in_table = table[-1]['lines'][-1]['date']
                 if last_date_in_table <= last_depreciation_date:
-                    raise orm.except_orm(
+                    raise except_orm(
                         _('Error!'),
                         _("The duration of the asset conflicts with the "
                           "posted depreciation table entry dates."))
