@@ -53,6 +53,12 @@
            <field name="inherit_id" ref="account_asset_management.view_account_asset_asset_form"/>
            <field name="arch" type="xml">
            		
+           		<xpath expr="//button[@name='remove']" position="replace">
+	           		<button name="remove" string="Remove" type="object" groups="account.group_account_manager"
+	                    attrs="{'invisible':['|', ('method_time', 'not in', ['year', 'percentage']),('state', 'not in', ['open', 'close'])]}"
+	                    help="Asset removal."/>
+                </xpath>
+           		
            		<xpath expr="//field[@name='value_residual']" position="after">
 	        		<field name="fiscal_value_depreciated" widget="monetary" options="{'currency_field': 'company_currency_id'}" 
 	        			attrs="{'invisible':['|',('type','=','view'),('fiscal_different_method','=', False)]}"/>
