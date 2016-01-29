@@ -1286,11 +1286,51 @@ class account_asset_depreciation_line(models.Model):
         '''
         recompute depreciation lines to align fiscal values
         '''
+        asset_obj = self.pool.get('account.asset.asset')
+        period_obj = self.pool.get('account.period')
+        move_obj = self.pool.get('account.move')
+        move_line_obj = self.pool.get('account.move.line')
+        currency_obj = self.pool.get('res.currency')
+        created_move_ids = []
+        asset_ids = []
+        for line in self.browse(cr, uid, ids, context=context):
+            asset = line.asset_id
+            if asset.method_time in ['year', 'percentage']:
+                depreciation_date = context.get('depreciation_date') or \
+                    line.line_date
+            else:
+                depreciation_date = context.get('depreciation_date') or \
+                    time.strftime('%Y-%m-%d')
+            ctx = dict(context, account_period_prefer_normal=True)
+            period_ids = period_obj.find(
+                cr, uid, depreciation_date, context=ctx)
+            period_id = period_ids and period_ids[0] or False
+            move_id = move_obj.create(cr, uid, self._setup_move_data(
+                line, depreciation_date, period_id, context),
+                context=context)
+            depr_acc_id = asset.category_id.account_depreciation_id.id
+            exp_acc_id = asset.category_id.account_expense_depreciation_id.id
+            ctx = dict(context, allow_asset=True)
+            move_line_obj.create(cr, uid, self._setup_move_line_data(
+                line, depreciation_date, period_id, depr_acc_id,
+                'depreciation', move_id, context), ctx)
+            move_line_obj.create(cr, uid, self._setup_move_line_data(
+                line, depreciation_date, period_id, exp_acc_id, 'expense',
+                move_id, context), ctx)
+            self.write(
+                cr, uid, line.id, {'move_id': move_id},
+                context={'allow_asset_line_update': True})
+            created_move_ids.append(move_id)
+            asset_ids.append(asset.id)
+        # we re-evaluate the assets to determine whether we can close them
+        for asset in asset_obj.browse(
+                cr, uid, list(set(asset_ids)), context=context):
+            if currency_obj.is_zero(cr, uid, asset.company_id.currency_id,
+                                    asset.value_residual):
+                asset.write({'state': 'close'})
         asset_to_recompute = []
-        move_ids = super(account_asset_depreciation_line, self).\
-            create_move(cr, uid, ids, context)
         # assets from move lines
-        domain = [('move_id', 'in', move_ids),
+        domain = [('move_id', 'in', created_move_ids),
                   ('asset_id', '!=', False)]
         ml_ids = self.pool['account.move.line'].search(cr, uid, domain)
         for ml in self.pool['account.move.line'].browse(cr, uid, ml_ids):
@@ -1298,7 +1338,7 @@ class account_asset_depreciation_line(models.Model):
         if asset_to_recompute:
             self.pool['account.asset.asset'].\
                 compute_depreciation_board(cr, uid, asset_to_recompute, context)
-        return move_ids
+        return created_move_ids
     
     @api.v7
     def unlink_move(self, cr, uid, ids, context=None):

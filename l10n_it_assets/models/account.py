@@ -67,9 +67,13 @@ class account_move_line(models.Model):
         # asset moves.
         dp_line_obj = self.pool['account.asset.depreciation.line']
         if 'asset_id' in vals:
+            period = self.pool['account.period'].browse(cr, uid, 
+                                                        vals['period_id'])
             domain = [('asset_id', '=', vals['asset_id']),
                       ('type', '=', 'depreciate'),
-                      ('line_date', '>=', vals['date']),
+                      #('line_date', '>=', vals['date']),
+                      ('move_id.period_id.fiscalyear_id', '=', \
+                       period.fiscalyear_id.id),
                       ('move_id', '!=', False)]
             dp_line_ids = dp_line_obj.search(cr, uid, domain)
             if dp_line_ids:
