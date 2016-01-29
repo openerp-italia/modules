@@ -94,7 +94,7 @@ class account_asset_category(models.Model):
     
     @api.onchange('fiscal_method_time')
     def change_fiscal_method_time(self):
-        if self.fiscal_method_time != 'year':
+        if self.fiscal_method_time not in ['year', 'percentage']:
             self.fiscal_prorata = True
             
     @api.onchange('fiscal_different_method')
@@ -325,7 +325,8 @@ class account_asset_asset(models.Model):
         '''
         if not context:
             context = {}
-        if vals.get('method_time') != 'year' and not vals.get('prorata'):
+        if vals.get('method_time') not in ['year','percentage'] \
+                and not vals.get('prorata'):
             vals['prorata'] = True
         asset_id = super(account_asset_asset, self).create(
             cr, uid, vals, context=context)
@@ -396,6 +397,50 @@ class account_asset_asset(models.Model):
                  [x.id for x in category.depreciation_property_id]
  
         return res
+    
+    @api.v7
+    def _get_fy_duration_factor(self, cr, uid, entry,
+                                asset, firstyear, context=None):
+        """
+        localization: override this method to change the logic used to
+        calculate the impact of extended/shortened fiscal years
+        """
+        if context.get('fiscal_methods'):
+            asset_prorata = asset.fiscal_prorata
+        else:
+            asset_prorata = asset.prorata
+            
+        duration_factor = 1.0
+        fy_id = entry['fy_id']
+        if asset_prorata:
+            if firstyear:
+                depreciation_date_start = datetime.strptime(
+                    asset.date_start, '%Y-%m-%d')
+                fy_date_stop = entry['date_stop']
+                first_fy_asset_days = \
+                    (fy_date_stop - depreciation_date_start).days + 1
+                if fy_id:
+                    first_fy_duration = self._get_fy_duration(
+                        cr, uid, fy_id, option='days')
+                    first_fy_year_factor = self._get_fy_duration(
+                        cr, uid, fy_id, option='years')
+                    duration_factor = \
+                        float(first_fy_asset_days) / first_fy_duration \
+                        * first_fy_year_factor
+                else:
+                    first_fy_duration = \
+                        calendar.isleap(entry['date_start'].year) \
+                        and 366 or 365
+                    duration_factor = \
+                        float(first_fy_asset_days) / first_fy_duration
+            elif fy_id:
+                duration_factor = self._get_fy_duration(
+                    cr, uid, fy_id, option='years')
+        elif fy_id:
+            fy_months = self._get_fy_duration(
+                cr, uid, fy_id, option='months')
+            duration_factor = float(fy_months) / 12
+        return duration_factor
     
     @api.v7
     def _get_depreciation_start_date(self, cr, uid, asset, fy, context=None):
@@ -563,15 +608,16 @@ class account_asset_asset(models.Model):
                 entry['fy_amount'] = fy_residual_amount
             fy_residual_amount -= entry['fy_amount']
             fy_residual_amount = round(fy_residual_amount, digits)
-        # ... Remove lines with amount 0
+        return table
+    
+    @api.v7
+    def _normalize_depreciation_table(self, cr, uid, asset, table, 
+                                      context=None):
+        # Remove lines with amount 0
         table_with_amounts = []
         for entry in table:
-            '''
-            All lines because the property can add new periods 
             if entry['fy_amount'] > 0:
                 table_with_amounts.append(entry)
-            '''
-            table_with_amounts.append(entry)
         table = table_with_amounts
         return table
    
@@ -742,6 +788,11 @@ class account_asset_asset(models.Model):
                 residual_amount = round(residual_amount, digits)
                 line['remaining_value'] = residual_amount
             entry['lines'] = lines
+        
+        # step 5: Remove lines without amounts
+        table = self._normalize_depreciation_table(cr, uid, asset, table, 
+                                                   context)
+         
         return table
   
     def _spread_depreciation_lines(self, cr, uid, asset, context=None):

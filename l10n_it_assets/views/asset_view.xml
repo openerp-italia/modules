@@ -19,6 +19,9 @@
           		<xpath expr="//field[@name='method_number']" position="replace">
           			<field name="method_number" attrs="{'invisible':[('method_time','in',['end','percentage'])], 'required':[('method_time','in',['number','year'])]}"/>
           		</xpath>
+          		<xpath expr="//field[@name='prorata']" position="replace">
+          			<field name="prorata"/>
+          		</xpath>
           		<xpath expr="//field[@name='method_period']" position="before">
           			<field name="method_percentage" attrs="{'invisible':[('method_time','!=','percentage')], 'required':[('method_time','in',['percentage'])]}"/>
           		</xpath>
@@ -34,7 +37,7 @@
 	            <group string="Fiscal Depreciation Method" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
 	              <field name="fiscal_method"/>
 	              <field name="fiscal_method_progress_factor" digits="(14, 4)" attrs="{'invisible':[('fiscal_method','=','linear')], 'required':[('fiscal_method','in',['degressive','degr-linear'])]}"/>
-	              <field name="fiscal_prorata" attrs="{'readonly':[('fiscal_method_time','!=','year')]}"/>
+	              <field name="fiscal_prorata"/>
 	            </group>
        		</xpath>
         	
@@ -71,6 +74,9 @@
           		<xpath expr="//field[@name='method_number']" position="replace">
           			<field name="method_number" attrs="{'invisible':[('method_time','in',['end','percentage'])], 'required':[('method_time','in',['number','year'])]}"/>
           		</xpath>
+          		<xpath expr="//field[@name='prorata']" position="replace">
+          			<field name="prorata"/>
+          		</xpath>
           		<xpath expr="//field[@name='method_period']" position="before">
           			<field name="method_percentage" attrs="{'invisible':[('method_time','!=','percentage')], 'required':[('method_time','in',['percentage'])]}"/>
           		</xpath>
@@ -86,7 +92,7 @@
 		            <group string="Fiscal Depreciation Method" attrs="{'invisible':[('fiscal_different_method','=', False)]}">
 		              <field name="fiscal_method"/>
 		              <field name="fiscal_method_progress_factor" digits="(14, 4)" attrs="{'invisible':[('fiscal_method','=','linear')], 'required':[('fiscal_method','in',['degressive','degr-linear'])]}"/>
-		              <field name="fiscal_prorata" attrs="{'readonly':[('fiscal_method_time','!=','year')]}"/>
+		              <field name="fiscal_prorata"/>
 		            </group>
           		</xpath>
            
