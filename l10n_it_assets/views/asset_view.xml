@@ -68,14 +68,21 @@
 	        	<xpath expr="//field[@name='purchase_value']" position="after">
                		<field name="value_variation" />
           		</xpath>
+          		
            		<!-- Depreciation Property Form-->
                <xpath expr="//field[@name='partner_id']" position="after">
                		<field name="depreciation_property_id" widget="many2many_tags"/>
                		<field name="fiscal_different_method" />
           		</xpath>
+          		
           		<!-- Depreciation methods Form-->
           		<xpath expr="//field[@name='method_end']" position="replace">
           			<field name="method_end" attrs="{'required': [('method_time','=','end')], 'invisible':[('method_time','in',['number','year','percentage'])]}"/>
+          		</xpath>
+          		
+          		<xpath expr="//button[@string='Change Duration']" position="replace">
+          			<button name="%(account_asset_management.action_asset_modify)d" string="Change Duration" type="action" icon="terp-stock_effects-object-colorize" class="oe_inline" colspan="1"
+          			attrs="{'invisible':[('method_time','=','percentage')]}"/>
           		</xpath>
           		<xpath expr="//field[@name='method_number']" position="replace">
           			<field name="method_number" attrs="{'invisible':[('method_time','in',['end','percentage'])], 'required':[('method_time','in',['number','year'])]}"/>
