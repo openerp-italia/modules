@@ -79,6 +79,17 @@ class account_move_line(models.Model):
             if dp_line_ids:
                 raise ValidationError(
                     _("There is a depreciation move in the period"))
+        # Previous period must have a depreciation with account move
+        if 'asset_id' in vals:
+            domain = [('asset_id', '=', vals['asset_id']), 
+                      ('type', '=', 'depreciate'),
+                      ('line_date', '<', vals['date']),
+                      ('move_id', '=', False)]
+            dp_line_ids = dp_line_obj.search(cr, uid, domain)
+            if dp_line_ids:
+                raise ValidationError(
+                    _("There are previous periods without account depreciation \
+                    move"))
         return True
     
     def create(self, cr, uid, vals, context=None, check=True):
