@@ -524,7 +524,8 @@ class account_asset_asset(models.Model):
         Localization: override this method to change the degressive-linear
         calculation logic according to local legislation.
         """
-        if context.get('fiscal_methods'):
+        fiscal_method = context.get('fiscal_methods', False)
+        if fiscal_method:
             asset_method = asset.fiscal_method
             asset_method_number = asset.fiscal_method_number
             asset_method_time = asset.fiscal_method_time
@@ -566,6 +567,18 @@ class account_asset_asset(models.Model):
                  datetime.strptime(asset.date_start, '%Y-%m-%d')).days + 1
             divisor = duration / 365.0
         year_amount_linear = amount_to_depr / divisor
+        # Apply property
+        line_competence = context.get('depreciation_line_number')
+        line_max = context.get('depreciation_line_max')
+        for property in asset.depreciation_property_id:
+            if (fiscal_method and property.fiscal_depreciation)\
+                or (not fiscal_method and property.normal_depreciation):
+                role = property._compute_role(year_amount_linear or 0, 
+                                              line_competence,
+                                              line_max)
+                if role :
+                    year_amount_linear = role['amount']
+        
         if asset_method == 'linear':
             return year_amount_linear
         year_amount_degressive = residual_amount * \
@@ -613,12 +626,31 @@ class account_asset_asset(models.Model):
     @api.v7
     def _normalize_depreciation_table(self, cr, uid, asset, table, 
                                       context=None):
+        # Date with move of variation ( Not delete line if exists)
+        domain = [('asset_id', '=', asset.id)]
+        line_ids = self.pool['account.move.line'].search(cr, uid, domain, 
+                                                         order='date desc')
+        date_last_account_move = False
+        if line_ids:
+            acc_move_line = self.pool['account.move.line'].browse(cr, uid, 
+                                                                  line_ids[0])
+            date_last_account_move = datetime.strptime(acc_move_line.date, 
+                                                       '%Y-%m-%d')
+             
         # Remove lines with amount 0
+        '''
         table_with_amounts = []
         for entry in table:
-            if entry['fy_amount'] > 0:
-                table_with_amounts.append(entry)
+            # print entry
+            # import pdb
+            # pdb.set_trace()
+            if entry['fy_amount'] > 0 \
+                or (date_last_account_move \
+                and entry['date_stop'] <= date_last_account_move):
+                    table_with_amounts.append(entry)
         table = table_with_amounts
+        import pdb
+        pdb.set_trace()'''
         return table
    
     @api.v7
@@ -702,7 +734,7 @@ class account_asset_asset(models.Model):
         digits = self.pool.get('decimal.precision').precision_get(
             cr, uid, 'Account')
         amount_to_depr = residual_amount = asset.asset_value
-            
+        
         # step 1: compute variation and value of asset 
         # ... depreciation lines to exclude
         domain = [('asset_id', '=', asset.id), ('move_id', '!=', False)]
@@ -725,11 +757,18 @@ class account_asset_asset(models.Model):
         for i, entry in enumerate(table):
             # Compute depreciation with amount variation
             fy_residual_amount += entry['amount_variation']
+            # In case of sell
+            if fy_residual_amount < 0:
+                fy_residual_amount = 0
             amount_to_depr += entry['amount_variation']
+            if amount_to_depr < 0:
+                amount_to_depr = 0
             context.update({
                 'variation_asset_method_number' : len(table) - i,
                 'variation_fy_residual_amount' : fy_residual_amount,
-                'variation_amount_to_depr' : amount_to_depr
+                'variation_amount_to_depr' : amount_to_depr,
+                'depreciation_line_number' : i + 1,
+                'depreciation_line_max' : i_max + 1
                 })
             year_amount = self._compute_year_amount(
                 cr, uid, asset, amount_to_depr,
@@ -763,7 +802,7 @@ class account_asset_asset(models.Model):
         ##table = table[:i_max + 1]
         
         # step 3: Apply Property 
-        table = self._compute_property(cr, uid, asset, table, context)
+        # table = self._compute_property(cr, uid, asset, table, context)
         
         # step 4: spread depreciation amount per fiscal year
         # over the depreciation periods
@@ -906,7 +945,6 @@ class account_asset_asset(models.Model):
                 cr, uid, asset, context=context)
             if not table:
                 continue
-            
             # group lines prior to depreciation start period
             depreciation_start_date = datetime.strptime(
                 asset.date_start, '%Y-%m-%d')
@@ -968,13 +1006,16 @@ class account_asset_asset(models.Model):
                 # check if residual value corresponds with table
                 # and adjust table when needed
                 cr.execute(
-                    "SELECT COALESCE(SUM(amount), 0.0) "
+                    "SELECT COALESCE(SUM(amount), 0.0), "
+                    "    COALESCE(SUM(amount_variation), 0.0) "
                     "FROM account_asset_depreciation_line "
                     "WHERE id IN %s",
                     (tuple(posted_depreciation_line_ids),))
                 res = cr.fetchone()
                 depreciated_value = res[0]
-                residual_amount = asset.asset_value - depreciated_value
+                amount_variation = res[1]
+                residual_amount = asset.asset_value + amount_variation \
+                    - depreciated_value
                 amount_diff = round(
                     residual_amount_table - residual_amount, digits)
                 if amount_diff:
@@ -1026,6 +1067,9 @@ class account_asset_asset(models.Model):
                             (last_date, asset.id))
                         res = cr.fetchone()
                         amount = (asset.asset_value + res[1]) - res[0]
+                        # In case of sell
+                        if amount < 0:
+                            amount = 0
                     else:
                         amount = line['amount']
                     vals = {
@@ -1272,7 +1316,7 @@ class account_asset_depreciation_line(models.Model):
                 accumulated_depreciation = depreciated_value + dl.amount
             
             dl.depreciated_value = depreciated_value
-            dl.remaining_value = remaining_value
+            dl.remaining_value = remaining_value > 0 and remaining_value or 0
             dl.accumulated_depreciation = accumulated_depreciation
             
     @api.onchange('amount')
@@ -1438,7 +1482,8 @@ class account_asset_depreciation_line_fiscal(models.Model):
                 depreciated_value += dl.previous_id.amount
                 accumulated_depreciation = depreciated_value + dl.amount
             dl.depreciated_value = depreciated_value
-            dl.remaining_value = round(remaining_value, digits)
+            dl.remaining_value = round(remaining_value > 0 and remaining_value \
+                                       or 0, digits)
             dl.accumulated_depreciation = accumulated_depreciation
             
     @api.onchange('amount')
