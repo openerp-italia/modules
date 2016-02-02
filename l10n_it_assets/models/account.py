@@ -63,15 +63,26 @@ class account_move_line(models.Model):
         return True
     
     def _asset_control_on_create(self, cr, uid, vals, context=None, check=True):
+        date = False
+        period = False
+        if 'period_id' in vals:
+            period = self.pool['account.period'].browse(cr, uid, 
+                                                    vals['period_id'])
+        if 'date' in vals:
+            date = vals['date']
+        if 'move_id' in vals:
+            move = self.pool['account.move'].browse(cr, uid, 
+                                                    vals['move_id'])
+            if not period:
+                period = move.period_id
+            if not date:
+                date = move.date
         # If in the period exists depreciate move, to avoid create other 
         # asset moves.
         dp_line_obj = self.pool['account.asset.depreciation.line']
         if 'asset_id' in vals:
-            period = self.pool['account.period'].browse(cr, uid, 
-                                                        vals['period_id'])
             domain = [('asset_id', '=', vals['asset_id']),
                       ('type', '=', 'depreciate'),
-                      #('line_date', '>=', vals['date']),
                       ('move_id.period_id.fiscalyear_id', '=', \
                        period.fiscalyear_id.id),
                       ('move_id', '!=', False)]
@@ -83,7 +94,7 @@ class account_move_line(models.Model):
         if 'asset_id' in vals:
             domain = [('asset_id', '=', vals['asset_id']), 
                       ('type', '=', 'depreciate'),
-                      ('line_date', '<', vals['date']),
+                      ('line_date', '<', date),
                       ('move_id', '=', False)]
             dp_line_ids = dp_line_obj.search(cr, uid, domain)
             if dp_line_ids:

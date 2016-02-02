@@ -75,8 +75,7 @@ class account_asset_remove(orm.TransientModel):
             first_to_depreciate_dl.amount, digits)
         
         amount_variation = asset._get_amount_variation(False, last_depr_date)
-        residual_value = asset.value_residual - to_depreciate_amount \
-            + amount_variation
+        residual_value = asset.value_residual - to_depreciate_amount 
         
         # Fiscal
         domain = [('asset_id', '=', asset.id), ('type', '=', 'depreciate'), 
@@ -137,6 +136,85 @@ class account_asset_remove(orm.TransientModel):
             'residual_value_fiscal' : f_residual_value
             })
         return res
+    
+    def _get_removal_data(self, cr, uid, wiz_data, asset, residual_value,
+                          context=None):
+        dp_line_obj = self.pool['account.asset.depreciation.line']
+        move_lines = []
+        partner_id = asset.partner_id and asset.partner_id.id or False
+        categ = asset.category_id
+        # asset and asset depreciation account reversal
+        amount_variation = 0
+        domain = [('line_date', '<', wiz_data.date_remove),
+                  ('type', '=', 'depreciate')]
+        dp_line_ids = dp_line_obj.search(cr, uid, domain, 
+                                         order='line_date desc')
+        if dp_line_ids:
+            previous_dp_line = dp_line_obj.browse(cr, uid, dp_line_ids[0])
+            amount_variation = asset._get_amount_variation(
+                False, previous_dp_line.line_date)
+        depr_amount = asset.asset_value + amount_variation - residual_value
+        asset_value = asset.asset_value + amount_variation
+        move_line_vals = {
+            'name': asset.name,
+            'account_id': categ.account_depreciation_id.id,
+            'debit': depr_amount > 0 and depr_amount or 0.0,
+            'credit': depr_amount < 0 and -depr_amount or 0.0,
+            'partner_id': partner_id,
+            'asset_id': asset.id
+        }
+        move_lines.append((0, 0, move_line_vals))
+        move_line_vals = {
+            'name': asset.name,
+            'account_id': categ.account_asset_id.id,
+            'debit': asset_value < 0 and -asset_value or 0.0,
+            'credit': asset_value > 0 and asset_value or 0.0,
+            'partner_id': partner_id,
+            'asset_id': asset.id
+        }
+        move_lines.append((0, 0, move_line_vals))
+
+        if residual_value:
+            if wiz_data.posting_regime == 'residual_value':
+                move_line_vals = {
+                    'name': asset.name,
+                    'account_id': wiz_data.account_residual_value_id.id,
+                    'analytic_account_id': asset.account_analytic_id.id,
+                    'debit': residual_value,
+                    'credit': 0.0,
+                    'partner_id': partner_id,
+                    'asset_id': asset.id
+                }
+                move_lines.append((0, 0, move_line_vals))
+            elif wiz_data.posting_regime == 'gain_loss_on_sale':
+                if wiz_data.sale_value:
+                    sale_value = wiz_data.sale_value
+                    move_line_vals = {
+                        'name': asset.name,
+                        'account_id': wiz_data.account_sale_id.id,
+                        'analytic_account_id': asset.account_analytic_id.id,
+                        'debit': sale_value,
+                        'credit': 0.0,
+                        'partner_id': partner_id,
+                        'asset_id': asset.id
+                    }
+                    move_lines.append((0, 0, move_line_vals))
+                balance = wiz_data.sale_value - residual_value
+                account_id = (wiz_data.account_plus_value_id.id
+                              if balance > 0
+                              else wiz_data.account_min_value_id.id)
+                move_line_vals = {
+                    'name': asset.name,
+                    'account_id': account_id,
+                    'analytic_account_id': asset.account_analytic_id.id,
+                    'debit': balance < 0 and -balance or 0.0,
+                    'credit': balance > 0 and balance or 0.0,
+                    'partner_id': partner_id,
+                    'asset_id': asset.id
+                }
+                move_lines.append((0, 0, move_line_vals))
+
+        return move_lines
     
     def remove(self, cr, uid, ids, context=None):
         asset_obj = self.pool.get('account.asset.asset')
