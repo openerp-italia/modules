@@ -32,6 +32,22 @@ _logger = logging.getLogger(__name__)
 class account_asset_remove(orm.TransientModel):
     _inherit = 'account.asset.remove'
     
+    def _posting_regime(self, cr, uid, context=None):
+        return[
+            ('gain_loss_on_sale', _('Gain/Loss on Sale')),
+        ]
+    
+    _columns = {
+        'posting_regime': fields.selection(
+            _posting_regime, 'Removal Entry Policy',
+            required=True,
+            help="Removal Entry Policy \n"
+                 "  * Residual Value: The non-depreciated value will be "
+                 "posted on the 'Residual Value Account' \n"
+                 "  * Gain/Loss on Sale: The Gain or Loss will be posted on "
+                 "the 'Plus-Value Account' or 'Min-Value Account' "),
+        }
+    
     def _prepare_early_removal(self, cr, uid,
                                asset, date_remove, context=None):
         """
