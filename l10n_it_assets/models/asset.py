@@ -596,34 +596,6 @@ class account_asset_asset(models.Model):
                 _("Illegal value %s in asset.method.") % asset_method)
             
     @api.v7
-    def _compute_property(self, cr, uid, asset, table, context=None):
-        fy_residual_amount = asset.asset_value
-        fiscal_method = context.get('fiscal_methods', False)
-        digits = self.pool.get('decimal.precision').precision_get(
-            cr, uid, 'Account')
-        for i, entry in enumerate(table):
-            fy_residual_amount += entry['amount_variation']
-            # Search Role
-            for property in asset.depreciation_property_id:
-                l = i+1
-                l_last = len(table)
-                if (fiscal_method and property.fiscal_depreciation)\
-                    or (not fiscal_method and property.normal_depreciation):
-                    role = property._compute_role(entry and \
-                                                  'fy_amount' in entry and \
-                                                  entry['fy_amount'] or 0, 
-                                                  l,
-                                                  l_last)
-                    if role :
-                        entry['fy_amount'] = role['amount']
-                        entry['period_amount'] = role['amount']
-            if fy_residual_amount < entry['fy_amount']:
-                entry['fy_amount'] = fy_residual_amount
-            fy_residual_amount -= entry['fy_amount']
-            fy_residual_amount = round(fy_residual_amount, digits)
-        return table
-    
-    @api.v7
     def _normalize_depreciation_table(self, cr, uid, asset, table, 
                                       context=None):
         # Date with move of variation ( Not delete line if exists)
@@ -636,21 +608,6 @@ class account_asset_asset(models.Model):
                                                                   line_ids[0])
             date_last_account_move = datetime.strptime(acc_move_line.date, 
                                                        '%Y-%m-%d')
-             
-        # Remove lines with amount 0
-        '''
-        table_with_amounts = []
-        for entry in table:
-            # print entry
-            # import pdb
-            # pdb.set_trace()
-            if entry['fy_amount'] > 0 \
-                or (date_last_account_move \
-                and entry['date_stop'] <= date_last_account_move):
-                    table_with_amounts.append(entry)
-        table = table_with_amounts
-        import pdb
-        pdb.set_trace()'''
         return table
    
     @api.v7
@@ -801,10 +758,7 @@ class account_asset_asset(models.Model):
         i_max = i
         ##table = table[:i_max + 1]
         
-        # step 3: Apply Property 
-        # table = self._compute_property(cr, uid, asset, table, context)
-        
-        # step 4: spread depreciation amount per fiscal year
+        # step 3: spread depreciation amount per fiscal year
         # over the depreciation periods
         fy_residual_amount = residual_amount
         line_date = False
@@ -828,7 +782,7 @@ class account_asset_asset(models.Model):
                 line['remaining_value'] = residual_amount
             entry['lines'] = lines
         
-        # step 5: Remove lines without amounts
+        # step 4: Remove lines without amounts
         table = self._normalize_depreciation_table(cr, uid, asset, table, 
                                                    context)
          
