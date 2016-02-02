@@ -43,9 +43,9 @@ class account_asset_remove(orm.TransientModel):
             }
         asset_line_obj = self.pool.get('account.asset.depreciation.line')
         asset_obj = self.pool['account.asset.asset']
-
         digits = self.pool.get('decimal.precision').precision_get(
             cr, uid, 'Account')
+        
         # Step 1: Compute values
         # Normal
         domain = [('asset_id', '=', asset.id), ('type', '=', 'depreciate'), 
@@ -53,14 +53,13 @@ class account_asset_remove(orm.TransientModel):
         asset_line_obj = self.pool['account.asset.depreciation.line']
         dl_ids = asset_line_obj.search(cr, uid, domain, order='line_date asc')
         first_to_depreciate_dl = asset_line_obj.browse(cr, uid, dl_ids[0])    
-
+        
         first_date = first_to_depreciate_dl.line_date
         if date_remove > first_date:
             raise orm.except_orm(
                 _('Error!'),
                 _("You can't make an early removal if all the depreciation "
                   "lines for previous periods are not posted."))
-
         last_depr_date = first_to_depreciate_dl.previous_id.line_date
         period_number_days = (
             datetime.strptime(first_date, '%Y-%m-%d') -
@@ -86,11 +85,13 @@ class account_asset_remove(orm.TransientModel):
         f_first_to_depreciate_dl = f_asset_line_obj.browse(cr, uid, f_dl_ids[0])    
 
         first_date = f_first_to_depreciate_dl.line_date
+        ''' Omit control. Fiscal won't create an account move
         if date_remove > first_date:
             raise orm.except_orm(
                 _('Error!'),
                 _("You can't make an early removal if all the depreciation "
                   "lines for previous periods are not posted."))
+        '''
         last_depr_date = f_first_to_depreciate_dl.previous_id.line_date
         period_number_days = (
             datetime.strptime(first_date, '%Y-%m-%d') -
@@ -222,12 +223,18 @@ class account_asset_remove(orm.TransientModel):
         f_asset_line_obj = self.pool['account.asset.depreciation.line.fiscal']
         move_obj = self.pool.get('account.move')
         period_obj = self.pool.get('account.period')
-
+        
         asset_id = context['active_id']
         asset = asset_obj.browse(cr, uid, asset_id, context=context)
         asset_ref = asset.code and '%s (ref: %s)' \
             % (asset.name, asset.code) or asset.name
         wiz_data = self.browse(cr, uid, ids[0], context=context)
+        # Recompute values with invoice selected
+        # Those will be removed from amount variation
+        context_save = context.copy()
+        self.pool['account.asset.asset'].\
+                compute_depreciation_board(cr, uid, [asset_id], context)
+        context = context_save.copy()
         # Residual and update last dp line proportionally
         res = self._prepare_early_removal(
             cr, uid, asset, wiz_data.date_remove, context=context)
@@ -255,7 +262,7 @@ class account_asset_remove(orm.TransientModel):
         line_name = asset_obj._get_depreciation_entry_name(
             cr, uid, asset, len(dl_ids) + 1, context=context)
         journal_id = asset.category_id.journal_id.id
-
+        
         # create move
         move_vals = {
             'name': asset.name,

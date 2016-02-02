@@ -77,6 +77,9 @@ class account_move_line(models.Model):
                 period = move.period_id
             if not date:
                 date = move.date
+        # Skip controls if move from early remove asset
+        if context.get('early_removal',False):
+            return True
         # If in the period exists depreciate move, to avoid create other 
         # asset moves.
         dp_line_obj = self.pool['account.asset.depreciation.line']

@@ -150,9 +150,27 @@ class account_asset_asset(models.Model):
         self.fiscal_value_depreciated = value_depreciated
     
     @api.model
-    def _get_amount_variation(self, date_start=None, date_stop=None):
+    def _get_amount_variation(self, date_start=None, date_stop=None, 
+                              context=None):
         cr = self.env.cr
         uid = self.env.uid
+        if not context:
+            context = {}
+        # Invoice lines with asset remove
+        sale_value = 0
+        invoice_line_ids = context.get('invoice_line_ids', [])
+        if invoice_line_ids:
+            domain = [('asset_id', '=', self.id),
+                      ('id', 'in', invoice_line_ids)]
+            if date_start:
+                domain.append(('invoice_id.move_id.date', '>=', date_start))
+            if date_stop:
+                domain.append(('invoice_id.move_id.date', '<=', date_stop))
+            inv_line_ids = self.pool['account.invoice.line'].search(cr, uid, 
+                                                                    domain)
+            for inv_line in self.pool['account.invoice.line'].browse(
+                cr, uid, inv_line_ids):
+                sale_value += inv_line.price_subtotal
         # Depreciation lines
         domain = [('asset_id', '=', self.id), ('move_id', '!=', False)]
         dp_line_ids = self.pool['account.asset.depreciation.line']\
@@ -162,7 +180,7 @@ class account_asset_asset(models.Model):
             .browse(cr, uid, dp_line_ids):
             dp_line_move_ids.append(dp_line.move_id.id)
         # Moves not in depreciation lines are variations
-        amount_variation = 0        
+        amount_variation = sale_value   
         domain = [('asset_id', '=', self.id),
                   ('move_id', 'not in', dp_line_move_ids),
                   ('move_id.asset_remove_move_id', '=', False)]
@@ -497,7 +515,7 @@ class account_asset_asset(models.Model):
                         elif not context.get('fiscal_methods') and \
                                 role['normal_depreciation']:
                             property_coeff = role['coeff']
-                count += (asset_method_percentage * property_coeff)
+                count += round((asset_method_percentage * property_coeff), )
                 years_number += 1
             depreciation_stop_date = depreciation_start_date + \
                 relativedelta(years=years_number, days=-1)
@@ -704,7 +722,7 @@ class account_asset_asset(models.Model):
         i_max = len(table) - 1
         for i, entry in enumerate(table):
             entry['amount_variation'] = asset._get_amount_variation(
-                entry['date_start'], entry['date_stop'])
+                entry['date_start'], entry['date_stop'], context)
 
         # step 2: calculate depreciation amount per fiscal year
         fy_residual_amount = residual_amount
@@ -753,8 +771,6 @@ class account_asset_asset(models.Model):
                 'asset_historical_value': amount_to_depr,
             })
             fy_residual_amount -= fy_amount
-            #if round(fy_residual_amount, digits) == 0:
-            #    break
         i_max = i
         ##table = table[:i_max + 1]
         
@@ -860,6 +876,7 @@ class account_asset_asset(models.Model):
     @api.v7
     def compute_depreciation_board(self, cr, uid, ids, context=None):
         self.compute_depreciation_board_fiscal(cr, uid, ids, context)
+        
         if not context:
             context = {}
         depreciation_lin_obj = self.pool.get(
@@ -1246,6 +1263,8 @@ class account_asset_depreciation_line(models.Model):
     fiscal_line_ids = fields.One2many('account.asset.depreciation.line.fiscal',
                                       'normal_line_id',
                                       string='Fiscal lines')
+    amount_remove_move = fields.Float('Amount remove move', readonly=True,
+        help="Contains amount of sale invoice line for remove asset")
     
     @api.one
     @api.depends('amount')
@@ -1328,6 +1347,7 @@ class account_asset_depreciation_line(models.Model):
                 asset.write({'state': 'close'})
         asset_to_recompute = []
         # assets from move lines
+        '''
         domain = [('move_id', 'in', created_move_ids),
                   ('asset_id', '!=', False)]
         ml_ids = self.pool['account.move.line'].search(cr, uid, domain)
@@ -1336,6 +1356,7 @@ class account_asset_depreciation_line(models.Model):
         if asset_to_recompute:
             self.pool['account.asset.asset'].\
                 compute_depreciation_board(cr, uid, asset_to_recompute, context)
+        '''
         return created_move_ids
     
     @api.v7

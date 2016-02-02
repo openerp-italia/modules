@@ -70,6 +70,7 @@ class account_asset_remove_select(orm.TransientModel):
                     account_sale_id = line.account_id.id
                 sale_value += line.price_subtotal 
         context.update({'invoice_line_ids': inv_line_ids})
+        context.update({'invoice_sale_value': sale_value})
         
         # Create wizard for remove
         remove_wiz_id = False
