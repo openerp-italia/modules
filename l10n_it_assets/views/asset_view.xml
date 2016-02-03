@@ -81,8 +81,6 @@
           		</xpath>
           		
           		<xpath expr="//button[@string='Change Duration']" position="replace">
-          			<button name="%(account_asset_management.action_asset_modify)d" string="Change Duration" type="action" icon="terp-stock_effects-object-colorize" class="oe_inline" colspan="1"
-          			attrs="{'invisible':[('method_time','=','percentage')]}"/>
           		</xpath>
           		<xpath expr="//field[@name='method_number']" position="replace">
           			<field name="method_number" attrs="{'invisible':[('method_time','in',['end','percentage'])], 'required':[('method_time','in',['number','year'])]}"/>

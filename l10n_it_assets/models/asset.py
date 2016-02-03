@@ -562,11 +562,8 @@ class account_asset_asset(models.Model):
         # For variation recompute with remaining numbers
         if context.get('variation_asset_method_number'):
             asset_method_number = context.get('variation_asset_method_number')
-        if context.get('variation_fy_residual_amount'):
-            amount_to_depr = context.get('variation_fy_residual_amount')
-        if asset_method_time == 'percentage':
-            if context.get('variation_amount_to_depr'):
-                amount_to_depr = context.get('variation_amount_to_depr')
+        if context.get('variation_amount_to_depr'):
+            amount_to_depr = context.get('variation_amount_to_depr')
         
         if asset_method_time == 'year':
             divisor = asset_method_number
@@ -729,8 +726,11 @@ class account_asset_asset(models.Model):
         #i_max = len(table) - 1
         i_max = len(table)
         asset_sign = asset.asset_value >= 0 and 1 or -1
+        asset_with_variation = False
         for i, entry in enumerate(table):
             # Compute depreciation with amount variation
+            if entry['amount_variation']:
+                asset_with_variation
             fy_residual_amount += entry['amount_variation']
             # In case of sell
             if fy_residual_amount < 0:
@@ -739,8 +739,8 @@ class account_asset_asset(models.Model):
             if amount_to_depr < 0:
                 amount_to_depr = 0
             context.update({
-                'variation_asset_method_number' : len(table) - i,
-                'variation_fy_residual_amount' : fy_residual_amount,
+                'variation_asset_method_number' : len(table),
+                #'variation_fy_residual_amount' : fy_residual_amount,
                 'variation_amount_to_depr' : amount_to_depr,
                 'depreciation_line_number' : i + 1,
                 'depreciation_line_max' : i_max + 1
