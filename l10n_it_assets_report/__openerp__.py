@@ -31,7 +31,7 @@
     'website': 'http://www.openforce.it/',
     'license': 'AGPL-3',
     'depends': [
-        'account', 'account_asset_management'
+        'account', 'account_asset_management', 'l10n_it_assets'
     ],
     'data': [
         'wizard/assets_report_registry.xml',
