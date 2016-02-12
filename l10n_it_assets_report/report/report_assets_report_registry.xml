@@ -59,12 +59,12 @@
 
         <template id="report_assets_report_registry">
             <t t-call="report.html_container">
-                <t t-set="title" t-value="'Assets Registry Report'"/>
+                <t t-set="title" t-value="'Registro Beni Ammortizzabili'"/>
                 <t t-call="l10n_it_assets_report.internal_layout">
                     <div class="page">
                         <t t-foreach="get_assets(asset_ids)" t-as="asset">
                             <!-- Info Asset //-->
-                            <table style="font-size: small;" cellspacing="0" class="table table-bordered">
+                            <table cellspacing="0" class="table table-bordered">
                                 <thead>
                                     <tr>
                                         <th>Bene</th>
@@ -83,15 +83,15 @@
                                 </tbody>
                             </table>
                             <!-- Lines Asset //-->
-                            <table style="font-size: small;" cellspacing="0" class="table table-striped">
+                            <table cellspacing="0" class="table table-striped">
                                 <thead>
                                     <tr style="page-break-inside: avoid;">
                                         <th class="left_without_line">Data</th>
-                                        <th class="pull-right">Variazioni</th>
-                                        <th class="pull-center">Valore Storico Immobilizzazione</th>
-                                        <th class="pull-right">Ammortamento</th>
-                                        <th class="pull-right">Valore Residuo</th>
-                                        <th class="pull-right">Valore Fondo</th>
+                                        <th class="right_without_line">Variazioni</th>
+                                        <th class="right_without_line">Valore Storico Immobilizzazione</th>
+                                        <th class="right_without_line">Ammortamento</th>
+                                        <th class="right_without_line">Valore Residuo</th>
+                                        <th class="right_without_line">Valore Fondo</th>
                                     </tr>
                                 </thead>
                                 <tbody>

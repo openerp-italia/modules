@@ -23,7 +23,7 @@
 
 {
     'name': 'Italian Assets Management Report',
-    'version': '8.0.1',
+    'version': '1.1.7',
     'category': 'Localization/Italy',
     'summary': 'Italian Assets Management',
     'author': 'Openforce di Alessandro Camilli, \
