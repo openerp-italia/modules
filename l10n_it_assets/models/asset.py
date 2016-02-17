@@ -252,6 +252,10 @@ class account_asset_asset(models.Model):
         else:
             self.value_depreciated = 0.0
     
+    category_id = fields.Many2one(
+        'account.asset.category', 'Asset Category', change_default=True, 
+        readonly=True, states={'draft': [('readonly', False)]}, 
+        ondelete='restrict')
     value_residual = fields.Float(
         string='Residual Value', store=True, readonly=True,
         compute='_compute_depreciation')
