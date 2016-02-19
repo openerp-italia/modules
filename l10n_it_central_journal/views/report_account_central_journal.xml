@@ -33,6 +33,7 @@
                             <th class="left_without_line">Account move</th>
                             <th class="left_without_line">Account code</th>
                             <th class="left_without_line">Account name</th>
+                            <th class="left_without_line">Partner</th>
                             <th class="left_without_line">Name</th>
                             <th class="right_without_line">Debit</th>
                             <th class="right_without_line">Credit</th>
@@ -47,6 +48,7 @@
                     
                     <tbody>
                         <tr style="page-break-inside: avoid;" >
+                            <td class="left_without_line"> </td>
                             <td class="left_without_line"> </td>
                             <td class="left_without_line"> </td>
                             <td class="left_without_line"> </td>
@@ -111,6 +113,14 @@
                                     <div style="page-break-inside: avoid" 
                                     t-esc="line.account_id.name" />
                                 </td>
+                                <!-- Partner name -->
+                                <td class="left_without_line">
+                                    <t t-if="line.partner_id and (line.partner_id.property_account_receivable.id == line.account_id.id
+                                        or line.partner_id.property_account_payable.id == line.account_id.id)">
+                                            <div style="page-break-inside: avoid"
+                                            t-esc="line.partner_id.name" />
+                                    </t>
+                                </td>
                                 <!-- Name -->
                                 <td class="left_without_line">
                                     <div style="page-break-inside: avoid" 
@@ -132,6 +142,7 @@
                         </t>
                         <t t-set="class_new_move" t-value="'new_move'"/>
                         <tr style="page-break-inside: avoid;" t-att-class="class_new_move">
+                            <td class="left_without_line"> </td>
                             <td class="left_without_line"> </td>
                             <td class="left_without_line"> </td>
                             <td class="left_without_line"> </td>
