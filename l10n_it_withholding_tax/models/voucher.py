@@ -264,7 +264,7 @@ class account_voucher(orm.Model):
                     self.pool['withholding.tax.voucher.line']._align_wt_move(
                                                     cr, uid, [wt_v_line.id])
         return res
-    
+
     
 class account_voucher_line(orm.Model):
     _inherit = "account.voucher.line"

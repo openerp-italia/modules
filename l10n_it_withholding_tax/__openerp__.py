@@ -20,7 +20,7 @@
 ##############################################################################
 {
     'name': 'Withholding tax',
-    'version': '0.2',
+    'version': '0.3',
     'category': 'Account',
     'description': """
     Withholding tax
