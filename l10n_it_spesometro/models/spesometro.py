@@ -41,7 +41,7 @@ class spesometro_configurazione(models.Model):
     _name = "spesometro.configurazione"
     _description = "Spesometro - Configurazione"
     
-    anno = fields.Integer(string='Anno', size=4, required=True )
+    anno = fields.Integer(string='Anno', size=4, required=True)
     stato_san_marino = fields.Many2one('res.country', string='Stato San Marino', 
                                        required=True)
     regole_ids = fields.One2many('spesometro.regole', 'configurazione_id',
@@ -75,6 +75,17 @@ class spesometro_configurazione(models.Model):
     quadro_se_limite_importo_line = \
         fields.Float(string='Quadro SE - Limite importo singola operaz.')
     
+    
+    @api.one
+    def copy(self, default=None):
+        default.update(anno=self.anno +1)
+        new_regole_ids = []
+        for role in self.regole_ids:
+            new_regole_ids.append(role.id)
+        if new_regole_ids:
+            default['regole_ids'] = [(6, 0, new_regole_ids)]
+        return super(spesometro_configurazione, self).copy(default)
+        
 
 class spesometro_regole(models.Model):
     
