@@ -81,7 +81,8 @@ class spesometro_configurazione(models.Model):
         default.update(anno=self.anno +1)
         new_regole_ids = []
         for role in self.regole_ids:
-            new_regole_ids.append(role.id)
+            new_role = role.copy()
+            new_regole_ids.append(new_role.id)
         if new_regole_ids:
             default['regole_ids'] = [(6, 0, new_regole_ids)]
         return super(spesometro_configurazione, self).copy(default)
