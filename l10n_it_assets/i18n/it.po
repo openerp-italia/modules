@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-28 18:32+0000\n"
-"PO-Revision-Date: 2016-01-28 18:32+0000\n"
+"POT-Creation-Date: 2016-04-08 12:45+0000\n"
+"PO-Revision-Date: 2016-04-08 12:45+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -47,6 +47,11 @@ msgstr "Valore Ammortizzato"
 msgid "Amount Variation"
 msgstr "Importo Variazioni"
 
+#: field:account.asset.depreciation.line,amount_remove_move:0
+#. module: l10n_it_assets
+msgid "Amount remove move"
+msgstr "Amount remove move"
+
 #: field:account.asset.property,fiscal_depreciation:0
 #. module: l10n_it_assets
 msgid "Apply to Fiscal Depreciation"
@@ -63,7 +68,7 @@ msgstr "Applica a Ammortamento Normale(Civilistico)"
 msgid "Asset"
 msgstr "Immobilizzazione"
 
-#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:234
+#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:335
 #. module: l10n_it_assets
 #, python-format
 msgid "Asset '%s' Removal Journal Entry"
@@ -132,6 +137,11 @@ msgstr "Riga ammortamento immobilizzazione"
 msgid "Asset property"
 msgstr "Proprietà Immobilizzazione"
 
+#: view:account.asset.asset:l10n_it_assets.view_account_asset_asset_form
+#. module: l10n_it_assets
+msgid "Asset removal."
+msgstr "Dimissione Immobilizzazione"
+
 #: view:account.asset.remove.select:l10n_it_assets.wizard_account_asset_remove_select_form
 #. module: l10n_it_assets
 msgid "Cancel"
@@ -165,10 +175,25 @@ msgstr "Choose the method to use to compute the dates and number of depreciation
 msgid "Coeff"
 msgstr "Coeff."
 
+#: field:account.asset.property,fiscal_coeff_asset_depreciable:0
+#. module: l10n_it_assets
+msgid "Coeff for asset Fiscal value depreciable"
+msgstr "Coeff Valore Ammortizzabile iniziale"
+
+#: field:account.asset.property,normal_coeff_asset_depreciable:0
+#. module: l10n_it_assets
+msgid "Coeff for asset Normal value depreciable"
+msgstr "Coeff Valore Ammortizzabile iniziale"
+
 #: view:account.asset.asset:l10n_it_assets.view_account_asset_asset_form
 #. module: l10n_it_assets
 msgid "Compute"
 msgstr "Calcola"
+
+#: help:account.asset.depreciation.line,amount_remove_move:0
+#. module: l10n_it_assets
+msgid "Contains amount of sale invoice line for remove asset"
+msgstr "Contains amount of sale invoice line for remove asset"
 
 #: view:account.asset.remove.select:l10n_it_assets.wizard_account_asset_remove_select_form
 #. module: l10n_it_assets
@@ -237,16 +262,25 @@ msgstr "Depreciation Name"
 msgid "Ending Date"
 msgstr "Ending Date"
 
-#: code:addons/l10n_it_assets/models/asset.py:615
-#: code:addons/l10n_it_assets/models/asset.py:891
-#: code:addons/l10n_it_assets/models/asset.py:1070
-#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:60
-#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:92
-#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:173
+#: code:addons/l10n_it_assets/models/asset.py:679
+#: code:addons/l10n_it_assets/models/asset.py:970
+#: code:addons/l10n_it_assets/models/asset.py:1155
+#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:76
+#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:274
 #. module: l10n_it_assets
 #, python-format
 msgid "Error!"
 msgstr "Error!"
+
+#: view:account.asset.property:l10n_it_assets.view_account_asset_property_form
+#. module: l10n_it_assets
+msgid "Fiscal"
+msgstr "Fiscale"
+
+#: field:account.asset.asset,fiscal_amount_to_depreciate:0
+#. module: l10n_it_assets
+msgid "Fiscal Amount To Depreciate"
+msgstr "Valore da Ammortizzare"
 
 #: field:account.asset.asset,fiscal_value_depreciated:0
 #. module: l10n_it_assets
@@ -269,6 +303,11 @@ msgstr "Metodo Ammortamento Fiscale"
 #. module: l10n_it_assets
 msgid "Fiscal Residual Value"
 msgstr "Fiscal Residual Value"
+
+#: view:account.asset.asset:l10n_it_assets.view_account_asset_asset_form
+#. module: l10n_it_assets
+msgid "Fiscal Values"
+msgstr "Fiscal Values"
 
 #: field:account.asset.asset,fiscal_different_method:0
 #: field:account.asset.category,fiscal_different_method:0
@@ -293,7 +332,13 @@ msgstr "Metodo di Calcolo"
 msgid "Fiscal method time"
 msgstr "Metodo Temporale"
 
-#: code:addons/l10n_it_assets/wizard/account_asset_remove_select.py:90
+#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:37
+#. module: l10n_it_assets
+#, python-format
+msgid "Gain/Loss on Sale"
+msgstr "Gain/Loss on Sale"
+
+#: code:addons/l10n_it_assets/wizard/account_asset_remove_select.py:91
 #. module: l10n_it_assets
 #, python-format
 msgid "Generate Asset Removal entries"
@@ -307,13 +352,13 @@ msgstr "Generate Asset Removal entries"
 msgid "ID"
 msgstr "ID"
 
-#: code:addons/l10n_it_assets/models/asset.py:538
+#: code:addons/l10n_it_assets/models/asset.py:625
 #. module: l10n_it_assets
 #, python-format
 msgid "Illegal value %s in asset.method."
 msgstr "Valore non valido %s in asset.method."
 
-#: code:addons/l10n_it_assets/models/asset.py:812
+#: code:addons/l10n_it_assets/models/asset.py:891
 #. module: l10n_it_assets
 #, python-format
 msgid "Illegal value %s in asset.method_period."
@@ -414,6 +459,16 @@ msgstr "Nome"
 msgid "Next Period Depreciation"
 msgstr "Valore residuo"
 
+#: view:account.asset.property:l10n_it_assets.view_account_asset_property_form
+#. module: l10n_it_assets
+msgid "Normal"
+msgstr "Normal"
+
+#: view:account.asset.asset:l10n_it_assets.view_account_asset_asset_form
+#. module: l10n_it_assets
+msgid "Normal Values"
+msgstr "Normal Values"
+
 #: field:account.asset.asset,fiscal_method_number:0
 #: field:account.asset.category,fiscal_method_number:0
 #: code:addons/l10n_it_assets/models/asset.py:119
@@ -454,8 +509,8 @@ msgstr "Confermata"
 msgid "Previous Depreciation Line"
 msgstr "Linea ammortamento precedente"
 
-#: code:addons/l10n_it_assets/models/asset.py:537
-#: code:addons/l10n_it_assets/models/asset.py:811
+#: code:addons/l10n_it_assets/models/asset.py:624
+#: code:addons/l10n_it_assets/models/asset.py:890
 #. module: l10n_it_assets
 #, python-format
 msgid "Programming Error!"
@@ -482,6 +537,11 @@ msgstr "Property id"
 msgid "Prorata Temporis"
 msgstr "Prorata Temporis"
 
+#: view:account.asset.asset:l10n_it_assets.view_account_asset_asset_form
+#. module: l10n_it_assets
+msgid "Remove"
+msgstr "Remove"
+
 #: model:ir.model,name:l10n_it_assets.model_account_asset_remove
 #: model:ir.model,name:l10n_it_assets.model_account_asset_remove_select
 #. module: l10n_it_assets
@@ -504,7 +564,7 @@ msgstr "Vendite - Movimenti di dismissione"
 msgid "Select Move for Remove Asset"
 msgstr "Seleziona i movimenti di dismissione dell'Immobilizzazione"
 
-#: code:addons/l10n_it_assets/models/asset.py:376
+#: code:addons/l10n_it_assets/models/asset.py:409
 #. module: l10n_it_assets
 #, python-format
 msgid "Select Moves for Asset Removal entries"
@@ -520,8 +580,8 @@ msgstr "Sequence"
 msgid "Set this flag for entries of previous                                 fiscal years for which OpenERP has not                                 generated accounting entries."
 msgstr "Set this flag for entries of previous                                 fiscal years for which OpenERP has not                                 generated accounting entries."
 
-#: code:addons/l10n_it_assets/models/asset.py:892
-#: code:addons/l10n_it_assets/models/asset.py:1071
+#: code:addons/l10n_it_assets/models/asset.py:971
+#: code:addons/l10n_it_assets/models/asset.py:1156
 #. module: l10n_it_assets
 #, python-format
 msgid "The duration of the asset conflicts with the posted depreciation table entry dates."
@@ -533,13 +593,19 @@ msgstr "The duration of the asset conflicts with the posted depreciation table e
 msgid "The number of years needed to depreciate your asset"
 msgstr "Numero di anni in cui ammortizzare il cespite"
 
-#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:174
+#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:275
 #. module: l10n_it_assets
 #, python-format
 msgid "The removal date must be after the last depreciation date."
 msgstr "La data di dismissione deve essere superiore all'ultima data di ammortamento"
 
-#: code:addons/l10n_it_assets/models/account.py:77
+#: code:addons/l10n_it_assets/models/account.py:105
+#. module: l10n_it_assets
+#, python-format
+msgid "There are previous periods without account depreciation                     move"
+msgstr "There are previous periods without account depreciation                     move"
+
+#: code:addons/l10n_it_assets/models/account.py:95
 #. module: l10n_it_assets
 #, python-format
 msgid "There is a depreciation move in the period"
@@ -566,14 +632,13 @@ msgstr "Valore Variazioni"
 msgid "Year"
 msgstr "Annuale"
 
-#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:61
-#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:93
+#: code:addons/l10n_it_assets/wizard/account_asset_remove.py:77
 #. module: l10n_it_assets
 #, python-format
 msgid "You can't make an early removal if all the depreciation lines for previous periods are not posted."
 msgstr "You can't make an early removal if all the depreciation lines for previous periods are not posted."
 
-#: code:addons/l10n_it_assets/models/asset.py:616
+#: code:addons/l10n_it_assets/models/asset.py:680
 #. module: l10n_it_assets
 #, python-format
 msgid "You cannot compute a depreciation table for an asset starting in an undefined future fiscal year.\n"

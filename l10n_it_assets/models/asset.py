@@ -146,7 +146,8 @@ class account_asset_asset(models.Model):
             value_depreciated = cr.fetchone()[0]
         else:
             value_depreciated = 0.0 
-        self.fiscal_value_residual = self.asset_value - value_depreciated
+        self.fiscal_value_residual = self.fiscal_amount_to_depreciate - \
+            value_depreciated
         self.fiscal_value_depreciated = value_depreciated
     
     @api.model
@@ -281,6 +282,8 @@ class account_asset_asset(models.Model):
                     help="Period length for the depreciation accounting \
                     entries")
     method_percentage = fields.Float(string='Percentage')
+    fiscal_amount_to_depreciate = fields.Float(string='Fiscal Amount To Depreciate',
+        readonly=True, states={'draft': [('readonly', False)]})
     fiscal_value_residual = fields.Float(
         string='Fiscal Residual Value', store=True, readonly=True,
         compute='_compute_depreciation_fiscal')
@@ -354,12 +357,19 @@ class account_asset_asset(models.Model):
             cr, uid, vals, context=context)
         asset = self.browse(cr, uid, asset_id, context)
         if asset.type == 'normal':
+            # Fiscal amount to depreciate from property
+            amount_to_depreciate = asset.asset_value
+            for property in asset.category_id.depreciation_property_id:
+                if property.fiscal_coeff_asset_depreciable:
+                    amount_to_depreciate = amount_to_depreciate * \
+                        property.fiscal_coeff_asset_depreciable
             # Fiscal e other values from category
             vals = {
                 'depreciation_property_id': [(6, 0, \
                     [x.id for x in \
                      asset.category_id.depreciation_property_id])],
                 'method_percentage' : asset.category_id.method_percentage,
+                'fiscal_amount_to_depreciate' : amount_to_depreciate,
                 'fiscal_different_method' : \
                     asset.category_id.fiscal_different_method,
                 'fiscal_method' : asset.category_id.fiscal_method,
@@ -378,7 +388,7 @@ class account_asset_asset(models.Model):
             line_name = self._get_depreciation_entry_name(
                 cr, uid, asset, 0, context=context)
             asset_line_vals = {
-                'amount': asset.asset_value,
+                'amount': amount_to_depreciate,
                 'asset_id': asset_id,
                 'name': line_name,
                 'line_date': asset.date_start,
@@ -709,7 +719,12 @@ class account_asset_asset(models.Model):
 
         digits = self.pool.get('decimal.precision').precision_get(
             cr, uid, 'Account')
-        amount_to_depr = residual_amount = asset.asset_value
+        
+        if context.get('fiscal_methods'):
+            amount_to_depr = residual_amount = \
+                asset.fiscal_amount_to_depreciate
+        else:
+            amount_to_depr = residual_amount = asset.asset_value
         
         # step 1: compute variation and value of asset 
         # ... depreciation lines to exclude
@@ -1074,7 +1089,7 @@ class account_asset_asset(models.Model):
             cr, uid, 'Account')
         # setting context for compute relative methods
         context.update({'fiscal_methods': True})
-
+        
         for asset in self.browse(cr, uid, ids, context=context):
             if asset.value_residual == 0.0:
                 continue
@@ -1099,7 +1114,7 @@ class account_asset_asset(models.Model):
                 depreciation_lin_obj.unlink(
                     cr, uid, old_depreciation_line_ids, context=context)
             context['company_id'] = asset.company_id.id
-
+            
             table = self._compute_depreciation_table(
                 cr, uid, asset, context=context)
             if not table:
@@ -1203,6 +1218,10 @@ class account_asset_asset(models.Model):
             else:
                 table_i_start = 0
                 line_i_start = 0
+            if context.get('fiscal_methods'):
+                amount_to_depr = asset.fiscal_amount_to_depreciate
+            else:
+                amount_to_depr = asset.asset_value
             seq = len(posted_depreciation_line_ids)
             depr_line_id = last_depreciation_line and last_depreciation_line.id
             last_date = table[-1]['lines'][-1]['date']
@@ -1222,7 +1241,7 @@ class account_asset_asset(models.Model):
                             "AND asset_id = %s ",
                             (last_date, asset.id))
                         res = cr.fetchone()
-                        amount = (asset.asset_value + res[1]) - res[0]
+                        amount = (amount_to_depr + res[1]) - res[0]
                     else:
                         amount = line['amount']
                     vals = {
@@ -1484,6 +1503,10 @@ class account_asset_property(models.Model):
                                          default=True)
     normal_depreciation = fields.Boolean(string='Apply to Normal Depreciation',
                                          default=True)
+    fiscal_coeff_asset_depreciable = fields.Float(
+        string='Coeff for asset Fiscal value depreciable', default=1)
+    normal_coeff_asset_depreciable = fields.Float(
+        string='Coeff for asset Normal value depreciable', default=1)
 
     def _compute_role(self, amount, nr_line, nr_last_line):
         dp_obj = self.env['decimal.precision']

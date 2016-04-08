@@ -58,13 +58,33 @@
 	                    attrs="{'invisible':['|', ('method_time', 'not in', ['year', 'percentage']),('state', 'not in', ['open', 'close'])]}"
 	                    help="Asset removal."/>
                 </xpath>
-           		
-           		<xpath expr="//field[@name='value_residual']" position="after">
-	        		<field name="fiscal_value_depreciated" widget="monetary" options="{'currency_field': 'company_currency_id'}" 
-	        			attrs="{'invisible':['|',('type','=','view'),('fiscal_different_method','=', False)]}"/>
-	              	<field name="fiscal_value_residual" widget="monetary" options="{'currency_field': 'company_currency_id'}" 
-	              		attrs="{'invisible':['|',('type','=','view'),('fiscal_different_method','=', False)]}"/>
-	        	</xpath>
+                <!-- Rigenerate header with asset values -->
+                <!-- ... before clear values -->
+                <xpath expr="//field[@name='asset_value']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='value_depreciated']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='value_residual']" position="replace">
+                </xpath>
+                <!-- ... after values with new layout -->
+                <xpath expr="//field[@name='code']/.." position="after">
+                	<newline/>
+                	<group>
+	                	<group string="Normal Values" name="normal_values">
+	                		<field name="asset_value" widget="monetary" options="{'currency_field': 'company_currency_id'}" attrs="{'invisible':[('type','=','view')]}"/>
+				        	<field name="value_depreciated" widget="monetary" options="{'currency_field': 'company_currency_id'}" attrs="{'invisible':[('type','=','view')]}"/>
+				            <field name="value_residual" widget="monetary" options="{'currency_field': 'company_currency_id'}" attrs="{'invisible':[('type','=','view')]}"/>
+	                	</group>
+	                	<group string="Fiscal Values" name="fiscal_values">
+	                		<field name="fiscal_amount_to_depreciate" />
+	                		<field name="fiscal_value_depreciated" widget="monetary" options="{'currency_field': 'company_currency_id'}" 
+			        			attrs="{'invisible':['|',('type','=','view'),('fiscal_different_method','=', False)]}"/>
+			              	<field name="fiscal_value_residual" widget="monetary" options="{'currency_field': 'company_currency_id'}" 
+			              		attrs="{'invisible':['|',('type','=','view'),('fiscal_different_method','=', False)]}"/>
+	                	</group>
+                	</group>
+                </xpath>
+                
 	        	<xpath expr="//field[@name='purchase_value']" position="after">
                		<field name="value_variation" />
           		</xpath>
@@ -204,8 +224,14 @@
                 		<field name="name"/>
                     </group>
                     <group>
-                		<field name="fiscal_depreciation"/>
-                		<field name="normal_depreciation"/>
+	                    <group string="Fiscal">
+	                		<field name="fiscal_depreciation"/>
+	                		<field name="fiscal_coeff_asset_depreciable"/>
+	                    </group>
+	                    <group string="Normal">
+	                		<field name="normal_depreciation"/>
+	                		<field name="normal_coeff_asset_depreciable" readonly="1"/>
+	                    </group>
                     </group>
                     <newline/>
                     <group string="Roles">
