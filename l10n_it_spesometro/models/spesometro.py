@@ -346,7 +346,7 @@ class spesometro_comunicazione(models.Model):
                     tot_BL2 += 1
                 elif line.acquisto_servizi_da_soggetti_non_residenti:
                     tot_BL3 += 1
-            #Analitiche
+            # Analitiche
             tot_FE = 0 # Fatture emesse
             tot_FE_R = 0 # Doc riepilogativi
             for line in com.line_FE_ids:
@@ -367,25 +367,22 @@ class spesometro_comunicazione(models.Model):
             tot_FN = len(com.line_FN_ids)
             tot_SE = len(com.line_SE_ids)
             tot_TU = len(com.line_TU_ids)
-            
-            res[com.id] = {
-                    'totale_FA' : tot_FA,
-                    'totale_SA' : tot_SA,
-                    'totale_BL1' : tot_BL1,
-                    'totale_BL2' : tot_BL2,
-                    'totale_BL3' : tot_BL3,
-                    'totale_FE' : tot_FE,
-                    'totale_FE_R' : tot_FE_R,
-                    'totale_FR' : tot_FR,
-                    'totale_FR_r' : tot_FR_R,
-                    'totale_NE' : tot_NE,
-                    'totale_NR' : tot_NR,
-                    'totale_DF' : tot_DF,
-                    'totale_FN' : tot_FN,
-                    'totale_SE' : tot_SE,
-                    'totale_TU' : tot_TU,
-                    }
-        return res
+            # Write
+            com.totale_FA = tot_FA
+            com.totale_SA = tot_SA
+            com.totale_BL1 = tot_BL1
+            com.totale_BL2 = tot_BL2
+            com.totale_BL3 = tot_BL3
+            com.totale_FE = tot_FE
+            com.totale_FE_R = tot_FE_R
+            com.totale_FR = tot_FR
+            com.totale_FR_R = tot_FR_R
+            com.totale_NE = tot_NE
+            com.totale_NR = tot_NR
+            com.totale_DF = tot_DF
+            com.totale_FN = tot_FN
+            com.totale_SE = tot_SE
+            com.totale_TU = tot_TU
     
     company_id = fields.Many2one('res.company', 'Azienda', required=True,
                                  default=_default_company)
@@ -576,26 +573,53 @@ class spesometro_comunicazione(models.Model):
     line_TU_ids = fields.One2many('spesometro.comunicazione.line.tu', 
                                   'comunicazione_id', 'Quadri TU' )
     
-    totale_FA = fields.Integer(string='Tot operazioni FA')
-    totale_SA = fields.Integer(string='Tot operazioni SA')
+    totale_FA = fields.Integer(string='Tot operazioni FA', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_SA = fields.Integer(string='Tot operazioni SA',
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
     totale_BL1 = fields.Integer(
-        string='Tot operazioni BL - Paesi con fiscalita privilegiata')
+        string='Tot operazioni BL - Paesi con fiscalita privilegiata',
+        compute='_tot_operation_number', store=True, readonly=True)
     totale_BL2 = fields.Integer(
-        string='Tot operazioni BL - Soggetti non residenti')
+        string='Tot operazioni BL - Soggetti non residenti',
+        compute='_tot_operation_number', store=True, readonly=True)
     totale_BL3 = fields.Integer(
         string='Tot operazioni BL - Acquisti servizi non soggetti non \
-            residenti')
+            residenti', compute='_tot_operation_number', 
+            store=True, readonly=True)
     
-    totale_FE = fields.Integer(string='Tot operazioni FE')
-    totale_FE_R = fields.Integer(string='Tot operazioni FE doc riepil.')
-    totale_FR = fields.Integer(string='Tot operazioni FR')
-    totale_FR_R = fields.Integer(string='Tot operazioni FR doc riepil.')
-    totale_NE = fields.Integer(string='Tot operazioni NE')
-    totale_NR = fields.Integer(string='Tot operazioni NR')
-    totale_DF = fields.Integer(string='Tot operazioni DF')
-    totale_FN = fields.Integer(string='Tot operazioni FN')
-    totale_SE = fields.Integer(string='Tot operazioni SE')
-    totale_TU = fields.Integer(string='Tot operazioni TU')
+    totale_FE = fields.Integer(string='Tot operazioni FE', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_FE_R = fields.Integer(string='Tot operazioni FE doc riepil.', 
+                                 compute='_tot_operation_number', 
+                                 store=True, readonly=True)
+    totale_FR = fields.Integer(string='Tot operazioni FR', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_FR_R = fields.Integer(string='Tot operazioni FR doc riepil.',
+                                 compute='_tot_operation_number',
+                                 store=True, readonly=True)
+    totale_NE = fields.Integer(string='Tot operazioni NE', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_NR = fields.Integer(string='Tot operazioni NR', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_DF = fields.Integer(string='Tot operazioni DF', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_FN = fields.Integer(string='Tot operazioni FN', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_SE = fields.Integer(string='Tot operazioni SE', 
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
+    totale_TU = fields.Integer(string='Tot operazioni TU',
+                               compute='_tot_operation_number', 
+                               store=True, readonly=True)
     
     @api.one
     def _unlink_sections(self):
