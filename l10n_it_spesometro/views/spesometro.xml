@@ -688,18 +688,22 @@
                     <newline/>
                     <notebook>
 	                    <page string="Persona Giuridica">
-                    		<field name="pg_denominazione"/>
-	                    	<field name="pg_citta_estera_sede_legale"/>
-	                    	<field name="pg_codice_stato_estero"/>
-	                    	<field name="pg_indirizzo_sede_legale"/>
+	                    	<group name="persona_giuridica">
+	                    		<field name="pg_denominazione"/>
+		                    	<field name="pg_citta_estera_sede_legale"/>
+		                    	<field name="pg_codice_stato_estero"/>
+		                    	<field name="pg_indirizzo_sede_legale"/>
+	                    	</group>
 	                    </page>
                     	<page string="Persona Fisica">
-                    		<field name="pf_cognome"/>
-	                    	<field name="pf_nome"/>
-	                    	<field name="pf_data_nascita"/>
-	                    	<field name="pf_comune_stato_nascita"/>
-	                    	<field name="pf_provincia_nascita"/>
-	                    	<field name="pf_codice_stato_estero"/>
+                    		<group name="persona_fisica">
+	                    		<field name="pf_cognome"/>
+		                    	<field name="pf_nome"/>
+		                    	<field name="pf_data_nascita"/>
+		                    	<field name="pf_comune_stato_nascita"/>
+		                    	<field name="pf_provincia_nascita"/>
+		                    	<field name="pf_codice_stato_estero"/>
+		                    </group>
                     	</page>
                     </notebook>
                     <newline/>
