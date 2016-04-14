@@ -1841,7 +1841,7 @@ class spesometro_comunicazione(models.Model):
                 rcd += '{:8s}'.format("BL" + "001" + "002" )  \
                     + '{:16s}'.format(s)
             rcd += '{:8s}'.format("BL" + "001" + "003" ) \
-                + '{:16s}'.format(datetime.strptime(
+                + '{:>16s}'.format(datetime.strptime(
                 line.pf_data_nascita, "%Y-%m-%d").strftime("%d%m%Y"))
             str_split = self._split_string_positional_field(
                 line.pf_comune_stato_nascita)
