@@ -1193,8 +1193,9 @@ class spesometro_comunicazione(models.Model):
             if not invoice and not regola:
                 continue
             
-            if invoice:
-                print 'INVOICE' + invoice.number
+            # if invoice:
+            #    print 'INVOICE id' +str(invoice.id)
+            #    print 'INVOICE' + invoice.number
                 
             # Config partner -> priorità alle impostazioni del partner
             if partner.spesometro_operazione:
