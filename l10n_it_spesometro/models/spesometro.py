@@ -265,17 +265,26 @@ class spesometro_regole(models.Model):
             else:
                 domain.append(('partner_id', '!=', False))
             move_line_ids = move_line_obj.search(cr, uid, domain, order='id')
-            if move_line_ids:
-                move_line = move_line_obj.browse(cr, uid, move_line_ids[0])
-                if role.spesometro_partner_id:
-                    partner = role.spesometro_partner_id
-                else:
-                    partner = move_line.partner_id
-                if not segno:
-                    if move_line.account_id.type in ['payable']:
+            if not move_line_ids:
+                continue
+            move_line = move_line_obj.browse(cr, uid, move_line_ids[0])
+            if role.spesometro_partner_id:
+                partner = role.spesometro_partner_id
+            else:
+                partner = move_line.partner_id
+            if not segno:
+                for ml in  move_line_obj.browse(cr, uid, move_line_ids):
+                    if ml.account_id.type in ['other']:
+                        continue
+                    if ml.account_id.type in ['payable']:
                         segno = 'passiva'
+                    elif ml.account_id.type in ['liquidity'] and ml.credit:
+                        segno = 'passiva'
+                    elif ml.account_id.type in ['liquidity'] and ml.debit:
+                        segno = 'attiva'
                     else:
                         segno = 'attiva'
+                    break
             # ... Calcolo importo
             res_importo = self.get_importo(cr, uid, role.id, move)
             res = {
@@ -1222,7 +1231,6 @@ class spesometro_comunicazione(models.Model):
             quadro = self._get_define_quadro(move, invoice, arg)
             
             arg.update({'quadro': quadro})
-            
             # Test operazione da includere nella comunicazione
             if not self.validate_operation(move, invoice, arg):
                 continue
