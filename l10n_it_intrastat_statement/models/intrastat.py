@@ -1930,7 +1930,7 @@ class account_intrastat_statement_purchase_section3(models.Model):
         # Data Fattura
         invoice_date_ddmmyy = False
         if self.invoice_date:
-            date_obj = datetime.strptime(invoice_date, '%Y-%m-%d')
+            date_obj = datetime.strptime(self.invoice_date, '%Y-%m-%d')
             invoice_date_ddmmyy = date_obj.strftime('%d%m%y') 
         rcd += '{:2s}'.format(invoice_date_ddmmyy or '')
         # Codice del servizio
@@ -2114,7 +2114,7 @@ class account_intrastat_statement_purchase_section4(models.Model):
         # Data Fattura
         invoice_date_ddmmyy = False
         if self.invoice_date:
-            date_obj = datetime.strptime(invoice_date, '%Y-%m-%d')
+            date_obj = datetime.strptime(self.invoice_date, '%Y-%m-%d')
             invoice_date_ddmmyy = date_obj.strftime('%d%m%y') 
         rcd += '{:2s}'.format(invoice_date_ddmmyy or '')
         # Codice del servizio
