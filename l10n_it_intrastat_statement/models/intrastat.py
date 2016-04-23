@@ -1588,7 +1588,12 @@ class account_intrastat_statement_purchase_section1(models.Model):
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
             'amount_euro': round(inv_intra_line.amount_euro) or 0,
-            'amount_currency': round(inv_intra_line.amount_currency) or 0,
+            'amount_currency':
+                # >> da valorizzare solo per operazione Paesi non Euro
+                not inv_intra_line.invoice_id.company_id.currency_id.id
+                and inv_intra_line.invoice_id.currency_id.id 
+                and round(inv_intra_line.amount_currency) 
+                or 0,
             'transation_nature_id': (
                 inv_intra_line.transation_nature_id and
                 inv_intra_line.transation_nature_id.id) or (
@@ -1649,12 +1654,7 @@ class account_intrastat_statement_purchase_section1(models.Model):
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Ammontare delle operazioni in valuta
-        # >> da valorizzare solo per operazione Paesi non Euro
-        if not self.invoice_id.company_id.currency_id.id == \
-                self.invoice_id.currency_id.id:
-            rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
-        else:
-            rcd += '{:13s}'.format(str(0).zfill(13))
+        rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
         # Codice della natura della transazione
         rcd += '{:1s}'.format(
             self.transation_nature_id and self.transation_nature_id.code or '')
@@ -1890,7 +1890,12 @@ class account_intrastat_statement_purchase_section3(models.Model):
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
             'amount_euro': round(inv_intra_line.amount_euro) or 0,
-            'amount_currency': round(inv_intra_line.amount_currency) or 0,
+            'amount_currency':
+                # >> da valorizzare solo per operazione Paesi non Euro
+                not inv_intra_line.invoice_id.company_id.currency_id.id
+                and inv_intra_line.invoice_id.currency_id.id 
+                and round(inv_intra_line.amount_currency) 
+                or 0,
             'invoice_number': inv_intra_line.invoice_number or False,
             'invoice_date': inv_intra_line.invoice_date or False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
@@ -1919,14 +1924,12 @@ class account_intrastat_statement_purchase_section3(models.Model):
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Ammontare delle operazioni in valuta
-        # >> da valorizzare solo per operazione Paesi non Euro
-        if not self.invoice_id.company_id.currency_id.id == \
-                self.invoice_id.currency_id.id:
-            rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
-        else:
-            rcd += '{:13s}'.format(str(0).zfill(13))
+        rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
         # Numero Fattura
-        rcd += '{:15s}'.format(str(self.invoice_number).zfill(15))
+        invoice_number = self.invoice_number 
+        if len(invoice_number) > 15:
+            invoice_number = invoice_number[-15:]
+        rcd += '{:15s}'.format(str(invoice_number).zfill(15))
         # Data Fattura
         invoice_date_ddmmyy = False
         if self.invoice_date:
