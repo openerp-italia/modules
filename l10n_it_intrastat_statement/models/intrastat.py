@@ -411,7 +411,8 @@ class account_intrastat_statement(models.Model):
         elif self.company_id.intrastat_export_file_name:
             file_name = self.company_id.intrastat_export_file_name
         else:
-            file_name = '%s%s%s.%s%s' % (self.company_id.intrastat_ua_code,
+            file_name = '%s%s%s.%s%s' % (self.company_id.intrastat_ua_code 
+                                         or '',
                                 '{:2s}'.format(str(date_obj.month).zfill(2)),
                                 '{:2s}'.format(str(date_obj.day).zfill(2)),
                                 'I', # doc intrastat
@@ -423,11 +424,14 @@ class account_intrastat_statement(models.Model):
     @api.model
     def _prepare_export_head(self):
         rcd = ''
+        intrastat_ua_code = ''
         # Codice utente abilitato (mittente)
-        if not self.company_id.intrastat_ua_code:
-            raise ValidationError(
-            _('Missing Intrasta UA code : see company configuration'))
-        rcd += '{:4s}'.format(self.company_id.intrastat_ua_code)
+        if self.company_id.intrastat_ua_code:
+            intrastat_ua_code = self.company_id.intrastat_ua_code
+        # if not self.company_id.intrastat_ua_code:
+        #    raise ValidationError(
+        #    _('Missing Intrasta UA code : see company configuration'))
+        rcd += '{:4s}'.format(intrastat_ua_code)
         # Riservato a SDA
         rcd += '{:12s}'.format("")
         # Nome del flusso
