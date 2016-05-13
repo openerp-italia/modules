@@ -255,12 +255,13 @@ class account_invoice(models.Model):
     _inherit = "account.invoice"
 
     intrastat = fields.Boolean(string="Subject to Intrastat",
-                               states={'draft': [('readonly', False)]})
+                               states={'draft': [('readonly', False)]}, 
+                               copy=False)
     intrastat_line_ids = fields.One2many(
         'account.invoice.intrastat', 'invoice_id', string='Intrastat',
-        readonly=True, states={'draft': [('readonly', False)]}, copy=True)
+        readonly=True, states={'draft': [('readonly', False)]}, copy=False)
     intrastat_refund_period_id = fields.Many2one('account.period',
-        readonly=True, states={'draft': [('readonly', False)]}, copy=True, 
+        readonly=True, states={'draft': [('readonly', False)]}, copy=False, 
         string='Period Ref of Refund')
     
     @api.onchange('fiscal_position')
