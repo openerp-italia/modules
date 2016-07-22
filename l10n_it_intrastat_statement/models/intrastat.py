@@ -721,8 +721,8 @@ class account_intrastat_statement(models.Model):
                 period_date_medium = datetime(date_start_year.year, 2, 1)
                 period_date_stop = datetime(date_start_year.year, 3, 31)
             elif self.period_number == 2:
-                period_date_start = datetime(date_start_year.year, 3, 1)
-                period_date_medium = datetime(date_start_year.year, 4, 1)
+                period_date_start = datetime(date_start_year.year, 4, 1)
+                period_date_medium = datetime(date_start_year.year, 5, 1)
                 period_date_stop = datetime(date_start_year.year, 6, 30)
             elif self.period_number == 3:
                 period_date_start = datetime(date_start_year.year, 7, 1)
