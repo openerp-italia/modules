@@ -378,6 +378,20 @@ class account_invoice_intrastat(models.Model):
     @api.depends('invoice_id.partner_id')
     def _compute_partner_data(self):
         self.country_partner_id = self.invoice_id.partner_id.country_id.id
+        
+    @api.depends('invoice_id.supplier_invoice_number', 
+                 'invoice_id.number', 'invoice_id.date_invoice')
+    def _compute_invoice_ref(self):
+        if self.invoice_id.type in ['in_invoice', 'in_refund']:
+            if self.invoice_id.supplier_invoice_number:
+                self.invoice_number = self.invoice_id.supplier_invoice_number
+                if self.invoice_id.date_invoice:
+                    self.invoice_date = self.invoice_id.date_invoice
+        else:
+            if self.invoice_id.number:
+                self.invoice_number = self.invoice_id.number
+                if self.invoice_id.date_invoice:
+                    self.invoice_date = self.invoice_id.date_invoice
     
     def _get_statement_section(self):
         '''
@@ -521,8 +535,10 @@ class account_invoice_intrastat(models.Model):
         'res.country', string='Country Destination',
          default =_default_country_destination)
     ## Invoice Ref ##
-    invoice_number = fields.Char(string='Invoice Number')
-    invoice_date = fields.Date(string='Invoice Date')
+    invoice_number = fields.Char(string='Invoice Number', 
+                                 compute='_compute_invoice_ref', store=True)
+    invoice_date = fields.Date(string='Invoice Date', 
+                               compute='_compute_invoice_ref', store=True)
     supply_method = fields.Selection([
         ('I', 'Instant'),
         ('R', 'Repeatedly'),
