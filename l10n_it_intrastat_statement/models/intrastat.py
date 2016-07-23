@@ -411,7 +411,8 @@ class account_intrastat_statement(models.Model):
         elif self.company_id.intrastat_export_file_name:
             file_name = self.company_id.intrastat_export_file_name
         else:
-            file_name = '%s%s%s.%s%s' % (self.company_id.intrastat_ua_code,
+            file_name = '%s%s%s.%s%s' % (self.company_id.intrastat_ua_code 
+                                         or '',
                                 '{:2s}'.format(str(date_obj.month).zfill(2)),
                                 '{:2s}'.format(str(date_obj.day).zfill(2)),
                                 'I', # doc intrastat
@@ -423,11 +424,14 @@ class account_intrastat_statement(models.Model):
     @api.model
     def _prepare_export_head(self):
         rcd = ''
+        intrastat_ua_code = ''
         # Codice utente abilitato (mittente)
-        if not self.company_id.intrastat_ua_code:
-            raise ValidationError(
-            _('Missing Intrasta UA code : see company configuration'))
-        rcd += '{:4s}'.format(self.company_id.intrastat_ua_code)
+        if self.company_id.intrastat_ua_code:
+            intrastat_ua_code = self.company_id.intrastat_ua_code
+        # if not self.company_id.intrastat_ua_code:
+        #    raise ValidationError(
+        #    _('Missing Intrasta UA code : see company configuration'))
+        rcd += '{:4s}'.format(intrastat_ua_code)
         # Riservato a SDA
         rcd += '{:12s}'.format("")
         # Nome del flusso
@@ -717,8 +721,8 @@ class account_intrastat_statement(models.Model):
                 period_date_medium = datetime(date_start_year.year, 2, 1)
                 period_date_stop = datetime(date_start_year.year, 3, 31)
             elif self.period_number == 2:
-                period_date_start = datetime(date_start_year.year, 3, 1)
-                period_date_medium = datetime(date_start_year.year, 4, 1)
+                period_date_start = datetime(date_start_year.year, 4, 1)
+                period_date_medium = datetime(date_start_year.year, 5, 1)
                 period_date_stop = datetime(date_start_year.year, 6, 30)
             elif self.period_number == 3:
                 period_date_start = datetime(date_start_year.year, 7, 1)
@@ -1588,7 +1592,12 @@ class account_intrastat_statement_purchase_section1(models.Model):
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
             'amount_euro': round(inv_intra_line.amount_euro) or 0,
-            'amount_currency': round(inv_intra_line.amount_currency) or 0,
+            'amount_currency':
+                # >> da valorizzare solo per operazione Paesi non Euro
+                not inv_intra_line.invoice_id.company_id.currency_id.id
+                and inv_intra_line.invoice_id.currency_id.id 
+                and round(inv_intra_line.amount_currency) 
+                or 0,
             'transation_nature_id': (
                 inv_intra_line.transation_nature_id and
                 inv_intra_line.transation_nature_id.id) or (
@@ -1649,12 +1658,7 @@ class account_intrastat_statement_purchase_section1(models.Model):
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Ammontare delle operazioni in valuta
-        # >> da valorizzare solo per operazione Paesi non Euro
-        if not self.invoice_id.company_id.currency_id.id == \
-                self.invoice_id.currency_id.id:
-            rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
-        else:
-            rcd += '{:13s}'.format(str(0).zfill(13))
+        rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
         # Codice della natura della transazione
         rcd += '{:1s}'.format(
             self.transation_nature_id and self.transation_nature_id.code or '')
@@ -1890,7 +1894,12 @@ class account_intrastat_statement_purchase_section3(models.Model):
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
             'amount_euro': round(inv_intra_line.amount_euro) or 0,
-            'amount_currency': round(inv_intra_line.amount_currency) or 0,
+            'amount_currency':
+                # >> da valorizzare solo per operazione Paesi non Euro
+                not inv_intra_line.invoice_id.company_id.currency_id.id
+                and inv_intra_line.invoice_id.currency_id.id 
+                and round(inv_intra_line.amount_currency) 
+                or 0,
             'invoice_number': inv_intra_line.invoice_number or False,
             'invoice_date': inv_intra_line.invoice_date or False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
@@ -1919,18 +1928,16 @@ class account_intrastat_statement_purchase_section3(models.Model):
         # Ammontare delle operazioni in euro
         rcd += '{:13s}'.format(str(self.amount_euro).zfill(13))
         # Ammontare delle operazioni in valuta
-        # >> da valorizzare solo per operazione Paesi non Euro
-        if not self.invoice_id.company_id.currency_id.id == \
-                self.invoice_id.currency_id.id:
-            rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
-        else:
-            rcd += '{:13s}'.format(str(0).zfill(13))
+        rcd += '{:13s}'.format(str(self.amount_currency).zfill(13))
         # Numero Fattura
-        rcd += '{:15s}'.format(str(self.invoice_number).zfill(15))
+        invoice_number = self.invoice_number 
+        if len(invoice_number) > 15:
+            invoice_number = invoice_number[-15:]
+        rcd += '{:15s}'.format(str(invoice_number).zfill(15))
         # Data Fattura
         invoice_date_ddmmyy = False
         if self.invoice_date:
-            date_obj = datetime.strptime(invoice_date, '%Y-%m-%d')
+            date_obj = datetime.strptime(self.invoice_date, '%Y-%m-%d')
             invoice_date_ddmmyy = date_obj.strftime('%d%m%y') 
         rcd += '{:2s}'.format(invoice_date_ddmmyy or '')
         # Codice del servizio
@@ -2114,7 +2121,7 @@ class account_intrastat_statement_purchase_section4(models.Model):
         # Data Fattura
         invoice_date_ddmmyy = False
         if self.invoice_date:
-            date_obj = datetime.strptime(invoice_date, '%Y-%m-%d')
+            date_obj = datetime.strptime(self.invoice_date, '%Y-%m-%d')
             invoice_date_ddmmyy = date_obj.strftime('%d%m%y') 
         rcd += '{:2s}'.format(invoice_date_ddmmyy or '')
         # Codice del servizio
