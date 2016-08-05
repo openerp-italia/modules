@@ -109,6 +109,8 @@ class account_move_line(models.Model):
     def create(self, cr, uid, vals, context=None, check=True):
         if not context:
             context = {}
+        else:
+            context = context.copy()
         context.update({'allow_asset': True})
         return super(account_move_line, self).create(
             cr, uid, vals, context, check)
