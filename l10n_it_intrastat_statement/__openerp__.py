@@ -37,6 +37,7 @@
     "data": [
         'data/sequence.xml',
         'security/ir.model.access.csv',
+        'security/rules.xml',
         'wizard/export_file_view.xml',
         'views/config.xml',
         'views/intrastat.xml',
