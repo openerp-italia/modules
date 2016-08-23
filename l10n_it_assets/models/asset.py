@@ -1440,7 +1440,7 @@ class account_asset_depreciation_line_fiscal(models.Model):
                                   string='Depreciation Line Normal chained',
                                   readonly=True, ondelete="cascade")
 
-    @api.depends('asset_id.depreciation_line_ids')
+    @api.depends('asset_id.depreciation_line_ids.move_check')
     def _move_check(self):
         '''
         Is posted if exists normal line with account moves
