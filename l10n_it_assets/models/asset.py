@@ -1440,21 +1440,21 @@ class account_asset_depreciation_line_fiscal(models.Model):
                                   string='Depreciation Line Normal chained',
                                   readonly=True, ondelete="cascade")
 
-    @api.one
     @api.depends('asset_id.depreciation_line_ids')
     def _move_check(self):
         '''
         Is posted if exists normal line with account moves
         '''
-        domain = [('asset_id', '=', self.asset_id.id),
-                  ('type', '=', 'depreciate'),
-                  ('line_date', '>=', self.line_date)]
-        last_line = self.env['account.asset.depreciation.line'].search(
-            domain, order='line_date', limit=1)
-        if last_line and last_line.move_check:
-            self.move_check = True
-        else:
-            self.move_check = False
+        for line in self:
+            domain = [('asset_id', '=', line.asset_id.id),
+                      ('type', '=', 'depreciate'),
+                      ('line_date', '>=', line.line_date)]
+            last_line = self.env['account.asset.depreciation.line'].search(
+                domain, order='line_date', limit=1)
+            if last_line and last_line.move_check:
+                line.move_check = True
+            else:
+                line.move_check = False
 
     @api.one
     @api.depends('amount')
