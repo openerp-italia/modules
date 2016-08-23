@@ -28,7 +28,7 @@ from dateutil.relativedelta import relativedelta
 
 class account_asset_category(models.Model):
     _inherit = "account.asset.category"
-    
+
     method = fields.Selection(selection='_get_method', required=True,
         default='linear',
         help="Choose the method to use to compute "
@@ -58,7 +58,7 @@ class account_asset_category(models.Model):
     fiscal_different_method = fields.Boolean(string='Fiscal different Method',
         default=False,
         help="It enable you to specify another Depreciation method for\
-            fiscal values" ) 
+            fiscal values")
     fiscal_method = fields.Selection(selection='_get_method', required=True,
         default='linear',
         help="Choose the method to use to compute "
@@ -90,30 +90,30 @@ class account_asset_category(models.Model):
     fiscal_prorata = fields.Boolean(string='Prorata Temporis',
         help="Indicates that the first depreciation entry for this asset "
                  "has to be done from the depreciation start date instead of "
-                 "the first day of the fiscal year.") 
-    
+                 "the first day of the fiscal year.")
+
     @api.onchange('fiscal_method_time')
     def change_fiscal_method_time(self):
         if self.fiscal_method_time not in ['year', 'percentage']:
             self.fiscal_prorata = True
-            
+
     @api.onchange('fiscal_different_method')
     def change_fiscal_different_method(self):
         if not self.fiscal_different_method:
-            self.fiscal_method = self.method 
-            self.fiscal_method_number = self.method_number 
-            self.fiscal_method_percentage = self.method_percentage 
-            self.fiscal_method_period = self.method_period 
+            self.fiscal_method = self.method
+            self.fiscal_method_number = self.method_number
+            self.fiscal_method_percentage = self.method_percentage
+            self.fiscal_method_period = self.method_period
             self.fiscal_method_progress_factor = \
-                self.method_progress_factor 
-            self.fiscal_method_time = self.method_time 
+                self.method_progress_factor
+            self.fiscal_method_time = self.method_time
             self.fiscal_prorata = self.prorata
-    
+
     def _get_method(self, cr, uid, context=None):
         return[
             ('linear', _('Linear')),
         ]
-        
+
     def _get_method_time(self, cr, uid, context=None):
         return [
             ('year', _('Number of Years')),
@@ -124,11 +124,11 @@ class account_asset_category(models.Model):
 
 class account_asset_asset(models.Model):
     _inherit = "account.asset.asset"
-    
+
     @api.one
-    @api.depends('depreciation_line_fiscal_ids.amount', 
+    @api.depends('depreciation_line_fiscal_ids.amount',
                  'depreciation_line_fiscal_ids.init_entry',
-                 'purchase_value', 'salvage_value', 'parent_id', 
+                 'purchase_value', 'salvage_value', 'parent_id',
                  'depreciation_line_ids')
     def _compute_depreciation_fiscal(self):
         cr = self.env.cr
@@ -145,13 +145,13 @@ class account_asset_asset(models.Model):
                 (tuple(child_ids),))
             value_depreciated = cr.fetchone()[0]
         else:
-            value_depreciated = 0.0 
+            value_depreciated = 0.0
         self.fiscal_value_residual = self.fiscal_amount_to_depreciate - \
             value_depreciated
         self.fiscal_value_depreciated = value_depreciated
-    
+
     @api.model
-    def _get_amount_variation(self, date_start=None, date_stop=None, 
+    def _get_amount_variation(self, date_start=None, date_stop=None,
                               context=None):
         cr = self.env.cr
         uid = self.env.uid
@@ -167,7 +167,7 @@ class account_asset_asset(models.Model):
                 domain.append(('invoice_id.move_id.date', '>=', date_start))
             if date_stop:
                 domain.append(('invoice_id.move_id.date', '<=', date_stop))
-            inv_line_ids = self.pool['account.invoice.line'].search(cr, uid, 
+            inv_line_ids = self.pool['account.invoice.line'].search(cr, uid,
                                                                     domain)
             for inv_line in self.pool['account.invoice.line'].browse(
                 cr, uid, inv_line_ids):
@@ -181,7 +181,7 @@ class account_asset_asset(models.Model):
             .browse(cr, uid, dp_line_ids):
             dp_line_move_ids.append(dp_line.move_id.id)
         # Moves not in depreciation lines are variations
-        amount_variation = sale_value   
+        amount_variation = sale_value
         domain = [('asset_id', '=', self.id),
                   ('move_id', 'not in', dp_line_move_ids),
                   ('move_id.asset_remove_move_id', '=', False)]
@@ -190,14 +190,14 @@ class account_asset_asset(models.Model):
         if date_stop:
             domain.append(('move_id.date', '<=', date_stop))
         line_ids = self.pool['account.move.line'].search(cr, uid, domain)
-        for line in self.pool['account.move.line'].browse(cr, uid, 
+        for line in self.pool['account.move.line'].browse(cr, uid,
                                                           line_ids):
             if line.debit :
                 amount_variation += line.debit
             else:
                 amount_variation -= line.credit
         return amount_variation
-    
+
     @api.model
     def _get_residual_value(self, type='fiscal', date_limit=None):
         cr = self.env.cr
@@ -218,23 +218,23 @@ class account_asset_asset(models.Model):
         dp_line_ids = dp_line_obj.search(cr, uid, domain)
         residual_value = self.asset_value
         for dp_line in dp_line_obj.browse(cr, uid, dp_line_ids):
-            residual_value -= dp_line.amount 
-            residual_value += dp_line.amount_variation 
+            residual_value -= dp_line.amount
+            residual_value += dp_line.amount_variation
             residual_value = round(residual_value, digits)
-        residual_value = round(residual_value, digits) 
+        residual_value = round(residual_value, digits)
         return residual_value
-    
+
     @api.one
-    @api.depends('depreciation_line_fiscal_ids.amount_variation')    
+    @api.depends('depreciation_line_fiscal_ids.amount_variation')
     def _compute_variation(self):
         self.value_variation = self._get_amount_variation()
-    
+
     @api.one
-    @api.depends('depreciation_line_ids.amount', 
-                 'depreciation_line_ids.init_entry', 
+    @api.depends('depreciation_line_ids.amount',
+                 'depreciation_line_ids.init_entry',
                  'depreciation_line_ids.move_id',
-                 'purchase_value', 'salvage_value', 'parent_id', 
-                 'depreciation_line_ids')    
+                 'purchase_value', 'salvage_value', 'parent_id',
+                 'depreciation_line_ids')
     def _compute_depreciation(self):
         self.value_residual = self._get_residual_value('normal')
         cr = self.env.cr
@@ -252,10 +252,10 @@ class account_asset_asset(models.Model):
             self.value_depreciated = cr.fetchone()[0]
         else:
             self.value_depreciated = 0.0
-    
+
     category_id = fields.Many2one(
-        'account.asset.category', 'Asset Category', change_default=True, 
-        readonly=True, states={'draft': [('readonly', False)]}, 
+        'account.asset.category', 'Asset Category', change_default=True,
+        readonly=True, states={'draft': [('readonly', False)]},
         ondelete='restrict')
     value_residual = fields.Float(
         string='Residual Value', store=True, readonly=True,
@@ -271,9 +271,9 @@ class account_asset_asset(models.Model):
         string='Asset Depreciation Property',
         readonly=True, states={'draft': [('readonly', False)]})
     depreciation_line_fiscal_ids = fields.One2many(
-            comodel_name='account.asset.depreciation.line.fiscal', 
+            comodel_name='account.asset.depreciation.line.fiscal',
             inverse_name='asset_id',
-            string="Depreciation Lines", readonly=True, 
+            string="Depreciation Lines", readonly=True,
             states={'draft': [('readonly', False)]})
     method_period = fields.Selection(
         selection=[('year', 'Year')],
@@ -293,9 +293,9 @@ class account_asset_asset(models.Model):
     fiscal_different_method = fields.Boolean(string='Fiscal different Method',
         default=False, readonly=True, states={'draft': [('readonly', False)]},
         help="It enable you to specify another Depreciation method for\
-            fiscal values" ) 
+            fiscal values")
     fiscal_method = fields.Selection(selection='_get_method', required=True,
-        default='linear', readonly=True, 
+        default='linear', readonly=True,
         states={'draft': [('readonly', False)]},
         help="Choose the method to use to compute "
                  "the amount of depreciation lines.\n"
@@ -331,26 +331,26 @@ class account_asset_asset(models.Model):
         readonly=True, states={'draft': [('readonly', False)]},
         help="Indicates that the first depreciation entry for this asset "
                  "has to be done from the depreciation start date instead of "
-                 "the first day of the fiscal year.") 
-    
+                 "the first day of the fiscal year.")
+
     @api.onchange('fiscal_different_method')
     def change_fiscal_different_method(self):
         if not self.fiscal_different_method:
-            self.fiscal_method = self.method 
-            self.fiscal_method_number = self.method_number 
-            self.fiscal_method_period = self.method_period 
+            self.fiscal_method = self.method
+            self.fiscal_method_number = self.method_number
+            self.fiscal_method_period = self.method_period
             self.fiscal_method_progress_factor = \
-                self.method_progress_factor 
-            self.fiscal_method_time = self.method_time 
+                self.method_progress_factor
+            self.fiscal_method_time = self.method_time
             self.fiscal_prorata = self.prorata
-    
+
     def create(self, cr, uid, vals, context=None):
         '''
-        Create init line depreciation fiscal 
+        Create init line depreciation fiscal
         '''
         if not context:
             context = {}
-        if vals.get('method_time') not in ['year','percentage'] \
+        if vals.get('method_time') not in ['year', 'percentage'] \
                 and not vals.get('prorata'):
             vals['prorata'] = True
         asset_id = super(account_asset_asset, self).create(
@@ -398,8 +398,8 @@ class account_asset_asset(models.Model):
             asset_line_id = asset_line_obj.create(
                 cr, uid, asset_line_vals, context=context)
         return asset_id
-    
-    @api.v7 
+
+    @api.v7
     def remove(self, cr, uid, ids, context=None):
         for asset in self.browse(cr, uid, ids, context):
             ctx = dict(context, active_ids=ids, active_id=ids[0])
@@ -420,16 +420,16 @@ class account_asset_asset(models.Model):
     def onchange_category_id(self, cr, uid, ids, category_id, context=None):
         res = super(account_asset_asset, self).onchange_category_id(
             cr, uid, ids, category_id, context)
-        
+
         asset_categ_obj = self.pool.get('account.asset.category')
         if category_id:
             category = asset_categ_obj.browse(
                 cr, uid, category_id, context=context)
-            res['value']['depreciation_property_id'] =\
+            res['value']['depreciation_property_id'] = \
                  [x.id for x in category.depreciation_property_id]
- 
+
         return res
-    
+
     @api.v7
     def _get_fy_duration_factor(self, cr, uid, entry,
                                 asset, firstyear, context=None):
@@ -441,7 +441,7 @@ class account_asset_asset(models.Model):
             asset_prorata = asset.fiscal_prorata
         else:
             asset_prorata = asset.prorata
-            
+
         duration_factor = 1.0
         fy_id = entry['fy_id']
         if asset_prorata:
@@ -473,7 +473,7 @@ class account_asset_asset(models.Model):
                 cr, uid, fy_id, option='months')
             duration_factor = float(fy_months) / 12
         return duration_factor
-    
+
     @api.v7
     def _get_depreciation_start_date(self, cr, uid, asset, fy, context=None):
         """
@@ -484,7 +484,7 @@ class account_asset_asset(models.Model):
             asset_prorata = asset.fiscal_prorata
         else:
             asset_prorata = asset.prorata
-        
+
         if asset_prorata:
             depreciation_start_date = datetime.strptime(
                 asset.date_start, '%Y-%m-%d')
@@ -507,7 +507,7 @@ class account_asset_asset(models.Model):
             asset_method_percentage = asset.method_percentage
             asset_method_time = asset.method_time
             asset_method_end = asset.method_end
-            
+
         if asset_method_time == 'year':
             depreciation_stop_date = depreciation_start_date + \
                 relativedelta(years=asset_method_number, days=-1)
@@ -529,11 +529,11 @@ class account_asset_asset(models.Model):
                         elif not context.get('fiscal_methods') and \
                                 role['normal_depreciation']:
                             property_coeff = role['coeff']
-                count += round((asset_method_percentage * property_coeff), )
+                count += round((asset_method_percentage * property_coeff),)
                 years_number += 1
             depreciation_stop_date = depreciation_start_date + \
                 relativedelta(years=years_number, days=-1)
-            
+
         elif asset_method_time == 'number':
             if asset_method_period == 'month':
                 depreciation_stop_date = depreciation_start_date + \
@@ -548,7 +548,7 @@ class account_asset_asset(models.Model):
             depreciation_stop_date = datetime.strptime(
                 asset_method_end, '%Y-%m-%d')
         return depreciation_stop_date
-    
+
     @api.v7
     def _compute_year_amount(self, cr, uid, asset, amount_to_depr,
                              residual_amount, context=None):
@@ -578,7 +578,7 @@ class account_asset_asset(models.Model):
             asset_method_number = context.get('variation_asset_method_number')
         if context.get('variation_amount_to_depr'):
             amount_to_depr = context.get('variation_amount_to_depr')
-        
+
         if asset_method_time == 'year':
             divisor = asset_method_number
         elif asset_method_time == 'percentage':
@@ -602,12 +602,12 @@ class account_asset_asset(models.Model):
         for property in asset.depreciation_property_id:
             if (fiscal_method and property.fiscal_depreciation)\
                 or (not fiscal_method and property.normal_depreciation):
-                role = property._compute_role(year_amount_linear or 0, 
+                role = property._compute_role(year_amount_linear or 0,
                                               line_competence,
                                               line_max)
                 if role :
                     year_amount_linear = role['amount']
-        
+
         if asset_method == 'linear':
             return year_amount_linear
         year_amount_degressive = residual_amount * \
@@ -623,31 +623,31 @@ class account_asset_asset(models.Model):
             raise except_orm(
                 _('Programming Error!'),
                 _("Illegal value %s in asset.method.") % asset_method)
-            
+
     @api.v7
-    def _normalize_depreciation_table(self, cr, uid, asset, table, 
+    def _normalize_depreciation_table(self, cr, uid, asset, table,
                                       context=None):
         # Date with move of variation ( Not delete line if exists)
         domain = [('asset_id', '=', asset.id)]
-        line_ids = self.pool['account.move.line'].search(cr, uid, domain, 
+        line_ids = self.pool['account.move.line'].search(cr, uid, domain,
                                                          order='date desc')
         date_last_account_move = False
         if line_ids:
-            acc_move_line = self.pool['account.move.line'].browse(cr, uid, 
+            acc_move_line = self.pool['account.move.line'].browse(cr, uid,
                                                                   line_ids[0])
-            date_last_account_move = datetime.strptime(acc_move_line.date, 
+            date_last_account_move = datetime.strptime(acc_move_line.date,
                                                        '%Y-%m-%d')
         return table
-   
+
     @api.v7
     def _compute_depreciation_table(self, cr, uid, asset, context=None):
         if not context:
             context = {}
-            
+
         table = []
         if not asset.method_number:
             return table
-        
+
         context['company_id'] = asset.company_id.id
         fy_obj = self.pool.get('account.fiscalyear')
         init_flag = False
@@ -692,7 +692,7 @@ class account_asset_asset(models.Model):
                 state='done',
                 dummy=True)
             init_flag = True
-        
+
         depreciation_start_date = self._get_depreciation_start_date(
             cr, uid, asset, fy, context=context)
         depreciation_stop_date = self._get_depreciation_stop_date(
@@ -719,14 +719,14 @@ class account_asset_asset(models.Model):
 
         digits = self.pool.get('decimal.precision').precision_get(
             cr, uid, 'Account')
-        
+
         if context.get('fiscal_methods'):
             amount_to_depr = residual_amount = \
                 asset.fiscal_amount_to_depreciate
         else:
             amount_to_depr = residual_amount = asset.asset_value
-        
-        # step 1: compute variation and value of asset 
+
+        # step 1: compute variation and value of asset
         # ... depreciation lines to exclude
         domain = [('asset_id', '=', asset.id), ('move_id', '!=', False)]
         dp_line_ids = self.pool['account.asset.depreciation.line']\
@@ -742,7 +742,7 @@ class account_asset_asset(models.Model):
 
         # step 2: calculate depreciation amount per fiscal year
         fy_residual_amount = residual_amount
-        #i_max = len(table) - 1
+        # i_max = len(table) - 1
         i_max = len(table)
         asset_sign = asset.asset_value >= 0 and 1 or -1
         asset_with_variation = False
@@ -759,7 +759,7 @@ class account_asset_asset(models.Model):
                 amount_to_depr = 0
             context.update({
                 'variation_asset_method_number' : len(table),
-                #'variation_fy_residual_amount' : fy_residual_amount,
+                # 'variation_fy_residual_amount' : fy_residual_amount,
                 'variation_amount_to_depr' : amount_to_depr,
                 'depreciation_line_number' : i + 1,
                 'depreciation_line_max' : i_max + 1
@@ -770,9 +770,9 @@ class account_asset_asset(models.Model):
             if asset.method_period == 'year':
                 period_amount = year_amount
             elif asset.method_period == 'quarter':
-                period_amount = year_amount/4
+                period_amount = year_amount / 4
             elif asset.method_period == 'month':
-                period_amount = year_amount/12
+                period_amount = year_amount / 12
             if i == i_max:
                 fy_amount = fy_residual_amount
             else:
@@ -791,8 +791,8 @@ class account_asset_asset(models.Model):
             })
             fy_residual_amount -= fy_amount
         i_max = i
-        ##table = table[:i_max + 1]
-        
+        # #table = table[:i_max + 1]
+
         # step 3: spread depreciation amount per fiscal year
         # over the depreciation periods
         fy_residual_amount = residual_amount
@@ -816,31 +816,31 @@ class account_asset_asset(models.Model):
                 residual_amount = round(residual_amount, digits)
                 line['remaining_value'] = residual_amount
             entry['lines'] = lines
-        
+
         # step 4: Remove lines without amounts
-        table = self._normalize_depreciation_table(cr, uid, asset, table, 
+        table = self._normalize_depreciation_table(cr, uid, asset, table,
                                                    context)
-         
+
         return table
-  
+
     def _spread_depreciation_lines(self, cr, uid, asset, context=None):
         '''
         Spread only amount value second method
         '''
         if not context:
             return False
-        
+
         if context.get('fiscal_methods'):
             asset_method_period = asset.fiscal_method_period
         else:
             asset_method_period = asset.method_period
-        
+
         spread_params = context.get('spread_params')
-        
+
         fy_residual_amount = spread_params['residual_amount']
         period_amount = spread_params['period_amount']
         fy_amount = spread_params['fy_amount']
-        
+
         asset_sign = asset.asset_value >= 0 and 1 or -1
         period_duration = (asset_method_period == 'year' and 12) \
             or (asset_method_period == 'quarter' and 3) or 1
@@ -883,7 +883,7 @@ class account_asset_asset(models.Model):
                 fy_residual_amount += diff
                 if i == 0:  # first year: deviation in first period
                     lines[0]['amount'] = period_amount - diff
-                else:       # other years: deviation in last period
+                else:  # other years: deviation in last period
                     lines[-1]['amount'] = period_amount - diff
         else:
             raise except_orm(
@@ -891,11 +891,11 @@ class account_asset_asset(models.Model):
                 _("Illegal value %s in asset.method_period.")
                 % asset_method_period)
         return lines
-    
+
     @api.v7
     def compute_depreciation_board(self, cr, uid, ids, context=None):
         self.compute_depreciation_board_fiscal(cr, uid, ids, context)
-        
+
         if not context:
             context = {}
         depreciation_lin_obj = self.pool.get(
@@ -958,7 +958,7 @@ class account_asset_asset(models.Model):
                 lines1 = [reduce(group_lines, lines1)]
                 lines1[0]['depreciated_value'] = 0.0
             table[0]['lines'] = lines1 + lines2
-            
+
             # check table with posted entries and
             # recompute in case of deviation
             if (len(posted_depreciation_line_ids) > 0):
@@ -1076,9 +1076,9 @@ class account_asset_asset(models.Model):
                     depr_line_id = depreciation_lin_obj.create(
                         cr, uid, vals, context=context)
                 line_i_start = 0
-                
+
         return True
-    
+
     @api.v7
     def compute_depreciation_board_fiscal(self, cr, uid, ids, context=None):
         if not context:
@@ -1089,7 +1089,7 @@ class account_asset_asset(models.Model):
             cr, uid, 'Account')
         # setting context for compute relative methods
         context.update({'fiscal_methods': True})
-        
+
         for asset in self.browse(cr, uid, ids, context=context):
             if asset.value_residual == 0.0:
                 continue
@@ -1114,12 +1114,12 @@ class account_asset_asset(models.Model):
                 depreciation_lin_obj.unlink(
                     cr, uid, old_depreciation_line_ids, context=context)
             context['company_id'] = asset.company_id.id
-            
+
             table = self._compute_depreciation_table(
                 cr, uid, asset, context=context)
             if not table:
                 continue
-            
+
             # group lines prior to depreciation start period
             depreciation_start_date = datetime.strptime(
                 asset.date_start, '%Y-%m-%d')
@@ -1143,7 +1143,7 @@ class account_asset_asset(models.Model):
                 lines1 = [reduce(group_lines, lines1)]
                 lines1[0]['depreciated_value'] = 0.0
             table[0]['lines'] = lines1 + lines2
-            
+
             # check table with posted entries and
             # recompute in case of deviation
             if (len(posted_depreciation_line_ids) > 0):
@@ -1260,35 +1260,35 @@ class account_asset_asset(models.Model):
                 line_i_start = 0
 
         return True
-    
-    
+
+
 class account_asset_depreciation_line(models.Model):
     _inherit = "account.asset.depreciation.line"
-    
-    amount = fields.Float('Amount', digits=dp.get_precision('Account'), 
+
+    amount = fields.Float('Amount', digits=dp.get_precision('Account'),
                           required=True)
-    amount_variation = fields.Float('Amount Variation', 
+    amount_variation = fields.Float('Amount Variation',
                                     digits=dp.get_precision('Account'))
-    remaining_value = fields.Float('Next Period Depreciation', 
+    remaining_value = fields.Float('Next Period Depreciation',
                                    compute='_compute', readonly=True,
                                    digits=dp.get_precision('Account'))
-    depreciated_value = fields.Float('Amount Already Depreciated', 
+    depreciated_value = fields.Float('Amount Already Depreciated',
                                    compute='_compute', readonly=True,
                                    digits=dp.get_precision('Account'))
-    asset_historical_value = fields.Float(string='Asset Historical Value', 
-                               digits=dp.get_precision('Account'), 
+    asset_historical_value = fields.Float(string='Asset Historical Value',
+                               digits=dp.get_precision('Account'),
                                readonly=True)
-    accumulated_depreciation = fields.Float('Accumulated Depreciation', 
+    accumulated_depreciation = fields.Float('Accumulated Depreciation',
                                      compute='_compute', store=True)
-    sale_remove_move_ids = fields.One2many('account.move', 
-                                           'asset_remove_move_id', 
+    sale_remove_move_ids = fields.One2many('account.move',
+                                           'asset_remove_move_id',
                                            string='Sale remove move')
     fiscal_line_ids = fields.One2many('account.asset.depreciation.line.fiscal',
                                       'normal_line_id',
                                       string='Fiscal lines')
     amount_remove_move = fields.Float('Amount remove move', readonly=True,
         help="Contains amount of sale invoice line for remove asset")
-    
+
     @api.one
     @api.depends('amount')
     def _compute(self):
@@ -1310,17 +1310,17 @@ class account_asset_depreciation_line(models.Model):
                 round(remaining_value, digits)
                 depreciated_value += dl.previous_id.amount
                 accumulated_depreciation = depreciated_value + dl.amount
-            
+
             dl.depreciated_value = depreciated_value
             dl.remaining_value = remaining_value > 0 and remaining_value or 0
             dl.accumulated_depreciation = accumulated_depreciation
-            
+
     @api.onchange('amount')
     def onchange_amount(self):
         if self.type == 'depreciate':
             self.remaining_value = self.asset_id.asset_value \
                 - self.depreciated_value - self.amount
-    
+
     @api.v7
     def create_move(self, cr, uid, ids, context=None):
         '''
@@ -1381,7 +1381,7 @@ class account_asset_depreciation_line(models.Model):
                 compute_depreciation_board(cr, uid, asset_to_recompute, context)
         '''
         return created_move_ids
-    
+
     @api.v7
     def unlink_move(self, cr, uid, ids, context=None):
         '''
@@ -1403,50 +1403,50 @@ class account_asset_depreciation_line(models.Model):
             self.pool['account.asset.asset'].\
                 compute_depreciation_board(cr, uid, asset_to_recompute, context)
         return res
-    
+
 
 class account_asset_depreciation_line_fiscal(models.Model):
     _name = "account.asset.depreciation.line.fiscal"
-    
+
     name = fields.Char(string='Depreciation Name', size=64, readonly=True)
     asset_id = fields.Many2one('account.asset.asset', string='Asset',
                                required=True, ondelete='cascade')
-    previous_id = fields.Many2one('account.asset.depreciation.line.fiscal', 
+    previous_id = fields.Many2one('account.asset.depreciation.line.fiscal',
                                   string='Previous Depreciation Line',
                                   readonly=True)
-    asset_historical_value = fields.Float(string='Asset Historical Value', 
-                               digits=dp.get_precision('Account'), 
+    asset_historical_value = fields.Float(string='Asset Historical Value',
+                               digits=dp.get_precision('Account'),
                                readonly=True)
     amount = fields.Float('Amount', required=True ,
                           digits=dp.get_precision('Account'))
-    remaining_value = fields.Float('Next Period Depreciation', 
+    remaining_value = fields.Float('Next Period Depreciation',
                                    compute='_compute', store=True)
-    amount_variation = fields.Float('Amount Variation', 
+    amount_variation = fields.Float('Amount Variation',
                                     digits=dp.get_precision('Account'))
-    depreciated_value = fields.Float('Amount Already Depreciated', 
+    depreciated_value = fields.Float('Amount Already Depreciated',
                                      compute='_compute', store=True)
-    accumulated_depreciation = fields.Float('Accumulated Depreciation', 
-                                     compute='_compute', store=True) 
+    accumulated_depreciation = fields.Float('Accumulated Depreciation',
+                                     compute='_compute', store=True)
     line_date = fields.Date('Date', required=True)
-    type = fields.Selection([('create', 'Asset Value'), 
-                             ('depreciate', 'Depreciation'), 
-                             ('remove', 'Asset Removal'),], 
+    type = fields.Selection([('create', 'Asset Value'),
+                             ('depreciate', 'Depreciation'),
+                             ('remove', 'Asset Removal'), ],
                             string="Type", readonly=True, default='depreciate')
-    init_entry = fields.Boolean(string='Initial Balance Entry', 
+    init_entry = fields.Boolean(string='Initial Balance Entry',
                                 help="Set this flag for entries of previous \
                                 fiscal years for which OpenERP has not \
                                 generated accounting entries.")
-    move_check = fields.Boolean(string='Posted', compute='_move_check', 
+    move_check = fields.Boolean(string='Posted', compute='_move_check',
                                 store=True)
-    normal_line_id = fields.Many2one('account.asset.depreciation.line', 
+    normal_line_id = fields.Many2one('account.asset.depreciation.line',
                                   string='Depreciation Line Normal chained',
                                   readonly=True, ondelete="cascade")
-    
+
     @api.one
     @api.depends('asset_id.depreciation_line_ids')
     def _move_check(self):
         '''
-        Is posted if exists normal line with account moves 
+        Is posted if exists normal line with account moves
         '''
         domain = [('asset_id', '=', self.asset_id.id),
                   ('type', '=', 'depreciate'),
@@ -1457,7 +1457,7 @@ class account_asset_depreciation_line_fiscal(models.Model):
             self.move_check = True
         else:
             self.move_check = False
-        
+
     @api.one
     @api.depends('amount')
     def _compute(self):
@@ -1483,7 +1483,7 @@ class account_asset_depreciation_line_fiscal(models.Model):
             dl.remaining_value = round(remaining_value > 0 and remaining_value \
                                        or 0, digits)
             dl.accumulated_depreciation = accumulated_depreciation
-            
+
     @api.onchange('amount')
     def onchange_amount(self):
         if self.type == 'depreciate':
@@ -1492,10 +1492,10 @@ class account_asset_depreciation_line_fiscal(models.Model):
 
 
 class account_asset_property(models.Model):
-     
+
     _name = "account.asset.property"
     _description = "Asset - Property"
-    
+
     name = fields.Char(string='Name', required=True)
     line_ids = fields.One2many('account.asset.property.line', 'property_id',
                                string='Roles')
@@ -1517,23 +1517,23 @@ class account_asset_property(models.Model):
         p_line = False
         # Search for nr line
         domain = [('property_id', '=', self.id),
-                  ('line_number', '=', nr_line)] 
+                  ('line_number', '=', nr_line)]
         p_line = self.env['account.asset.property.line'].search(domain)
         if p_line:
-            role['amount'] = round(amount * p_line.coeff, 
+            role['amount'] = round(amount * p_line.coeff,
                                    dp_obj.precision_get('Account'))
             role['coeff'] = p_line.coeff
             role['fiscal_depreciation'] = p_line.property_id.fiscal_depreciation
             role['normal_depreciation'] = p_line.property_id.normal_depreciation
             return role
-        
+
         # Search for last line
         if nr_line == nr_last_line:
             domain = [('property_id', '=', self.id),
                       ('line_number', '=', -1)]
             p_line = self.env['account.asset.property.line'].search(domain)
             if p_line:
-                role['amount'] = round(amount * p_line.coeff, 
+                role['amount'] = round(amount * p_line.coeff,
                                    dp_obj.precision_get('Account'))
                 role['coeff'] = p_line.coeff
                 role['fiscal_depreciation'] = \
@@ -1541,15 +1541,15 @@ class account_asset_property(models.Model):
                 role['normal_depreciation'] = \
                     p_line.property_id.normal_depreciation
                 return role
-        
+
         return role
 
 
 class account_asset_property_line(models.Model):
-     
+
     _name = "account.asset.property.line"
     _description = "Asset - Property line"
-    
+
     property_id = fields.Many2one('account.asset.property', readonly=True)
     sequence = fields.Integer(string='Sequence', readonly=True)
     name = fields.Char(string='Name')

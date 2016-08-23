@@ -31,12 +31,12 @@ _logger = logging.getLogger(__name__)
 
 class account_asset_remove(orm.TransientModel):
     _inherit = 'account.asset.remove'
-    
+
     def _posting_regime(self, cr, uid, context=None):
         return[
             ('gain_loss_on_sale', _('Gain/Loss on Sale')),
         ]
-    
+
     _columns = {
         'posting_regime': fields.selection(
             _posting_regime, 'Removal Entry Policy',
@@ -47,7 +47,7 @@ class account_asset_remove(orm.TransientModel):
                  "  * Gain/Loss on Sale: The Gain or Loss will be posted on "
                  "the 'Plus-Value Account' or 'Min-Value Account' "),
         }
-    
+
     def _prepare_early_removal(self, cr, uid,
                                asset, date_remove, context=None):
         """
@@ -61,15 +61,15 @@ class account_asset_remove(orm.TransientModel):
         asset_obj = self.pool['account.asset.asset']
         digits = self.pool.get('decimal.precision').precision_get(
             cr, uid, 'Account')
-        
+
         # Step 1: Compute values
         # Normal
-        domain = [('asset_id', '=', asset.id), ('type', '=', 'depreciate'), 
+        domain = [('asset_id', '=', asset.id), ('type', '=', 'depreciate'),
                   ('init_entry', '=', False), ('move_check', '=', False)]
         asset_line_obj = self.pool['account.asset.depreciation.line']
         dl_ids = asset_line_obj.search(cr, uid, domain, order='line_date asc')
-        first_to_depreciate_dl = asset_line_obj.browse(cr, uid, dl_ids[0])    
-        
+        first_to_depreciate_dl = asset_line_obj.browse(cr, uid, dl_ids[0])
+
         first_date = first_to_depreciate_dl.line_date
         if date_remove > first_date:
             raise orm.except_orm(
@@ -88,17 +88,17 @@ class account_asset_remove(orm.TransientModel):
         to_depreciate_amount = round(
             float(to_depreciate_days) / float(period_number_days) *
             first_to_depreciate_dl.amount, digits)
-        
+
         amount_variation = asset._get_amount_variation(False, last_depr_date)
-        residual_value = asset.value_residual - to_depreciate_amount 
-        
+        residual_value = asset.value_residual - to_depreciate_amount
+
         # Fiscal
-        domain = [('asset_id', '=', asset.id), ('type', '=', 'depreciate'), 
+        domain = [('asset_id', '=', asset.id), ('type', '=', 'depreciate'),
                   ('init_entry', '=', False), ('move_check', '=', False)]
         f_asset_line_obj = self.pool['account.asset.depreciation.line.fiscal']
-        f_dl_ids = f_asset_line_obj.search(cr, uid, domain, 
+        f_dl_ids = f_asset_line_obj.search(cr, uid, domain,
                                            order='line_date asc')
-        f_first_to_depreciate_dl = f_asset_line_obj.browse(cr, uid, f_dl_ids[0])    
+        f_first_to_depreciate_dl = f_asset_line_obj.browse(cr, uid, f_dl_ids[0])
 
         first_date = f_first_to_depreciate_dl.line_date
         ''' Omit control. Fiscal won't create an account move
@@ -123,9 +123,9 @@ class account_asset_remove(orm.TransientModel):
         f_residual_value = asset._get_residual_value('fiscal', date_remove)
         f_residual_value -= f_to_depreciate_amount
         f_residual_value = round(f_residual_value, digits)
-        
-        # Step 2: Create line remove 
-        # Normal   
+
+        # Step 2: Create line remove
+        # Normal
         if to_depreciate_amount:
             update_vals = {
                 'amount': to_depreciate_amount,
@@ -143,17 +143,17 @@ class account_asset_remove(orm.TransientModel):
                 'line_date': f_new_line_date
             }
             f_first_to_depreciate_dl.write(update_vals)
-            #f_asset_line_obj.create_move(
+            # f_asset_line_obj.create_move(
             #    cr, uid, [f_dl_ids[0]], context=context)
             f_dl_ids.pop(0)
         f_asset_line_obj.unlink(cr, uid, f_dl_ids, context=context)
-        
+
         res.update({
             'residual_value' : residual_value,
             'residual_value_fiscal' : f_residual_value
             })
         return res
-    
+
     def _get_removal_data(self, cr, uid, wiz_data, asset, residual_value,
                           context=None):
         dp_line_obj = self.pool['account.asset.depreciation.line']
@@ -164,7 +164,7 @@ class account_asset_remove(orm.TransientModel):
         amount_variation = 0
         domain = [('line_date', '<', wiz_data.date_remove),
                   ('type', '=', 'depreciate')]
-        dp_line_ids = dp_line_obj.search(cr, uid, domain, 
+        dp_line_ids = dp_line_obj.search(cr, uid, domain,
                                          order='line_date desc')
         if dp_line_ids:
             previous_dp_line = dp_line_obj.browse(cr, uid, dp_line_ids[0])
@@ -232,14 +232,14 @@ class account_asset_remove(orm.TransientModel):
                 move_lines.append((0, 0, move_line_vals))
 
         return move_lines
-    
+
     def remove(self, cr, uid, ids, context=None):
         asset_obj = self.pool.get('account.asset.asset')
         asset_line_obj = self.pool['account.asset.depreciation.line']
         f_asset_line_obj = self.pool['account.asset.depreciation.line.fiscal']
         move_obj = self.pool.get('account.move')
         period_obj = self.pool.get('account.period')
-        
+
         asset_id = context['active_id']
         asset = asset_obj.browse(cr, uid, asset_id, context=context)
         asset_ref = asset.code and '%s (ref: %s)' \
@@ -256,7 +256,7 @@ class account_asset_remove(orm.TransientModel):
             cr, uid, asset, wiz_data.date_remove, context=context)
         residual_value = res.get('residual_value')
         residual_value_fiscal = res.get('residual_value_fiscal')
-        
+
         ctx = dict(context, company_id=asset.company_id.id)
         period_id = wiz_data.period_id and wiz_data.period_id.id or False
         if not period_id:
@@ -274,11 +274,11 @@ class account_asset_remove(orm.TransientModel):
                 _('Error!'),
                 _("The removal date must be after "
                   "the last depreciation date."))
-            
+
         line_name = asset_obj._get_depreciation_entry_name(
             cr, uid, asset, len(dl_ids) + 1, context=context)
         journal_id = asset.category_id.journal_id.id
-        
+
         # create move
         move_vals = {
             'name': asset.name,
@@ -299,7 +299,7 @@ class account_asset_remove(orm.TransientModel):
             'move_id': move_id,
             'type': 'remove',
         }
-        dp_line_id = asset_line_obj.create(cr, uid, asset_line_vals, 
+        dp_line_id = asset_line_obj.create(cr, uid, asset_line_vals,
                                            context=context)
         asset.write({'state': 'removed', 'date_remove': wiz_data.date_remove})
         # create asset line Fiscal
@@ -313,22 +313,22 @@ class account_asset_remove(orm.TransientModel):
             'normal_line_id': dp_line_id
         }
         f_asset_line_obj.create(cr, uid, asset_line_vals, context=context)
-        
+
         # create move lines
         move_lines = self._get_removal_data(
             cr, uid, wiz_data, asset, residual_value, context=context)
         move_obj.write(cr, uid, [move_id], {'line_id': move_lines},
                        context=dict(context, allow_asset=True))
-        
+
         # Sale moves used for remove asset will chain to remove dp line
-        remove_sale_moves =[]
+        remove_sale_moves = []
         inv_line_ids = context.get('invoice_line_ids')
         if inv_line_ids:
             for inv_line in self.pool['account.invoice.line'].\
                 browse(cr, uid, inv_line_ids):
                     remove_sale_moves.append(inv_line.invoice_id.move_id.id)
         if remove_sale_moves:
-            move_obj.write(cr, uid, remove_sale_moves, 
+            move_obj.write(cr, uid, remove_sale_moves,
                            {'asset_remove_move_id': move_id})
 
         return {
@@ -342,4 +342,4 @@ class account_asset_remove(orm.TransientModel):
             'nodestroy': True,
             'domain': [('id', '=', move_id)],
         }
-        
+

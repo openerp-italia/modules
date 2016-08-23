@@ -26,9 +26,9 @@
     'description': """
         - Parallel Depreciation Board for fiscal values
         - Amount Variations from other moves in the year
-        - Property of asset to compute lines throught coefficients 
-        
-        Require account_asset_management with Pull Request 
+        - Property of asset to compute lines throught coefficients
+
+        Require account_asset_management with Pull Request
         https://github.com/alessandrocamilli/account-financial-tools/commit/27a6b65521370c68ed381d3a41f0305735c7dee6
     """,
     'summary': 'Italian Assets Management',

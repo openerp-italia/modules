@@ -32,7 +32,7 @@ _logger = logging.getLogger(__name__)
 class account_asset_remove_select(orm.TransientModel):
     _name = 'account.asset.remove.select'
     _description = 'Remove Asset'
-    
+
     def _get_invoice_lines(self, cr, uid, context=None):
         if not context:
             context = {}
@@ -46,7 +46,7 @@ class account_asset_remove_select(orm.TransientModel):
         inv_line_ids = inv_line_obj.search(
             cr, uid, domain, context=context)
         return inv_line_ids
-    
+
     def continue_remove(self, cr, uid, ids, context=None):
         assert len(ids) == 1
         inv_line_ids = []
@@ -62,16 +62,16 @@ class account_asset_remove_select(orm.TransientModel):
         sale_value = 0.0
         account_sale_id = False
         if wiz.invoice_line_ids:
-            for line in wiz.invoice_line_ids: 
+            for line in wiz.invoice_line_ids:
                 inv_line_ids.append(line.id)
                 if not date_remove or (date_remove and date_invoce < \
                                         line.invoice_id.date_invoice):
                     date_remove = line.invoice_id.date_invoice
                     account_sale_id = line.account_id.id
-                sale_value += line.price_subtotal 
+                sale_value += line.price_subtotal
         context.update({'invoice_line_ids': inv_line_ids})
         context.update({'invoice_sale_value': sale_value})
-        
+
         # Create wizard for remove
         remove_wiz_id = False
         if wiz.invoice_line_ids:
@@ -79,14 +79,14 @@ class account_asset_remove_select(orm.TransientModel):
                 'date_remove' : date_remove or False,
                 'sale_value' : sale_value or 0,
                 'account_sale_id' : account_sale_id or False,
-                'account_plus_value_id' : 
+                'account_plus_value_id' :
                     asset.category_id.account_plus_value_id.id or False,
-                'account_min_value_id' : 
+                'account_min_value_id' :
                     asset.category_id.account_min_value_id.id or False,
                 }
-            remove_wiz_id = self.pool['account.asset.remove'].create(cr, uid, 
+            remove_wiz_id = self.pool['account.asset.remove'].create(cr, uid,
                                                                      vals)
-        
+
         return {
             'name': _("Generate Asset Removal entries"),
             'view_type': 'form',
@@ -98,12 +98,12 @@ class account_asset_remove_select(orm.TransientModel):
             'context': context,
             'nodestroy': True,
         }
-        
+
     _columns = {
-        'invoice_line_ids': fields.many2many('account.invoice.line', 
+        'invoice_line_ids': fields.many2many('account.invoice.line',
                                      string='Account Moves')
     }
-    
+
     _defaults = {
         'invoice_line_ids': _get_invoice_lines,
     }
