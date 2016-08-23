@@ -21,7 +21,7 @@
 
 
 from openerp import models, fields, api, _
-from openerp.exceptions import except_orm, ValidationError
+from openerp.exceptions import ValidationError
 
 
 class account_move(models.Model):
@@ -52,8 +52,9 @@ class account_move_line(models.Model):
         List of move line's fields that can't be modified if move is linked
         with a depreciation line
         '''
-        res = ['credit', 'debit', 'account_id', 'journal_id', 'date',
-         'asset_category_id', 'asset_id', 'tax_code_id', 'tax_amount']
+        res = [
+            'credit', 'debit', 'account_id', 'journal_id', 'date',
+            'asset_category_id', 'asset_id', 'tax_code_id', 'tax_amount']
         res = []  # <<<< test
         return res
 
@@ -66,13 +67,13 @@ class account_move_line(models.Model):
         date = False
         period = False
         if 'period_id' in vals:
-            period = self.pool['account.period'].browse(cr, uid,
-                                                    vals['period_id'])
+            period = self.pool['account.period'].browse(
+                cr, uid, vals['period_id'])
         if 'date' in vals:
             date = vals['date']
         if 'move_id' in vals:
-            move = self.pool['account.move'].browse(cr, uid,
-                                                    vals['move_id'])
+            move = self.pool['account.move'].browse(
+                cr, uid, vals['move_id'])
             if not period:
                 period = move.period_id
             if not date:
@@ -86,7 +87,7 @@ class account_move_line(models.Model):
         if 'asset_id' in vals:
             domain = [('asset_id', '=', vals['asset_id']),
                       ('type', '=', 'depreciate'),
-                      ('move_id.period_id.fiscalyear_id', '=', \
+                      ('move_id.period_id.fiscalyear_id', '=',
                        period.fiscalyear_id.id),
                       ('move_id', '!=', False)]
             dp_line_ids = dp_line_obj.search(cr, uid, domain)
@@ -109,6 +110,8 @@ class account_move_line(models.Model):
     def create(self, cr, uid, vals, context=None, check=True):
         if not context:
             context = {}
+        else:
+            context = context.copy()
         context.update({'allow_asset': True})
         return super(account_move_line, self).create(
             cr, uid, vals, context, check)
@@ -138,4 +141,3 @@ class account_invoice(models.Model):
         if 'asset_id' in line:
             res.update({'asset_id':line['asset_id']})
         return res
-

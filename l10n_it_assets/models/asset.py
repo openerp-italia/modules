@@ -21,15 +21,18 @@
 
 
 from openerp import models, fields, api, _
-from openerp.exceptions import except_orm, ValidationError
+from openerp.exceptions import except_orm
 import openerp.addons.decimal_precision as dp
-from datetime import datetime, date
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
+
 
 class account_asset_category(models.Model):
     _inherit = "account.asset.category"
 
-    method = fields.Selection(selection='_get_method', required=True,
+    method = fields.Selection(
+        selection='_get_method',
+        required=True,
         default='linear',
         help="Choose the method to use to compute "
                  "the amount of depreciation lines.\n"
@@ -40,7 +43,9 @@ class account_asset_category(models.Model):
                  "  * Degressive-Linear (only for Time Method = Year): "
                  "Degressive becomes linear when the annual linear "
                  "depreciation exceeds the annual degressive depreciation")
-    method_time = fields.Selection(selection='_get_method_time', required=True,
+    method_time = fields.Selection(
+        selection='_get_method_time',
+        required=True,
         default='percentage',
         help="Choose the method to use to compute the dates and "
                  "number of depreciation lines.\n"
@@ -48,18 +53,23 @@ class account_asset_category(models.Model):
                  "for the depreciation.\n")
     method_period = fields.Selection(
         selection=[('year', 'Year')],
-                    string='Period Length', required=True, default='year',
-                    help="Period length for the depreciation accounting \
-                    entries")
+        string='Period Length',
+        required=True,
+        default='year',
+        help="Period length for the depreciation accounting entries")
     method_percentage = fields.Float(string='Percentage')
-    depreciation_property_id = fields.Many2many('account.asset.property',
+    depreciation_property_id = fields.Many2many(
+        'account.asset.property',
         'account_asset_category_property_rel', 'category_id', 'property_id',
         string='Category Depreciation Property')
-    fiscal_different_method = fields.Boolean(string='Fiscal different Method',
+    fiscal_different_method = fields.Boolean(
+        string='Fiscal different Method',
         default=False,
         help="It enable you to specify another Depreciation method for\
             fiscal values")
-    fiscal_method = fields.Selection(selection='_get_method', required=True,
+    fiscal_method = fields.Selection(
+        selection='_get_method',
+        required=True,
         default='linear',
         help="Choose the method to use to compute "
                  "the amount of depreciation lines.\n"
@@ -70,27 +80,32 @@ class account_asset_category(models.Model):
                  "  * Degressive-Linear (only for Time Method = Year): "
                  "Degressive becomes linear when the annual linear "
                  "depreciation exceeds the annual degressive depreciation")
-    fiscal_method_number = fields.Integer(string='Number of Years',
-            help="The number of years needed to depreciate your asset",
-            default=5)
+    fiscal_method_number = fields.Integer(
+        string='Number of Years',
+        help="The number of years needed to depreciate your asset",
+        default=5)
     fiscal_method_period = fields.Selection(
         selection=[('year', 'Year')],
-                    string='Period Length', required=True, default='year',
-                    help="Period length for the depreciation accounting \
-                    entries")
+        string='Period Length',
+        required=True,
+        default='year',
+        help="Period length for the depreciation accounting entries")
     fiscal_method_percentage = fields.Float(string='Percentage')
-    fiscal_method_progress_factor = fields.Float(string='Degressive Factor',
+    fiscal_method_progress_factor = fields.Float(
+        string='Degressive Factor',
         default=0.3)
-    fiscal_method_time = fields.Selection(selection='_get_method_time',
+    fiscal_method_time = fields.Selection(
+        selection='_get_method_time',
         required=True,
         help="Choose the method to use to compute the dates and "
-                 "number of depreciation lines.\n"
-                 "  * Number of Years: Specify the number of years "
-                 "for the depreciation.\n")
-    fiscal_prorata = fields.Boolean(string='Prorata Temporis',
+             "number of depreciation lines.\n"
+             "  * Number of Years: Specify the number of years "
+             "for the depreciation.\n")
+    fiscal_prorata = fields.Boolean(
+        string='Prorata Temporis',
         help="Indicates that the first depreciation entry for this asset "
-                 "has to be done from the depreciation start date instead of "
-                 "the first day of the fiscal year.")
+             "has to be done from the depreciation start date instead of "
+             "the first day of the fiscal year.")
 
     @api.onchange('fiscal_method_time')
     def change_fiscal_method_time(self):
@@ -121,6 +136,7 @@ class account_asset_category(models.Model):
             # ('number', _('Number of Depreciations')),
             # ('end', _('Ending Date'))
         ]
+
 
 class account_asset_asset(models.Model):
     _inherit = "account.asset.asset"
@@ -170,7 +186,7 @@ class account_asset_asset(models.Model):
             inv_line_ids = self.pool['account.invoice.line'].search(cr, uid,
                                                                     domain)
             for inv_line in self.pool['account.invoice.line'].browse(
-                cr, uid, inv_line_ids):
+                    cr, uid, inv_line_ids):
                 sale_value += inv_line.price_subtotal
         # Depreciation lines
         domain = [('asset_id', '=', self.id), ('move_id', '!=', False)]
@@ -178,7 +194,7 @@ class account_asset_asset(models.Model):
             .search(cr, uid, domain)
         dp_line_move_ids = []
         for dp_line in self.pool['account.asset.depreciation.line']\
-            .browse(cr, uid, dp_line_ids):
+                .browse(cr, uid, dp_line_ids):
             dp_line_move_ids.append(dp_line.move_id.id)
         # Moves not in depreciation lines are variations
         amount_variation = sale_value
@@ -192,7 +208,7 @@ class account_asset_asset(models.Model):
         line_ids = self.pool['account.move.line'].search(cr, uid, domain)
         for line in self.pool['account.move.line'].browse(cr, uid,
                                                           line_ids):
-            if line.debit :
+            if line.debit:
                 amount_variation += line.debit
             else:
                 amount_variation -= line.credit
@@ -204,8 +220,7 @@ class account_asset_asset(models.Model):
         uid = self.env.uid
         digits = self.pool.get('decimal.precision').precision_get(
             cr, uid, 'Account')
-        domain = [('asset_id', '=', self.id),
-                   ('type', 'in', ['depreciate'])]
+        domain = [('asset_id', '=', self.id), ('type', 'in', ['depreciate'])]
         if date_limit:
             domain.append(('line_date', '<=', date_limit))
         if type == 'fiscal':
@@ -238,8 +253,8 @@ class account_asset_asset(models.Model):
     def _compute_depreciation(self):
         self.value_residual = self._get_residual_value('normal')
         cr = self.env.cr
-        childs = self.search([('parent_id', 'child_of', [self.id]),
-                                 ('type', '=', 'normal')])
+        childs = self.search([
+            ('parent_id', 'child_of', [self.id]), ('type', '=', 'normal')])
         if childs:
             child_ids = [child.id for child in childs]
             cr.execute(
@@ -266,23 +281,25 @@ class account_asset_asset(models.Model):
     value_variation = fields.Float(
         string='Value Variations', store=True, readonly=True,
         compute='_compute_variation')
-    depreciation_property_id = fields.Many2many('account.asset.property',
+    depreciation_property_id = fields.Many2many(
+        'account.asset.property',
         'account_asset_property_rel', 'asset_id', 'property_id',
         string='Asset Depreciation Property',
         readonly=True, states={'draft': [('readonly', False)]})
     depreciation_line_fiscal_ids = fields.One2many(
-            comodel_name='account.asset.depreciation.line.fiscal',
-            inverse_name='asset_id',
-            string="Depreciation Lines", readonly=True,
-            states={'draft': [('readonly', False)]})
+        comodel_name='account.asset.depreciation.line.fiscal',
+        inverse_name='asset_id',
+        string="Depreciation Lines", readonly=True,
+        states={'draft': [('readonly', False)]})
     method_period = fields.Selection(
         selection=[('year', 'Year')],
-                    string='Period Length', required=True, default='year',
-                    readonly=True, states={'draft': [('readonly', False)]},
-                    help="Period length for the depreciation accounting \
-                    entries")
+        string='Period Length', required=True, default='year',
+        readonly=True, states={'draft': [('readonly', False)]},
+        help="Period length for the depreciation accounting \
+        entries")
     method_percentage = fields.Float(string='Percentage')
-    fiscal_amount_to_depreciate = fields.Float(string='Fiscal Amount To Depreciate',
+    fiscal_amount_to_depreciate = fields.Float(
+        string='Fiscal Amount To Depreciate',
         readonly=True, states={'draft': [('readonly', False)]})
     fiscal_value_residual = fields.Float(
         string='Fiscal Residual Value', store=True, readonly=True,
@@ -290,48 +307,54 @@ class account_asset_asset(models.Model):
     fiscal_value_depreciated = fields.Float(
         string='Fiscal Depreciated Value', store=True, readonly=True,
         compute='_compute_depreciation_fiscal')
-    fiscal_different_method = fields.Boolean(string='Fiscal different Method',
+    fiscal_different_method = fields.Boolean(
+        string='Fiscal different Method',
         default=False, readonly=True, states={'draft': [('readonly', False)]},
         help="It enable you to specify another Depreciation method for\
             fiscal values")
-    fiscal_method = fields.Selection(selection='_get_method', required=True,
+    fiscal_method = fields.Selection(
+        selection='_get_method', required=True,
         default='linear', readonly=True,
         states={'draft': [('readonly', False)]},
         help="Choose the method to use to compute "
-                 "the amount of depreciation lines.\n"
-                 "  * Linear: Calculated on basis of: "
-                 "Gross Value / Number of Depreciations\n"
-                 "  * Degressive: Calculated on basis of: "
-                 "Residual Value * Degressive Factor"
-                 "  * Degressive-Linear (only for Time Method = Year): "
-                 "Degressive becomes linear when the annual linear "
-                 "depreciation exceeds the annual degressive depreciation")
-    fiscal_method_number = fields.Integer(string='Number of Years',
-            default=5, readonly=True, states={'draft': [('readonly', False)]},
-            help="The number of years needed to depreciate your asset",
-            )
+             "the amount of depreciation lines.\n"
+             "  * Linear: Calculated on basis of: "
+             "Gross Value / Number of Depreciations\n"
+             "  * Degressive: Calculated on basis of: "
+             "Residual Value * Degressive Factor"
+             "  * Degressive-Linear (only for Time Method = Year): "
+             "Degressive becomes linear when the annual linear "
+             "depreciation exceeds the annual degressive depreciation")
+    fiscal_method_number = fields.Integer(
+        string='Number of Years',
+        default=5, readonly=True, states={'draft': [('readonly', False)]},
+        help="The number of years needed to depreciate your asset",)
     fiscal_method_period = fields.Selection(
         selection=[('year', 'Year')],
-                    string='Period Length', required=True, default='year',
-                    readonly=True, states={'draft': [('readonly', False)]},
-                    help="Period length for the depreciation accounting \
-                    entries")
+        string='Period Length', required=True, default='year',
+        readonly=True, states={'draft': [('readonly', False)]},
+        help="Period length for the depreciation accounting \
+        entries")
     fiscal_method_percentage = fields.Float(string='Percentage')
-    fiscal_method_end = fields.Date(string='Ending Date', readonly=True,
+    fiscal_method_end = fields.Date(
+        string='Ending Date', readonly=True,
         states={'draft': [('readonly', False)]})
-    fiscal_method_progress_factor = fields.Float(string='Degressive Factor',
+    fiscal_method_progress_factor = fields.Float(
+        string='Degressive Factor',
         default=0.3, readonly=True, states={'draft': [('readonly', False)]})
-    fiscal_method_time = fields.Selection(selection='_get_method_time',
+    fiscal_method_time = fields.Selection(
+        selection='_get_method_time',
         readonly=True, states={'draft': [('readonly', False)]},
         help="Choose the method to use to compute the dates and "
-                 "number of depreciation lines.\n"
-                 "  * Number of Years: Specify the number of years "
-                 "for the depreciation.\n")
-    fiscal_prorata = fields.Boolean(string='Prorata Temporis',
+             "number of depreciation lines.\n"
+             "  * Number of Years: Specify the number of years "
+             "for the depreciation.\n")
+    fiscal_prorata = fields.Boolean(
+        string='Prorata Temporis',
         readonly=True, states={'draft': [('readonly', False)]},
         help="Indicates that the first depreciation entry for this asset "
-                 "has to be done from the depreciation start date instead of "
-                 "the first day of the fiscal year.")
+             "has to be done from the depreciation start date instead of "
+             "the first day of the fiscal year.")
 
     @api.onchange('fiscal_different_method')
     def change_fiscal_different_method(self):
@@ -424,8 +447,8 @@ class account_asset_asset(models.Model):
         if category_id:
             category = asset_categ_obj.browse(
                 cr, uid, category_id, context=context)
-            res['value']['depreciation_property_id'] = \
-                 [x.id for x in category.depreciation_property_id]
+            res['value']['depreciation_property_id'] = [
+                x.id for x in category.depreciation_property_id]
 
         return res
 
