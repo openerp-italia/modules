@@ -368,7 +368,6 @@ class account_asset_asset(models.Model):
                 'depreciation_property_id': [(6, 0, \
                     [x.id for x in \
                      asset.category_id.depreciation_property_id])],
-                'method_percentage' : asset.category_id.method_percentage,
                 'fiscal_amount_to_depreciate' : amount_to_depreciate,
                 'fiscal_different_method' : \
                     asset.category_id.fiscal_different_method,
@@ -1036,7 +1035,6 @@ class account_asset_asset(models.Model):
             else:
                 table_i_start = 0
                 line_i_start = 0
-
             seq = len(posted_depreciation_line_ids)
             depr_line_id = last_depreciation_line and last_depreciation_line.id
             last_date = table[-1]['lines'][-1]['date']
