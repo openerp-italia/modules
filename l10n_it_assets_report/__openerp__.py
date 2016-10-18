@@ -39,5 +39,5 @@
         'report/report_assets_report_registry.xml'
     ],
     'test': [],
-    'installable': True,
+    'installable': False,
 }

@@ -48,6 +48,6 @@
         'demo/product_demo.xml'     
         ],
     "active": False,
-    "installable": True
+    "installable": False
 }
 

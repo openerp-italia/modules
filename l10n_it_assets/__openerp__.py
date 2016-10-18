@@ -45,5 +45,5 @@
         'wizard/account_asset_remove_select_view.xml',
         ],
     'test': [],
-    'installable': True,
+    'installable': False,
 }
