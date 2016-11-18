@@ -34,8 +34,8 @@ class stock_picking(models.Model):
         
         res = super(stock_picking, self)._get_invoice_vals(
             key, inv_type, journal_id, move)
-        
-        partner, currency_id, company_id = key
+
+        partner, currency_id, company_id, user_id = key
         
         res['intrastat'] = partner.property_account_position.intrastat
         
