@@ -388,16 +388,17 @@ class account_invoice_intrastat(models.Model):
     @api.depends('invoice_id.supplier_invoice_number',
                  'invoice_id.number', 'invoice_id.date_invoice')
     def _compute_invoice_ref(self):
-        if self.invoice_id.type in ['in_invoice', 'in_refund']:
-            if self.invoice_id.supplier_invoice_number:
-                self.invoice_number = self.invoice_id.supplier_invoice_number
-                if self.invoice_id.date_invoice:
-                    self.invoice_date = self.invoice_id.date_invoice
-        else:
-            if self.invoice_id.number:
-                self.invoice_number = self.invoice_id.number
-                if self.invoice_id.date_invoice:
-                    self.invoice_date = self.invoice_id.date_invoice
+        for rec in self:
+            if rec.invoice_id.type in ['in_invoice', 'in_refund']:
+                if rec.invoice_id.supplier_invoice_number:
+                    rec.invoice_number = rec.invoice_id.supplier_invoice_number
+                    if rec.invoice_id.date_invoice:
+                        rec.invoice_date = rec.invoice_id.date_invoice
+            else:
+                if rec.invoice_id.number:
+                    rec.invoice_number = rec.invoice_id.number
+                    if rec.invoice_id.date_invoice:
+                        rec.invoice_date = rec.invoice_id.date_invoice
 
     def _get_statement_section(self):
         '''
