@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    Author: Alessandro Camilli (a.camilli@openforce.it)
 #    Copyright (C) 2015
 #    Apulia Software srl - info@apuliasoftware.it - www.apuliasoftware.it
@@ -23,7 +23,7 @@
 
 {
     'name': 'Account - Intrastat',
-    'version': '0.1',
+    'version': '0.2',
     'category': 'Account',
     'description': """
     Taxation and customs European Union statements.
@@ -43,11 +43,10 @@
         'views/product.xml',
         'views/account.xml',
         'views/config.xml',
-        ],
+    ],
     "demo": [
-        'demo/product_demo.xml'     
-        ],
+        'demo/product_demo.xml'
+    ],
     "active": False,
     "installable": True
 }
-
