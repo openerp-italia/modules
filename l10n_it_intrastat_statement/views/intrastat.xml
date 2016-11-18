@@ -37,6 +37,7 @@
                 <search string="Intrastat Statements">
                     <filter icon="terp-sale" string="Sale" domain="[('sale','=',True)]"/>
                     <filter icon="terp-purchase" string="Purchase" domain="[('purchase','=',True)]"/>
+                    <field name="company_id" groups="base.group_multi_company"></field>
                     <group expand="0" string="Group By">
                         <filter string="Year" icon="terp-folder-orange" domain="" context="{'group_by':'fiscalyear_id'}"/>
                         <filter string="Sale" icon="terp-stock_symbol-selection" domain="" context="{'group_by':'sale'}"/>

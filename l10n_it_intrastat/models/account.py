@@ -278,6 +278,7 @@ class account_invoice(models.Model):
                 if not total_amount == invoice.amount_untaxed:
                     raise Warning(_('Total Intrastat must be ugual to\
                         Total Invoice Untaxed'))
+        return True
 
     @api.multi
     def compute_intrastat_lines(self):
