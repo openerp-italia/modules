@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+        <record model="ir.ui.view" id="view_partner_vat_dichiarazioni_intento">
+            <field name="name">partner.vat.dichiarazioni.intento</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="type">form</field> 
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='property_payment_term']/../.." position="after">
+                    <group string="Dichiarazione intento">
+                        <group>
+                            <field name="dichiarazione_intento_partner_number"></field>
+                            <field name="dichiarazione_intento_partner_date"></field>
+                        </group>
+                        <group> 
+                            <field name="dichiarazione_intento_registration_number"></field>
+                            <field name="dichiarazione_intento_registration_date"></field>
+                            <button name="get_sequence_registration_number" string="Assegna nr" icon="gtk-execute" type="object"/>
+                            <newline/>
+                        </group>
+                    </group>
+                </xpath>
+                
+            </field>
+        </record>
+    </data>
+</openerp>

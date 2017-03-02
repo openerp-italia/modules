@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="1">
+
+        <!-- Sequences for dichiarazione_intento_registration_number -->
+        <record forcecreate="1" id="seq_type_res_partner_dichiarazioni_intento" model="ir.sequence.type">
+            <field name="name">Dichiarazioni intento</field>
+            <field name="code">partner.dichiarazioni.intento</field>
+        </record>
+		
+        <record forcecreate="1" id="seq_res_partner_dichiarazioni_intento" model="ir.sequence">
+            <field name="name">Dichiarazioni intento</field>
+            <field name="code">partner.dichiarazioni.intento</field>
+            <field name="suffix">/%(year)s</field>
+        </record>
+		 	
+    </data>
+</openerp>
