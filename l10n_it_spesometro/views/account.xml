@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-    
-    	<!--
+
+        <!--
         JOURNAL
          -->
         <record id="view_spesometro_account_journal_form" model="ir.ui.view">
@@ -12,31 +12,31 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='sequence_id']" position="after">
                     <group string="Comunicazione art.21" colspan="4">
-	                	<field name="spesometro"/>
-	                	<field name="spesometro_operazione" attrs="{'invisible': [('spesometro', '=', False)], 'required': [('spesometro', '=', True)]}"/>
-	                	<field name="spesometro_segno" attrs="{'invisible': ['|', ('spesometro', '=', False), ('spesometro_operazione', '=', 'SA')], 'required': [('spesometro_operazione', 'IN', ('FA','BL1','BL2','BL3') )]}" />
-	                	<field name="spesometro_IVA_non_esposta" attrs="{'invisible': ['|', ('spesometro', '=', False), ('spesometro_operazione', '=', 'SA')]}" />
-	                </group>
-           		</xpath>
+                        <field name="spesometro"/>
+                        <field name="spesometro_operazione" attrs="{'invisible': [('spesometro', '=', False)], 'required': [('spesometro', '=', True)]}"/>
+                        <field name="spesometro_segno" attrs="{'invisible': ['|', ('spesometro', '=', False), ('spesometro_operazione', '=', 'SA')], 'required': [('spesometro_operazione', 'IN', ('FA','BL1','BL2','BL3') )]}" />
+                        <field name="spesometro_IVA_non_esposta" attrs="{'invisible': ['|', ('spesometro', '=', False), ('spesometro_operazione', '=', 'SA')]}" />
+                    </group>
+                </xpath>
             </field>
-		</record>
-		
-		
-		<!--
+        </record>
+
+
+        <!--
         TAX CODE
          -->
-		<record id="view_spesometro_tax_code_form" model="ir.ui.view">
+        <record id="view_spesometro_tax_code_form" model="ir.ui.view">
             <field name="name">view.spesometro.tax.code.form</field>
             <field name="model">account.tax.code</field>
             <field name="inherit_id" ref="account.view_tax_code_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//group[@string='Statistics']" position="after">
                     <group string="Comunicazione art.21">
-	                	<field name="spesometro_escludi"/>
-	                </group>
-           		</xpath>
+                        <field name="spesometro_escludi"/>
+                    </group>
+                </xpath>
             </field>
-		</record>
-		
+        </record>
+
     </data>
 </openerp>
