@@ -119,6 +119,7 @@ class spesometro_regole(models.Model):
                             ('account_credit', 'Conto Avere'),
                             ('account_debit', 'Conto Dare'),
                             ('invoice', 'Fattura'),
+                            ('invoice_move', 'Registrazione Fattura'),
                             ),
                             'Tipo Calcolo', required=True)
     no_limite_importo = fields.Boolean('No limite importo')
@@ -170,7 +171,7 @@ class spesometro_regole(models.Model):
         #
         # Calcolo da righe registrazione
         #
-        if not role.tipo_calcolo == 'invoice':
+        if role.tipo_calcolo not in ['invoice', 'invoice_move']:
             # Selezione linee registrazione x calcolo
             if role.tipo_calcolo == 'counterpart':
                 domain = [('move_id', '=', move.id),
@@ -202,7 +203,7 @@ class spesometro_regole(models.Model):
         #
         # Calcolo da fattura
         #
-        else:
+        elif role.tipo_calcolo == 'invoice':
             domain = [('move_id', '=', move.id)]
             inv_ids = invoice_obj.search(cr, uid, domain)
             if inv_ids:
@@ -212,6 +213,22 @@ class spesometro_regole(models.Model):
                         res['amount_untaxed'] += line.base
                         res['amount_tax'] += line.amount
                         res['amount_total'] += round(line.base + line.amount, 2)
+        #
+        # Calcolo da registrazione contabile fattura
+        #
+        elif role.tipo_calcolo == 'invoice_move':
+            for ml in move.line_id:
+                # Iva
+                domain = [('account_collected_id', '=', ml.account_id.id)]
+                vat_acc_ids = self.pool['account.tax'].search(cr, uid, domain)
+                if vat_acc_ids:
+                    res['amount_tax'] += (ml.credit + ml.debit)
+                # Credito/Debito (tot fattura)
+                elif ml.account_id.type in ['payable', 'receivable']\
+                    and ml.partner_id:
+                    res['amount_total'] += (ml.credit + ml.debit)
+            res['amount_untaxed'] = round(res['amount_total'] - \
+                                          res['amount_tax'], 2)
 
         return res
 
