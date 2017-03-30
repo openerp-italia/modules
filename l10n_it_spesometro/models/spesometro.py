@@ -2261,8 +2261,8 @@ class spesometro_comunicazione_line_FA(models.Model):
                                   or amount_untaxed
                 val['attive_note_variazione_imposta'] = \
                     com_line and (com_line.attive_note_variazione_imposta + \
-                                  amount_untaxed) \
-                                  or amount_untaxed
+                                  amount_tax) \
+                                  or amount_tax
             else:
                 if arg.get('operazione_iva_non_esposta', False):
                     val['attive_operazioni_iva_non_esposta' ] = \
