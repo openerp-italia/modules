@@ -45,7 +45,7 @@ class spesometro_configurazione(models.Model):
     stato_san_marino = fields.Many2one('res.country', string='Stato San Marino',
                                        required=True)
     regole_ids = fields.One2many('spesometro.regole', 'configurazione_id',
-                 string='Regole')
+                                 string='Regole')
     quadro_fa_limite_importo = \
         fields.Float(string='Quadro FA - Limite importo')
     quadro_fa_limite_importo_line = \
@@ -75,7 +75,6 @@ class spesometro_configurazione(models.Model):
     quadro_se_limite_importo_line = \
         fields.Float(string='Quadro SE - Limite importo singola operaz.')
 
-
     @api.one
     def copy(self, default=None):
         default.update(anno=self.anno + 1)
@@ -104,7 +103,7 @@ class spesometro_regole(models.Model):
     _description = "Spesometro - Regole"
 
     configurazione_id = fields.Many2one('spesometro.configurazione',
-        string='Configurazione', required=True, readonly=True)
+                                        string='Configurazione', required=True, readonly=True)
     active = fields.Boolean('Active', default=True)
     note = fields.Text('Note')
     sequence = fields.Integer('Sequenza', required=True)
@@ -114,14 +113,14 @@ class spesometro_regole(models.Model):
     partner_id = fields.Many2one('res.partner', 'Partner')
     counterpart_id = fields.Many2one('account.account', 'Counterpart')
     tipo_calcolo = fields.Selection((
-                            ('counterpart', 'Saldo Contropartita'),
-                            ('account_balance', 'Saldo Conto'),
-                            ('account_credit', 'Conto Avere'),
-                            ('account_debit', 'Conto Dare'),
-                            ('invoice', 'Fattura'),
-                            ('invoice_move', 'Registrazione Fattura'),
-                            ),
-                            'Tipo Calcolo', required=True)
+        ('counterpart', 'Saldo Contropartita'),
+        ('account_balance', 'Saldo Conto'),
+        ('account_credit', 'Conto Avere'),
+        ('account_debit', 'Conto Dare'),
+        ('invoice', 'Fattura'),
+        ('invoice_move', 'Registrazione Fattura'),
+    ),
+        'Tipo Calcolo', required=True)
     no_limite_importo = fields.Boolean('No limite importo')
     spesometro_partner_id = fields.Many2one('res.partner',
                                             'Partner sul quadro')
@@ -149,16 +148,16 @@ class spesometro_regole(models.Model):
                                            ('E', 'Aeromobili')),
                                           'Tipo Leasing')
     spesometro_tipo_servizio = fields.Selection((('cessione', 'Cessione Beni'),
-        ('servizi', 'Prestazione di servizi')), 'Tipo servizio',
-        help="Specificare per 'Operazioni con soggetti non residenti' ")
+                                                 ('servizi', 'Prestazione di servizi')), 'Tipo servizio',
+                                                help="Specificare per 'Operazioni con soggetti non residenti' ")
 
     _order = "sequence"
 
     def get_importo(self, cr, uid, role_id, move):
         res = {
-            'amount_untaxed' : 0,
-            'amount_tax' : 0,
-            'amount_total' : 0,
+            'amount_untaxed': 0,
+            'amount_tax': 0,
+            'amount_total': 0,
         }
 
         invoice_obj = self.pool['account.invoice']
@@ -212,7 +211,8 @@ class spesometro_regole(models.Model):
                     if not line.tax_code_id.spesometro_escludi:
                         res['amount_untaxed'] += line.base
                         res['amount_tax'] += line.amount
-                        res['amount_total'] += round(line.base + line.amount, 2)
+                        res['amount_total'] += round(line.base +
+                                                     line.amount, 2)
         #
         # Calcolo da registrazione contabile fattura
         #
@@ -225,9 +225,9 @@ class spesometro_regole(models.Model):
                     res['amount_tax'] += (ml.credit + ml.debit)
                 # Credito/Debito (tot fattura)
                 elif ml.account_id.type in ['payable', 'receivable']\
-                    and ml.partner_id:
+                        and ml.partner_id:
                     res['amount_total'] += (ml.credit + ml.debit)
-            res['amount_untaxed'] = round(res['amount_total'] - \
+            res['amount_untaxed'] = round(res['amount_total'] -
                                           res['amount_tax'], 2)
 
         return res
@@ -290,7 +290,7 @@ class spesometro_regole(models.Model):
             else:
                 partner = move_line.partner_id
             if not segno:
-                for ml in  move_line_obj.browse(cr, uid, move_line_ids):
+                for ml in move_line_obj.browse(cr, uid, move_line_ids):
                     if ml.account_id.type in ['other']:
                         continue
                     if ml.account_id.type in ['payable']:
@@ -305,21 +305,21 @@ class spesometro_regole(models.Model):
             # ... Calcolo importo
             res_importo = self.get_importo(cr, uid, role.id, move)
             res = {
-                'role_id' : role.id,
-                'journal_id': role.journal_id and role.journal_id.id\
-                    or False,
-                'account_id' : role.account_id and role.account_id.id \
-                    or False,
-                'counterpart_id' : role.counterpart_id and \
-                    role.counterpart_id.id or False,
-                'partner_id' : partner and partner.id or False,
-                'segno' : segno or False,
+                'role_id': role.id,
+                'journal_id': role.journal_id and role.journal_id.id
+                or False,
+                'account_id': role.account_id and role.account_id.id
+                or False,
+                'counterpart_id': role.counterpart_id and
+                role.counterpart_id.id or False,
+                'partner_id': partner and partner.id or False,
+                'segno': segno or False,
                 'amount_untaxed': res_importo['amount_untaxed'],
                 'amount_tax': res_importo['amount_tax'],
                 'amount_total': res_importo['amount_total'],
                 'operazione': role.spesometro_operazione,
-                'operazione_tipo_importo': \
-                    role.spesometro_operazione_tipo_importo,
+                'operazione_tipo_importo':
+                role.spesometro_operazione_tipo_importo,
                 'tipo_servizio': role.spesometro_tipo_servizio,
                 'no_limite_importo': role.no_limite_importo
             }
@@ -345,12 +345,11 @@ class spesometro_comunicazione(models.Model):
         if self.tipo == 'ordinaria':
             domain = [('tipo', '=', 'ordinaria')]
             com_last = self.search(domain,
-                                       order='progressivo_telematico desc',
-                                       limit=1)
+                                   order='progressivo_telematico desc',
+                                   limit=1)
             if com_last:
                 com_next_prg = com_last.progressivo_telematico + 1
         return com_next_prg
-
 
     @api.multi
     @api.depends('line_FA_ids', 'line_SA_ids', 'line_BL_ids', 'line_FE_ids',
@@ -420,15 +419,16 @@ class spesometro_comunicazione(models.Model):
     trimestre = fields.Integer('Trimestre', size=1)
     mese = fields.Selection((('1', 'Gennaio'), ('2', 'Febbraio'), ('3', 'Marzo'),
                              ('4', 'Aprile'), ('5', 'Maggio'), ('6', 'Giugno'),
-                             ('7', 'Luglio'), ('8', 'Agosto'), ('9', 'Settembre'),
+                             ('7', 'Luglio'), ('8',
+                                               'Agosto'), ('9', 'Settembre'),
                              ('10', 'Ottobre'), ('11', 'Novembre'),
                              ('12', 'Dicembre'),
                              ), 'Mese')
     tipo = fields.Selection((('ordinaria', 'Ordinaria'),
                              ('sostitutiva', 'Sostitutiva'),
                              ('annullamento', 'Annullamento')),
-                             'Tipo comunicazione', required=True,
-                             default='ordinaria')
+                            'Tipo comunicazione', required=True,
+                            default='ordinaria')
     comunicazione_da_sostituire_annullare = fields.Integer(
         'Protocollo comunicaz. da sostituire/annullare')
     documento_da_sostituire_annullare = fields.Integer(
@@ -436,17 +436,17 @@ class spesometro_comunicazione(models.Model):
 
     formato_dati = fields.Selection((('aggregati', 'Dati Aggregati'),
                                      ('analitici', 'Dati Analitici')),
-                                     'Formato dati', default='aggregati')
+                                    'Formato dati', default='aggregati')
     codice_fornitura = fields.Char('Codice fornitura',
                                    readonly=True, size=5,
                                    default='NSP00',
                                    help='Impostare a "NSP00" ')
     tipo_fornitore = fields.Selection((('01', 'Invio propria comunicazione'),
                                        ('10', 'Intermediario')),
-                                       'Tipo fornitore',
-                                       default='01')
+                                      'Tipo fornitore',
+                                      default='01')
     codice_fiscale_fornitore = fields.Char('Codice fiscale Fornitore', size=16,
-        help="Deve essere uguale al Codice fiscale dell'intermediario \
+                                           help="Deve essere uguale al Codice fiscale dell'intermediario \
         (campo 52 del record B) se presente, altrimenti al Codice fiscale del \
         soggetto tenuto alla comunicazione (campo 41 del record B) se \
         presente, altrimenti al Codice fiscale del soggetto obbligato \
@@ -454,14 +454,14 @@ class spesometro_comunicazione(models.Model):
     #
     # Valori per comunicazione su più invii (non gestito)
     progressivo_telematico = fields.Integer('Progressivo telematico',
-        default=_default_progressivo_telematico)
+                                            default=_default_progressivo_telematico)
     numero_totale_invii = fields.Integer('Numero totale invii telematici',
                                          readonly=True)
     #
     # Soggetto a cui si riferisce la comunicazione
     #
     soggetto_codice_fiscale = fields.Char('Codice fiscale soggetto obbligato',
-        size=16, help="Soggetto cui si riferisce la comunicazione")
+                                          size=16, help="Soggetto cui si riferisce la comunicazione")
     soggetto_partitaIVA = fields.Char('Partita IVA', size=11)
     soggetto_codice_attivita = fields.Char('Codice attività',
                                            size=6,
@@ -504,7 +504,7 @@ class spesometro_comunicazione(models.Model):
             in relazione alla funzione istituzionale rivestita'),
         ('12', 'Liquidatore (liquidazione volontaria di ditta individuale - \
             periodo ante messa in liquidazione)'),
-        ), 'Codice Carica')
+    ), 'Codice Carica')
 
     soggetto_pf_cognome = fields.Char('Cognome', size=24, help="")
     soggetto_pf_nome = fields.Char('Nome', size=20, help="")
@@ -521,7 +521,7 @@ class spesometro_comunicazione(models.Model):
         ('persona_fisica', 'Persona Fisica')),
         'Forma Giuridica')
     soggetto_cm_codice_fiscale = fields.Char('Codice Fiscale', size=16,
-        help="Soggetto che effettua la comunicazione se diverso dal soggetto \
+                                             help="Soggetto che effettua la comunicazione se diverso dal soggetto \
         tenuto alla comunicazione")
     soggetto_cm_pf_cognome = fields.Char('Cognome', size=24, help="")
     soggetto_cm_pf_nome = fields.Char('Nome', size=20, help="")
@@ -548,32 +548,32 @@ class spesometro_comunicazione(models.Model):
     soggetto_trasmissione_data_impegno = fields.Date('Data data impegno')
 
     quadro_FA = fields.Boolean(string='Quadro FA',
-        help="Operazioni documentate da fattura esposte in forma aggregata",
-        default=True)
+                               help="Operazioni documentate da fattura esposte in forma aggregata",
+                               default=True)
     quadro_SA = fields.Boolean(string='Quadro SA',
-        help="Operazioni senza fattura esposte in forma aggregata",
-        default=True)
+                               help="Operazioni senza fattura esposte in forma aggregata",
+                               default=True)
     quadro_BL = fields.Boolean(string='Quadro BL',
-        help="Operazioni con paesi con fiscalità privilegiata - \
+                               help="Operazioni con paesi con fiscalità privilegiata - \
         Operazioni con soggetti non residenti - \
         Acquisti di servizi da soggetti non residenti ", default=True)
     quadro_FE = fields.Boolean(string='Quadro FE',
-        help="Fatture emesse e Documenti riepilogativi (Operazioni attive)")
+                               help="Fatture emesse e Documenti riepilogativi (Operazioni attive)")
     quadro_FR = fields.Boolean(string='Quadro FR',
-        help="Fatture ricevute e Documenti riepilogativi (Operazioni passive)")
+                               help="Fatture ricevute e Documenti riepilogativi (Operazioni passive)")
     quadro_NE = fields.Boolean(string='Quadro NE',
-        help="Note di variazione emesse")
+                               help="Note di variazione emesse")
     quadro_NR = fields.Boolean(string='Quadro NR',
                                help="Note di variazioni ricevute")
     quadro_DF = fields.Boolean(string='Quadro DF',
                                help="Operazioni senza fattura")
     quadro_FN = fields.Boolean(string='Quadro FN',
-        help="Operazioni con soggetti non residenti (Operazioni attive)")
+                               help="Operazioni con soggetti non residenti (Operazioni attive)")
     quadro_SE = fields.Boolean(string='Quadro SE',
-        help="Acquisti di servizi da non residenti e Acquisti da operatori di \
+                               help="Acquisti di servizi da non residenti e Acquisti da operatori di \
         San Marino", default=True)
     quadro_TU = fields.Boolean(string='Quadro TU',
-        help="Operazioni legate al turismo - Art. 3 comma 1 D.L. 16/2012")
+                               help="Operazioni legate al turismo - Art. 3 comma 1 D.L. 16/2012")
 
     line_FA_ids = fields.One2many('spesometro.comunicazione.line.fa',
                                   'comunicazione_id', 'Quadri FA')
@@ -614,7 +614,7 @@ class spesometro_comunicazione(models.Model):
     totale_BL3 = fields.Integer(
         string='Tot operazioni BL - Acquisti servizi non soggetti non \
             residenti', compute='_tot_operation_number',
-            store=True, readonly=True)
+        store=True, readonly=True)
 
     totale_FE = fields.Integer(string='Tot operazioni FE',
                                compute='_tot_operation_number',
@@ -704,7 +704,6 @@ class spesometro_comunicazione(models.Model):
 
         return res
 
-
     @api.onchange('soggetto_trasmissione_impegno')
     def onchange_soggetto_trasmissione_impegno(self):
         res = {}
@@ -757,10 +756,10 @@ class spesometro_comunicazione(models.Model):
         esclusi, fuori campo o esenti
         '''
         res = {
-              'amount_untaxed' : 0,
-              'amount_tax' : 0,
-              'amount_total' : 0,
-              }
+            'amount_untaxed': 0,
+            'amount_tax': 0,
+            'amount_total': 0,
+        }
         if invoice:
             for line in invoice.tax_line:
                 if not line.tax_code_id.spesometro_escludi:
@@ -849,10 +848,10 @@ class spesometro_comunicazione(models.Model):
                     line.passive_imponibile_non_esente = \
                         line.passive_imponibile_non_esente * -1
                 importo_test = line.passive_imponibile_non_esente
-            if configurazione.quadro_fa_limite_importo :
+            if configurazione.quadro_fa_limite_importo:
                 if importo_test \
-                    and (importo_test < \
-                        configurazione.quadro_fa_limite_importo):
+                    and (importo_test <
+                         configurazione.quadro_fa_limite_importo):
                     line.unlink()
 
         for line in self.line_SA_ids:
@@ -860,9 +859,9 @@ class spesometro_comunicazione(models.Model):
             # contabilità
             if line.importo_complessivo < 0:
                 line.importo_complessivo = line.importo_complessivo * -1
-            if configurazione.quadro_sa_limite_importo :
+            if configurazione.quadro_sa_limite_importo:
                 if line.importo_complessivo \
-                    and (line.importo_complessivo < \
+                    and (line.importo_complessivo <
                          configurazione.quadro_sa_limite_importo):
                     line.unlink()
 
@@ -870,32 +869,32 @@ class spesometro_comunicazione(models.Model):
 
             importo_test = 0
             # operazioni attive
-            if line.attive_importo_complessivo :
+            if line.attive_importo_complessivo:
                 importo_test = line.attive_importo_complessivo
-            elif line.attive_non_sogg_cessione_beni :
+            elif line.attive_non_sogg_cessione_beni:
                 importo_test = line.attive_non_sogg_cessione_beni
-            elif line.attive_non_sogg_servizi :
+            elif line.attive_non_sogg_servizi:
                 importo_test = line.attive_non_sogg_servizi
             # operazioni passive
-            elif line.passive_importo_complessivo :
+            elif line.passive_importo_complessivo:
                 importo_test = line.passive_importo_complessivo
-            elif line.passive_non_sogg_importo_complessivo :
+            elif line.passive_non_sogg_importo_complessivo:
                 importo_test = line.passive_non_sogg_importo_complessivo
 
             to_remove = False
             # BL1 - Operazione con pesei con fiscalità privilegiata
             if line.operazione_fiscalita_privilegiata\
-                    and configurazione.quadro_bl1_limite_importo :
+                    and configurazione.quadro_bl1_limite_importo:
                 if importo_test < configurazione.quadro_bl1_limite_importo:
                     to_remove = True
             # BL2 - Operazione con soggetto non residente
             if line.operazione_con_soggetti_non_residenti\
-                    and configurazione.quadro_bl2_limite_importo :
+                    and configurazione.quadro_bl2_limite_importo:
                 if importo_test < configurazione.quadro_bl2_limite_importo:
                     to_remove = True
             # BL3 - Acquisto di servizi da soggetti non residenti
             if line.acquisto_servizi_da_soggetti_non_residenti\
-                    and configurazione.quadro_bl3_limite_importo :
+                    and configurazione.quadro_bl3_limite_importo:
                 if importo_test < configurazione.quadro_bl3_limite_importo:
                     to_remove = True
 
@@ -947,34 +946,34 @@ class spesometro_comunicazione(models.Model):
         # Limiti
         if not arg['no_limite_importo']:
             if arg['quadro'] == 'FA':
-                if configurazione.quadro_fa_limite_importo_line :
+                if configurazione.quadro_fa_limite_importo_line:
                     if not amount_untaxed or amount_untaxed < \
                             configurazione.quadro_fa_limite_importo_line:
                         return False
             if arg['quadro'] == 'SA':
-                if configurazione.quadro_sa_limite_importo_line :
+                if configurazione.quadro_sa_limite_importo_line:
                     if not amount_total or amount_total < \
                             configurazione.quadro_sa_limite_importo_line:
                         return False
             if arg['quadro'] == 'BL':
                 if arg['operazione'] == 'BL1':
-                    if configurazione.quadro_bl1_limite_importo_line :
+                    if configurazione.quadro_bl1_limite_importo_line:
                         if not amount_total or amount_total < \
                                 configurazione.quadro_bl1_limite_importo_line:
                             return False
                 if arg['operazione'] == 'BL2':
-                    if configurazione.quadro_bl2_limite_importo_line :
+                    if configurazione.quadro_bl2_limite_importo_line:
                         if not amount_total or amount_total < \
                                 configurazione.quadro_bl2_limite_importo_line:
                             return False
                 if arg['operazione'] == 'BL3':
-                    if configurazione.quadro_bl3_limite_importo_line :
+                    if configurazione.quadro_bl3_limite_importo_line:
                         if not amount_total or amount_total < \
                                 configurazione.quadro_bl3_limite_importo_line:
                             return False
 
             if arg['quadro'] == 'SE':
-                if configurazione.quadro_se_limite_importo_line :
+                if configurazione.quadro_se_limite_importo_line:
                     if not amount_untaxed or amount_untaxed < \
                             configurazione.quadro_se_limite_importo_line:
                         return False
@@ -1045,8 +1044,8 @@ class spesometro_comunicazione(models.Model):
         # Company
         sql_where += " AND company_id = %(company_id)s "
         search_params.update({
-                    'company_id' : self.company_id.id,
-                     })
+            'company_id': self.company_id.id,
+        })
         # Periodo annuale
         if self.periodo == 'anno':
             period_date_start = datetime(self.anno, 1, 1)
@@ -1054,16 +1053,16 @@ class spesometro_comunicazione(models.Model):
             sql_where += " AND p.date_start >= date(%(period_date_start)s) \
                 AND p.date_stop <=date(%(period_date_stop)s) "
             search_params.update({
-                    'period_date_start' : period_date_start,
-                    'period_date_stop' : period_date_stop
-                     })
+                'period_date_start': period_date_start,
+                'period_date_stop': period_date_stop
+            })
         # Periodo mensile
         if self.periodo == 'mese':
             period_date_start = datetime(self.anno, self.mese, 1)
             sql_where += " AND p.date_start = date(%(period_date_start)s) "
             search_params.update({
-                    'period_date_start' : period_date_start,
-                     })
+                'period_date_start': period_date_start,
+            })
         # Periodo trimestrale
         if self.periodo == 'trimestre':
             if self.trimestre == 1:
@@ -1083,9 +1082,9 @@ class spesometro_comunicazione(models.Model):
             sql_where += " AND p.date_start >= date(%(period_date_start)s) \
                 AND p.date_stop <=date(%(period_date_stop)s) "
             search_params.update({
-                    'period_date_start' : period_date_start,
-                    'period_date_stop' : period_date_stop
-                     })
+                'period_date_start': period_date_start,
+                'period_date_stop': period_date_stop
+            })
 
         sql = sql_select + sql_where
         self.env.cr.execute(sql, search_params)
@@ -1098,8 +1097,8 @@ class spesometro_comunicazione(models.Model):
         if self.tipo == 'ordinaria':
             domain = [('tipo', '=', 'ordinaria')]
             com_last = self.search(domain,
-                                       order='progressivo_telematico desc',
-                                       limit=1)
+                                   order='progressivo_telematico desc',
+                                   limit=1)
             com_next_prg = 1
             if com_last:
                 com_next_prg = com_last.progressivo_telematico + 1
@@ -1131,7 +1130,6 @@ class spesometro_comunicazione(models.Model):
         else:
             self.soggetto_forma_giuridica = 'persona_fisica'
 
-
     @api.one
     def compute_statement(self):
         # Esistenza record di configurazione per l'anno della comunicazione
@@ -1157,8 +1155,8 @@ class spesometro_comunicazione(models.Model):
 
         # Account moves
         domain = [('company_id', '=', self.company_id.id),
-                       ('period_id', 'in', period_ids),
-                       ('partner_id', 'not in', partner_to_exclude_ids)]
+                  ('period_id', 'in', period_ids),
+                  ('partner_id', 'not in', partner_to_exclude_ids)]
         account_moves = self.env['account.move'].search(domain)
 
         for move in account_moves:
@@ -1188,11 +1186,12 @@ class spesometro_comunicazione(models.Model):
 
             # Config spesometro
             operazione = False
-            operazione_tipo_importo = False
             tipo_servizio = False
             no_limite_importo = False
             operazione_iva_non_esposta = False
             operazione = move.journal_id.spesometro_operazione
+            operazione_tipo_importo = \
+                move.journal_id.spesometro_operazione_tipo_importo or False
             operazione_iva_non_esposta = \
                 move.journal_id.spesometro_IVA_non_esposta
             segno = move.journal_id.spesometro_segno
@@ -1224,10 +1223,6 @@ class spesometro_comunicazione(models.Model):
             if not invoice and not regola:
                 continue
 
-            # if invoice:
-            #    print 'INVOICE id' +str(invoice.id)
-            #    print 'INVOICE' + invoice.number
-
             # Config partner -> priorità alle impostazioni del partner
             if partner.spesometro_operazione:
                 operazione = partner.spesometro_operazione
@@ -1237,17 +1232,17 @@ class spesometro_comunicazione(models.Model):
                 operazione_iva_non_esposta = partner.spesometro_IVA_non_esposta
 
             arg = {
-                'comunicazione_id' : self.id,
-                'partner' : partner,
-                'segno' : segno,
-                'operazione_iva_non_esposta' : operazione_iva_non_esposta,
-                'operazione' : operazione,
-                'operazione_tipo_importo' : operazione_tipo_importo,
-                'tipo_servizio' : tipo_servizio,
-                'no_limite_importo' : no_limite_importo,
-                'formato_dati' : self.formato_dati,
-                'quadri_richiesti' : quadri_richiesti,
-                }
+                'comunicazione_id': self.id,
+                'partner': partner,
+                'segno': segno,
+                'operazione_iva_non_esposta': operazione_iva_non_esposta,
+                'operazione': operazione,
+                'operazione_tipo_importo': operazione_tipo_importo,
+                'tipo_servizio': tipo_servizio,
+                'no_limite_importo': no_limite_importo,
+                'formato_dati': self.formato_dati,
+                'quadri_richiesti': quadri_richiesti,
+            }
 
             # Quadro di competenza
             quadro = self._get_define_quadro(move, invoice, arg)
@@ -1311,7 +1306,7 @@ class spesometro_comunicazione(models.Model):
         # Parte in eccesso:
         str_eccesso = string[16:]
         str_split = [str_eccesso[i:i + length] for i in range(0, len(str_eccesso),
-                                                             length)]
+                                                              length)]
         for s in str_split:
             new_string = '+' + s
             res.append(new_string)
@@ -1341,7 +1336,7 @@ class spesometro_comunicazione(models.Model):
         for line in self.line_FA_ids:
             progressivo_modulo += 1
             progressivo_sezione += 1
-            if progressivo_sezione > sezione_max :
+            if progressivo_sezione > sezione_max:
                 progressivo_sezione = 1
             content += self._record_C_FA(line, progressivo_modulo,
                                          progressivo_sezione)
@@ -1352,7 +1347,7 @@ class spesometro_comunicazione(models.Model):
         for line in self.line_SA_ids:
             progressivo_modulo += 1
             progressivo_sezione += 1
-            if progressivo_sezione > sezione_max :
+            if progressivo_sezione > sezione_max:
                 progressivo_sezione = 1
             content += self._record_C_SA(line, progressivo_modulo,
                                          progressivo_sezione)
@@ -1364,7 +1359,7 @@ class spesometro_comunicazione(models.Model):
         for line in self.line_BL_ids:
             progressivo_modulo += 1
             progressivo_sezione += 1
-            if progressivo_sezione > sezione_max :
+            if progressivo_sezione > sezione_max:
                 progressivo_sezione = 1
             content += self._record_C_BL(line, progressivo_modulo,
                                          progressivo_sezione)
@@ -1376,7 +1371,7 @@ class spesometro_comunicazione(models.Model):
         for line in self.line_SE_ids:
             progressivo_modulo += 1
             progressivo_sezione += 1
-            if progressivo_sezione > sezione_max :
+            if progressivo_sezione > sezione_max:
                 progressivo_sezione = 1
             content += self._record_D_SE(line, progressivo_modulo,
                                          progressivo_sezione)
@@ -1389,11 +1384,11 @@ class spesometro_comunicazione(models.Model):
 
         # Coda
         args = {
-            'numero_record_B' : numero_record_B,
-            'numero_record_C' : numero_record_C,
-            'numero_record_D' : numero_record_D,
-            'numero_record_E' : numero_record_E,
-            }
+            'numero_record_B': numero_record_B,
+            'numero_record_C': numero_record_C,
+            'numero_record_D': numero_record_D,
+            'numero_record_E': numero_record_E,
+        }
         content += self._record_Z(args)
         # Validtation data
         if not content:
@@ -1401,7 +1396,6 @@ class spesometro_comunicazione(models.Model):
                 _('Nothing to export'))
 
         return content
-
 
     def _record_A(self):
 
@@ -1442,9 +1436,9 @@ class spesometro_comunicazione(models.Model):
         rcd = "B"
         rcd += '{:16s}'.format(self.soggetto_codice_fiscale)
         rcd += '{:8s}'.format("1".zfill(8))  # Progressivo modulo - vale 1
-        rcd += '{:3s}'.format("")  #  Spazio a disposizione dell'utente
+        rcd += '{:3s}'.format("")  # Spazio a disposizione dell'utente
         rcd += '{:25s}'.format("")  # Filler
-        rcd += '{:20s}'.format("")  #  Spazio a disposizione dell'utente
+        rcd += '{:20s}'.format("")  # Spazio a disposizione dell'utente
         #  Identificativo del produttore del software (codice fiscale)
         rcd += '{:16s}'.format("")
         # tipo comunicazione (ordinaria,sostitutiva o di annullamento)
@@ -1464,12 +1458,12 @@ class spesometro_comunicazione(models.Model):
         if self.comunicazione_da_sostituire_annullare == 0:
             rcd += '{:17s}'.format("".zfill(17))
         else:
-            rcd += '{:17s}'.format(str(comunicazione_da_sostituire_annullare)\
+            rcd += '{:17s}'.format(str(comunicazione_da_sostituire_annullare)
                                    .zfill(17))
         if self.documento_da_sostituire_annullare == 0:
             rcd += '{:6s}'.format("".zfill(6))
         else:
-            rcd += '{:6s}'.format(str(self.documento_da_sostituire_annullare)\
+            rcd += '{:6s}'.format(str(self.documento_da_sostituire_annullare)
                                   .zfill(6))
         # formato dati: aggregata o analitica (caselle alternative)
         if self.formato_dati == 'aggregati':
@@ -1477,15 +1471,15 @@ class spesometro_comunicazione(models.Model):
         else:
             rcd += "01"
         # Quadri compilati
-        if self.line_FA_ids :
+        if self.line_FA_ids:
             rcd += "1"
         else:
             rcd += "0"
-        if self.line_SA_ids :
+        if self.line_SA_ids:
             rcd += "1"
         else:
             rcd += "0"
-        if self.line_BL_ids :
+        if self.line_BL_ids:
             rcd += "1"
         else:
             rcd += "0"
@@ -1513,7 +1507,7 @@ class spesometro_comunicazione(models.Model):
         #     rcd += "1"
         # else:
         rcd += "0"
-        if self.line_SE_ids :
+        if self.line_SE_ids:
             rcd += "1"
         else:
             rcd += "0"
@@ -1522,12 +1516,12 @@ class spesometro_comunicazione(models.Model):
         # else:
         rcd += "0"
 
-        rcd += "1"  #  Quadro TA  - RIEPILOGO
+        rcd += "1"  # Quadro TA  - RIEPILOGO
         # Partita IVA , Codice Attività e riferimenti del Soggetto cui si
         #  riferisce la comunicazione
         rcd += '{:11s}'.format(self.soggetto_partitaIVA)  # PARTITA IVA
         if not self.soggetto_codice_attivita:
-                raise ValidationError(_("Errore comunicazione! Manca il \
+            raise ValidationError(_("Errore comunicazione! Manca il \
                     codice attività"))
         # CODICE attività  (6 caratteri) --> obbligatorio
         rcd += '{:6s}'.format(self.soggetto_codice_attivita)
@@ -1554,7 +1548,7 @@ class spesometro_comunicazione(models.Model):
             rcd += '{:24s}'.format(self.soggetto_pf_cognome)  # cognome
             rcd += '{:20s}'.format(self.soggetto_pf_nome)  # nome
             rcd += '{:1s}'.format(self.soggetto_pf_sesso)  # sesso
-            rcd += '{:8s}'.format(datetime.strptime(\
+            rcd += '{:8s}'.format(datetime.strptime(
                 self.soggetto_pf_data_nascita, "%Y-%m-%d").strftime("%d%m%Y"))
             rcd += '{:40s}'.format(self.soggetto_pf_comune_nascita)
             rcd += '{:2s}'.format(self.soggetto_pf_provincia_nascita)
@@ -1593,20 +1587,20 @@ class spesometro_comunicazione(models.Model):
         # (Obbligatorio e da compilare solo se si tratta di Persona Fisica. )
         if self.soggetto_cm_forma_giuridica == 'persona_fisica':
             if not self.soggetto_cm_pf_cognome \
-                or not self.soggetto_cm_pf_nome \
-                or not self.soggetto_cm_pf_sesso \
-                or not self.soggetto_cm_pf_data_nascita\
-                or not self.soggetto_cm_pf_comune_nascita \
-                or not self.soggetto_cm_pf_provincia_nascita:
-                    raise ValidationError(_("Soggetto tenuto alla \
+                    or not self.soggetto_cm_pf_nome \
+                    or not self.soggetto_cm_pf_sesso \
+                    or not self.soggetto_cm_pf_data_nascita\
+                    or not self.soggetto_cm_pf_comune_nascita \
+                    or not self.soggetto_cm_pf_provincia_nascita:
+                raise ValidationError(_("Soggetto tenuto alla \
                         comunicazione: Inserire tutti i dati della persona \
                         fisica"))
             rcd += '{:24s}'.format(self.soggetto_cm_pf_cognome)  # cognome
             rcd += '{:20s}'.format(self.soggetto_cm_pf_nome)  # nome
             rcd += '{:1s}'.format(self.soggetto_cm_pf_sesso)  # sesso
-            rcd += '{:8s}'.format(datetime.strptime(\
-                                    self.soggetto_cm_pf_data_nascita,
-                                    "%Y-%m-%d").strftime("%d%m%Y"))
+            rcd += '{:8s}'.format(datetime.strptime(
+                self.soggetto_cm_pf_data_nascita,
+                "%Y-%m-%d").strftime("%d%m%Y"))
             rcd += '{:40s}'.format(self.soggetto_cm_pf_comune_nascita)
             rcd += '{:2s}'.format(self.soggetto_cm_pf_provincia_nascita)
             rcd += '{:60s}'.format("")  #  persona giuridica
@@ -1631,7 +1625,7 @@ class spesometro_comunicazione(models.Model):
         # Codice fiscale dell'intermediario
         rcd += '{:16s}'.format(self.soggetto_trasmissione_codice_fiscale or '')
         # Numero di iscrizione all'albo del C.A.F.
-        rcd += '{:5s}'.format(str(self.soggetto_trasmissione_numero_CAF)\
+        rcd += '{:5s}'.format(str(self.soggetto_trasmissione_numero_CAF)
                               .zfill(5))
         # Impegno a trasmettere in via telematica la comunicazione
         # Dato obbligatorio Vale 1 se la comunicazione è stata predisposta dal
@@ -1644,9 +1638,9 @@ class spesometro_comunicazione(models.Model):
             raise ValidationError(_("Manca la data dell'impegno alla \
                 trasmissione"))
         # Data dell'impegno
-        rcd += '{:8s}'.format(datetime.strptime(\
-                                self.soggetto_trasmissione_data_impegno,
-                                "%Y-%m-%d").strftime("%d%m%Y"))
+        rcd += '{:8s}'.format(datetime.strptime(
+            self.soggetto_trasmissione_data_impegno,
+            "%Y-%m-%d").strftime("%d%m%Y"))
         # Spazio riservato al Servizio telematico
         rcd += '{:1258s}'.format("")  # Filler
         rcd += '{:20s}'.format("")  # Spazio riservato al Servizio Telematico
@@ -1679,10 +1673,10 @@ class spesometro_comunicazione(models.Model):
                  partner %s") % (line.partner_id.name,))
         # Doc. riepilogativo : non ammessi codice fiscale o partita iva
         if line.documento_riepilogativo \
-                and (line.partita_iva or line.codice_fiscale) :
+                and (line.partita_iva or line.codice_fiscale):
             raise ValidationError(_("Documento riepilogativo per partner %s, \
-                togliere Codice Fiscale E partita IVA") \
-                % (line.partner_id.name,))
+                togliere Codice Fiscale E partita IVA")
+                                  % (line.partner_id.name,))
 
         if line.partita_iva:
             rcd += '{:8s}'.format("FA" + prog_sezione + "001")
@@ -1757,7 +1751,7 @@ class spesometro_comunicazione(models.Model):
         prog_sezione = str(prog_sezione).zfill(3)
 
         if not line.codice_fiscale:
-            raise ValidationError(_("Manca codice fiscale su partner %s") \
+            raise ValidationError(_("Manca codice fiscale su partner %s")
                                   % (line.partner_id.name,))
         rcd = "C"
         # codice fiscale soggetto obbligato
@@ -1808,7 +1802,7 @@ class spesometro_comunicazione(models.Model):
         #    BL006)
         if line.operazione_con_soggetti_non_residenti:
             if (not line.pf_cognome or not line.pf_nome) \
-                and not line.pg_denominazione:
+                    and not line.pg_denominazione:
                 ValidationError("Errore quadro BL - Partner %s! Cognome e nome\
                      obbligatori oppure ragione sociale per soggetto \
                      giuridico") % (line.partner_id.name,)
@@ -1816,8 +1810,8 @@ class spesometro_comunicazione(models.Model):
                     and not line.pf_codice_stato_estero:
                 raise ValidationError(_("Errore quadro BL - Partner %s! \
                     Inserire alemno uno dei seguenti valori: \
-                    Pers.Fisica-Data di nascita, Pers.Fisica-Codice Stato") \
-                    % (line.partner_id.name ,))
+                    Pers.Fisica-Data di nascita, Pers.Fisica-Codice Stato")
+                                      % (line.partner_id.name,))
         # ...Acquisti di servizi da soggetti non residenti (è obbligatorio
         #    compilare le sezioni BL001, BL002 e almeno un campo della sezione
         #    BL006)
@@ -1831,18 +1825,18 @@ class spesometro_comunicazione(models.Model):
                     and not line.pf_codice_stato_estero:
                 raise ValidationError(_("Errore quadro BL - Partner %s! \
                     Inserire alemno uno dei seguenti valori: \
-                    Pers.Fisica-Data di nascita, Pers.Fisica-Codice Stato") \
-                    % (line.partner_id.name ,))
+                    Pers.Fisica-Data di nascita, Pers.Fisica-Codice Stato")
+                                      % (line.partner_id.name,))
         # BL001006 : Codice stato estero x persona fisica
         if not line.pg_denominazione and not line.pf_codice_stato_estero:
-                raise ValidationError(_("Errore quadro BL - Partner %s! \
-                    Inserire Codice Stato Estero per la persona fisica") \
-                    % (line.partner_id.name ,))
+            raise ValidationError(_("Errore quadro BL - Partner %s! \
+                    Inserire Codice Stato Estero per la persona fisica")
+                                  % (line.partner_id.name,))
         # BL001009 : Codice stato estero x persona giuridica
         if line.pg_denominazione and not line.pg_codice_stato_estero:
-                raise ValidationError(_("Errore quadro BL - Partner %s! \
-                    Inserire Codice Stato Estero per la persona giuridica") \
-                    % (line.partner_id.name,))
+            raise ValidationError(_("Errore quadro BL - Partner %s! \
+                    Inserire Codice Stato Estero per la persona giuridica")
+                                  % (line.partner_id.name,))
 
         rcd = "C"
         # codice fiscale soggetto obbligato
@@ -1872,7 +1866,7 @@ class spesometro_comunicazione(models.Model):
                     + '{:16s}'.format(s)
             rcd += '{:8s}'.format("BL" + "001" + "003") \
                 + '{:>16s}'.format(datetime.strptime(
-                line.pf_data_nascita, "%Y-%m-%d").strftime("%d%m%Y"))
+                    line.pf_data_nascita, "%Y-%m-%d").strftime("%d%m%Y"))
             str_split = self._split_string_positional_field(
                 line.pf_comune_stato_nascita)
             for s in str_split:
@@ -1994,8 +1988,8 @@ class spesometro_comunicazione(models.Model):
                 and not line.pf_codice_stato_estero:
             raise ValidationError(_("Errore quadro SE - Partner %s! Inserire \
                 alemno uno dei seguenti valori: \
-                Pers.Fisica-Data di nascita, Pers.Fisica-Codice Stato") \
-                % (line.partner_id.name ,))
+                Pers.Fisica-Data di nascita, Pers.Fisica-Codice Stato")
+                                  % (line.partner_id.name,))
 
         rcd = "D"
         # codice fiscale soggetto obbligato
@@ -2090,7 +2084,6 @@ class spesometro_comunicazione(models.Model):
 
         return rcd
 
-
     def _record_E(self, prog_modulo):
         rcd = "E"
         rcd += '{:16s}'.format(self.soggetto_codice_fiscale)
@@ -2106,11 +2099,14 @@ class spesometro_comunicazione(models.Model):
         if self.totale_SA:
             rcd += '{:8s}'.format("TA002001") + '{:16d}'.format(self.totale_SA)
         if self.totale_BL1:
-            rcd += '{:8s}'.format("TA003001") + '{:16d}'.format(self.totale_BL1)
+            rcd += '{:8s}'.format("TA003001") + \
+                '{:16d}'.format(self.totale_BL1)
         if self.totale_BL2:
-            rcd += '{:8s}'.format("TA003002") + '{:16d}'.format(self.totale_BL2)
+            rcd += '{:8s}'.format("TA003002") + \
+                '{:16d}'.format(self.totale_BL2)
         if self.totale_BL3:
-            rcd += '{:8s}'.format("TA003003") + '{:16d}'.format(self.totale_BL3)
+            rcd += '{:8s}'.format("TA003003") + \
+                '{:16d}'.format(self.totale_BL3)
         # Analitiche
         if self.totale_FE:
             rcd += '{:8s}'.format("TA004001") + '{:16d}'.format(self.totale_FE)
@@ -2193,8 +2189,8 @@ class spesometro_comunicazione_line_FA(models.Model):
         'Totale operaz. IVA non esposta', digits=dp.get_precision('Account'),
         help="Totale operazioni con IVA non esposta")
     attive_note_variazione = fields.Float('Totale note variazione',
-        digits=dp.get_precision('Account'),
-        help="Totale note di variazione a debito per la controparte")
+                                          digits=dp.get_precision('Account'),
+                                          help="Totale note di variazione a debito per la controparte")
     attive_note_variazione_imposta = fields.Float(
         'Totale imposta note variazione', digits=dp.get_precision('Account'),
         help="Totale imposta sulle note di variazione a debito")
@@ -2203,13 +2199,13 @@ class spesometro_comunicazione_line_FA(models.Model):
         'Tot impon., non impon ed esenti', digits=dp.get_precision('Account'),
         help="Totale operazioni imponibili, non imponibili ed esenti")
     passive_imposta = fields.Float('Totale imposta',
-        digits=dp.get_precision('Account'), help="Totale imposta")
+                                   digits=dp.get_precision('Account'), help="Totale imposta")
     passive_operazioni_iva_non_esposta = fields.Float(
         'Totale operaz. IVA non esposta', digits=dp.get_precision('Account'),
         help="Totale operazioni con IVA non esposta")
     passive_note_variazione = fields.Float('Totale note variazione',
-        digits=dp.get_precision('Account'),
-        help="Totale note di variazione a credito per la controparte")
+                                           digits=dp.get_precision('Account'),
+                                           help="Totale note di variazione a credito per la controparte")
     passive_note_variazione_imposta = fields.Float(
         'Totale imposta note variazione', digits=dp.get_precision('Account'),
         help="Totale imposta sulle note di variazione a credito")
@@ -2238,13 +2234,13 @@ class spesometro_comunicazione_line_FA(models.Model):
             if arg['operazione'] == 'DR':
                 documento_riepilogativo = True
             val_head = {
-                'comunicazione_id' : comunicazione_id,
-                'partner_id' : partner.id,
-                'partita_iva' : partita_iva,
-                'codice_fiscale' : partner.fiscalcode or '',
-                'noleggio' : partner.spesometro_leasing or '',
-                'documento_riepilogativo' : documento_riepilogativo,
-                }
+                'comunicazione_id': comunicazione_id,
+                'partner_id': partner.id,
+                'partita_iva': partita_iva,
+                'codice_fiscale': partner.fiscalcode or '',
+                'noleggio': partner.spesometro_leasing or '',
+                'documento_riepilogativo': documento_riepilogativo,
+            }
         # Valori
         amount_untaxed = doc_vals.get('amount_untaxed', 0)
         amount_tax = doc_vals.get('amount_tax', 0)
@@ -2256,25 +2252,25 @@ class spesometro_comunicazione_line_FA(models.Model):
                 or 1
             if 'refund' in move.journal_id.type:
                 val['attive_note_variazione'] = \
-                    com_line and (com_line.attive_note_variazione + \
+                    com_line and (com_line.attive_note_variazione +
                                   amount_untaxed) \
-                                  or amount_untaxed
+                    or amount_untaxed
                 val['attive_note_variazione_imposta'] = \
-                    com_line and (com_line.attive_note_variazione_imposta + \
+                    com_line and (com_line.attive_note_variazione_imposta +
                                   amount_tax) \
-                                  or amount_tax
+                    or amount_tax
             else:
                 if arg.get('operazione_iva_non_esposta', False):
                     val['attive_operazioni_iva_non_esposta' ] = \
-                        com_line and (\
-                            com_line.attive_operazioni_iva_non_esposta + \
+                        com_line and (
+                            com_line.attive_operazioni_iva_non_esposta +
                             amount_total) \
-                            or amount_total
+                        or amount_total
                 else:
                     val['attive_imponibile_non_esente' ] = \
-                        com_line and (com_line.attive_imponibile_non_esente + \
-                                  amount_untaxed) \
-                                  or amount_untaxed
+                        com_line and (com_line.attive_imponibile_non_esente +
+                                      amount_untaxed) \
+                        or amount_untaxed
                     val['attive_imposta'] = \
                         com_line and (com_line.attive_imposta + amount_tax) \
                         or amount_tax
@@ -2282,28 +2278,28 @@ class spesometro_comunicazione_line_FA(models.Model):
         else:
             val['numero_operazioni_passive_aggregate'] = \
                 com_line and (com_line.numero_operazioni_passive_aggregate + 1)\
-                 or 1
+                or 1
             if 'refund' in move.journal_id.type:
                 val['passive_note_variazione'] = \
-                    com_line and (com_line.passive_note_variazione + \
+                    com_line and (com_line.passive_note_variazione +
                                   amount_untaxed) \
-                                  or amount_untaxed
+                    or amount_untaxed
                 val['passive_note_variazione_imposta'] = \
-                    com_line and (com_line.passive_note_variazione_imposta + \
+                    com_line and (com_line.passive_note_variazione_imposta +
                                   amount_tax) \
-                                  or amount_tax
+                    or amount_tax
             else:
                 if arg.get('operazione_iva_non_esposta', False):
                     val['passive_operazioni_iva_non_esposta' ] = \
-                        com_line and (\
-                            com_line.passive_operazioni_iva_non_esposta + \
+                        com_line and (
+                            com_line.passive_operazioni_iva_non_esposta +
                             amount_total) \
-                            or amount_total
+                        or amount_total
                 else:
                     val['passive_imponibile_non_esente' ] = \
-                        com_line and (com_line.passive_imponibile_non_esente + \
-                                  amount_untaxed) \
-                                  or amount_untaxed
+                        com_line and (com_line.passive_imponibile_non_esente +
+                                      amount_untaxed) \
+                        or amount_untaxed
                     val['passive_imposta' ] = \
                         com_line and (com_line.passive_imposta + amount_tax) \
                         or amount_tax
@@ -2356,11 +2352,11 @@ class spesometro_comunicazione_line_SA(models.Model):
         # New partner
         if not com_line:
             val_head = {
-                'comunicazione_id' : comunicazione_id,
-                'partner_id' : partner.id,
-                'codice_fiscale' : partner.fiscalcode or False,
-                'noleggio' : partner.spesometro_leasing or False,
-                }
+                'comunicazione_id': comunicazione_id,
+                'partner_id': partner.id,
+                'codice_fiscale': partner.fiscalcode or False,
+                'noleggio': partner.spesometro_leasing or False,
+            }
         # Valori
         amount_untaxed = doc_vals.get('amount_untaxed', 0)
         amount_tax = doc_vals.get('amount_tax', 0)
@@ -2407,7 +2403,7 @@ class spesometro_comunicazione_line_BL(models.Model):
                                  ('C', 'Altri Veicoli'),
                                  ('D', 'Unità da diporto'),
                                  ('E', 'Aeromobii')),
-                                 'Leasing')
+                                'Leasing')
 
     pf_cognome = fields.Char('Cognome', size=24, help="")
     pf_nome = fields.Char('Nome', size=20, help="")
@@ -2416,14 +2412,14 @@ class spesometro_comunicazione_line_BL(models.Model):
                                           size=40)
     pf_provincia_nascita = fields.Char('Provincia', size=2)
     pf_codice_stato_estero = fields.Char('Codice Stato Estero', size=3,
-        help="Deve essere uno di quelli presenti nella tabella 'elenco dei \
+                                         help="Deve essere uno di quelli presenti nella tabella 'elenco dei \
         paesi e territori esteri' pubblicata nelle istruzioni del modello \
         Unico")
     pg_denominazione = fields.Char('Denominazione/Ragione sociale', size=60)
     pg_citta_estera_sede_legale = fields.Char('Città estera delle Sede legale',
                                               size=40)
     pg_codice_stato_estero = fields.Char('Codice Stato Estero', size=3,
-        help="Deve essere uno di quelli presenti nella tabella\
+                                         help="Deve essere uno di quelli presenti nella tabella\
         'elenco dei paesi e territori esteri' pubblicata nelle istruzioni del \
         modello Unico")
     pg_indirizzo_sede_legale = fields.Char('Indirizzo sede legale', size=60)
@@ -2437,10 +2433,10 @@ class spesometro_comunicazione_line_BL(models.Model):
     acquisto_servizi_da_soggetti_non_residenti = fields.Boolean('Acquisto \
         di servizi da soggetti non residenti')
     operazione_tipo_importo = fields.Selection((
-                    ('INE', 'Imponibile, Non Imponibile, Esente'),
-                    ('NS', 'Non Soggette ad IVA'),
-                    ('NV', 'Note di variazione')),
-               'Tipo Importo')
+        ('INE', 'Imponibile, Non Imponibile, Esente'),
+        ('NS', 'Non Soggette ad IVA'),
+        ('NV', 'Note di variazione')),
+        'Tipo Importo')
 
     attive_importo_complessivo = fields.Float(
         'Tot operaz. attive impon., non impon ed esenti',
@@ -2458,8 +2454,8 @@ class spesometro_comunicazione_line_BL(models.Model):
         digits=dp.get_precision('Account'),
         help="Totale operazioni imponibili, non imponibili ed esenti")
     attive_note_variazione = fields.Float('Totale note variazione',
-        digits=dp.get_precision('Account'),
-        help="Totale note di variazione a debito per la controparte")
+                                          digits=dp.get_precision('Account'),
+                                          help="Totale note di variazione a debito per la controparte")
     attive_note_variazione_imposta = fields.Float(
         'Totale imposta note variazione',
         digits=dp.get_precision('Account'),
@@ -2521,23 +2517,23 @@ class spesometro_comunicazione_line_BL(models.Model):
             # prov. nascita
             prov_code = False
             val_head = {
-                'comunicazione_id' : comunicazione_id,
-                'partner_id' : partner.id,
-                'codice_fiscale' : partner.fiscalcode or False,
-                'codice_identificativo_IVA' : partner.vat or False,
-                'noleggio' : partner.spesometro_leasing or False,
-                'operazione_tipo_importo' : operazione_tipo_importo or False,
+                'comunicazione_id': comunicazione_id,
+                'partner_id': partner.id,
+                'codice_fiscale': partner.fiscalcode or False,
+                'codice_identificativo_IVA': partner.vat or False,
+                'noleggio': partner.spesometro_leasing or False,
+                'operazione_tipo_importo': operazione_tipo_importo or False,
 
-                'pg_denominazione' : partner.name or False,
-                'pg_citta_estera_sede_legale' : partner.city or False,
-                'pg_codice_stato_estero' : \
-                    partner.country_id.codice_stato_agenzia_entrate or '',
-                'pg_indirizzo_sede_legale' : partner.street or False,
+                'pg_denominazione': partner.name or False,
+                'pg_citta_estera_sede_legale': partner.city or False,
+                'pg_codice_stato_estero':
+                partner.country_id.codice_stato_agenzia_entrate or '',
+                'pg_indirizzo_sede_legale': partner.street or False,
 
-                'operazione_fiscalita_privilegiata' : False,
-                'operazione_con_soggetti_non_residenti' : False,
-                'acquisto_servizi_da_soggetti_non_residenti' : False,
-                }
+                'operazione_fiscalita_privilegiata': False,
+                'operazione_con_soggetti_non_residenti': False,
+                'acquisto_servizi_da_soggetti_non_residenti': False,
+            }
             if operazione == 'BL1':
                 val_head['operazione_fiscalita_privilegiata'] = True
             elif operazione == 'BL2':
@@ -2568,11 +2564,11 @@ class spesometro_comunicazione_line_BL(models.Model):
             # BL005 - Note di variazione
             elif operazione_tipo_importo == 'NV':
                 val['attive_note_variazione'] = com_line and \
-                        (com_line.attive_note_variazione + amount_untaxed) \
-                        or amount_untaxed
+                    (com_line.attive_note_variazione + amount_untaxed) \
+                    or amount_untaxed
                 val['attive_note_variazione_imposta'] = com_line and \
-                        (com_line.attive_note_variazione_imposta + amount_tax) \
-                        or amount_tax
+                    (com_line.attive_note_variazione_imposta + amount_tax) \
+                    or amount_tax
         # ...passive
         else:
             # BL006 - Operazioni imponibili, non imponibili ed esenti
@@ -2585,7 +2581,7 @@ class spesometro_comunicazione_line_BL(models.Model):
             # BL007 - Operazioni non soggette ad IVA
             elif operazione_tipo_importo == 'NS':
                 val['passive_non_sogg_importo_complessivo'] = com_line and \
-                    (com_line.passive_non_sogg_importo_complessivo + \
+                    (com_line.passive_non_sogg_importo_complessivo +
                      amount_total) or amount_total
             # BL008 - Note di variazione
             elif operazione_tipo_importo == 'NV':
@@ -2601,6 +2597,7 @@ class spesometro_comunicazione_line_BL(models.Model):
         else:
             val.update(val_head)
             return self.create(val)
+
 
 class spesometro_comunicazione_line_FE(models.Model):
 
@@ -2629,6 +2626,7 @@ class spesometro_comunicazione_line_FE(models.Model):
     importo = fields.Float('Importo', digits=dp.get_precision('Account'))
     imposta = fields.Float('Imposta', digits=dp.get_precision('Account'))
 
+
 class spesometro_comunicazione_line_FR(models.Model):
 
     _name = "spesometro.comunicazione.line.fr"
@@ -2649,6 +2647,7 @@ class spesometro_comunicazione_line_FR(models.Model):
     importo = fields.Float('Importo', digits=dp.get_precision('Account'))
     imposta = fields.Float('Imposta', digits=dp.get_precision('Account'))
 
+
 class spesometro_comunicazione_line_NE(models.Model):
 
     _name = "spesometro.comunicazione.line.ne"
@@ -2667,6 +2666,7 @@ class spesometro_comunicazione_line_NE(models.Model):
     importo = fields.Float('Importo', digits=dp.get_precision('Account'))
     imposta = fields.Float('Imposta', digits=dp.get_precision('Account'))
 
+
 class spesometro_comunicazione_line_NR(models.Model):
 
     _name = "spesometro.comunicazione.line.nr"
@@ -2674,7 +2674,7 @@ class spesometro_comunicazione_line_NR(models.Model):
 
     comunicazione_id = fields.Many2one('spesometro.comunicazione',
                                        'Comunicazione',
-                                        ondelete='cascade')
+                                       ondelete='cascade')
     partner_id = fields.Many2one('res.partner', 'Partner')
     partita_iva = fields.Char('Partita IVA', size=11)
     data_documento = fields.Date('Data documento')
@@ -2703,7 +2703,7 @@ class spesometro_comunicazione_line_DF(models.Model):
                                  ('C', 'Altri Veicoli'),
                                  ('D', 'Unità  da diporto'),
                                  ('E', 'Aeromobii')),
-                                 'Leasing')
+                                'Leasing')
 
 
 class spesometro_comunicazione_line_FN(models.Model):
@@ -2829,19 +2829,19 @@ class spesometro_comunicazione_line_SE(models.Model):
                 move, invoice, arg):
             codice_identificativo_iva = '037'
         val = {
-            'comunicazione_id' : comunicazione_id,
-            'partner_id' : partner.id,
-            'codice_fiscale' : partner.fiscalcode or False,
-            'noleggio' : partner.spesometro_leasing or False,
+            'comunicazione_id': comunicazione_id,
+            'partner_id': partner.id,
+            'codice_fiscale': partner.fiscalcode or False,
+            'noleggio': partner.spesometro_leasing or False,
 
-            'pg_denominazione' : partner.name or False,
-            'pg_citta_estera_sede_legale' : address.city or False,
-            'pg_codice_stato_estero_domicilio' : \
-                address.country_id.codice_stato_agenzia_entrate or \
-                codice_identificativo_iva or '',
-            'pg_indirizzo_sede_legale' : address.street or False,
+            'pg_denominazione': partner.name or False,
+            'pg_citta_estera_sede_legale': address.city or False,
+            'pg_codice_stato_estero_domicilio':
+            address.country_id.codice_stato_agenzia_entrate or
+            codice_identificativo_iva or '',
+            'pg_indirizzo_sede_legale': address.street or False,
 
-            'codice_identificativo_IVA' : codice_identificativo_iva,
+            'codice_identificativo_IVA': codice_identificativo_iva,
 
             'data_emissione': move.date,
             'data_registrazione': invoice.date_invoice or move.date,
@@ -2849,9 +2849,10 @@ class spesometro_comunicazione_line_SE(models.Model):
 
             'importo': doc_vals.get('amount_untaxed', 0),
             'imposta': doc_vals.get('amount_tax', 0)
-            }
+        }
 
         return self.create(val)
+
 
 class spesometro_comunicazione_line_TU(models.Model):
 
@@ -2872,11 +2873,11 @@ class spesometro_comunicazione_line_TU(models.Model):
     citta_estera_residenza = fields.Char('Città Estera di residenza',
                                          size=40)
     codice_stato_estero = fields.Char('Codice Stato Estero', size=3,
-        help="Deve essere uno di quelli presenti nella tabella 'elenco dei \
+                                      help="Deve essere uno di quelli presenti nella tabella 'elenco dei \
             paesi e territori esteri' pubblicata nelle istruzioni del modello \
             Unico")
     indirizzo_estero_residenza = fields.Char('Indirizzo Estero di residenza',
-                                              size=40)
+                                             size=40)
     data_emissione = fields.Date('Data emissione')
     data_registrazione = fields.Date('Data registrazione')
     numero_fattura = fields.Char('Numero Fattura/Doc riepilog.', size=16)
@@ -2884,4 +2885,3 @@ class spesometro_comunicazione_line_TU(models.Model):
     importo = fields.Float('Importo/imponibile',
                            digits=dp.get_precision('Account'))
     imposta = fields.Float('Imposta', digits=dp.get_precision('Account'))
-

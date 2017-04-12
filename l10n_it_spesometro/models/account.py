@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    Author: Alessandro Camilli (a.camilli@openforce.it)
 #    Copyright (C) 2015
 #    Openforce di Camilli Alessandro - www.openforce.it
@@ -24,26 +24,31 @@
 from openerp import models, fields, api
 
 
-class account_tax_code(models.Model): 
+class account_tax_code(models.Model):
     _inherit = "account.tax.code"
     spesometro_escludi = fields.Boolean(string='Escludi dalla dichiarazione',
                                         default=False)
-    
-    
-class account_journal(models.Model): 
+
+
+class account_journal(models.Model):
     _inherit = "account.journal"
-    
+
     spesometro = fields.Boolean('Da includere')
     spesometro_operazione = fields.Selection((
-        ('FA','Operazioni documentate da fattura'), 
-        ('SA','Operazioni senza fattura'),
-        ('BL1','Operazioni con paesi con fiscalità privilegiata'),
-        ('BL2','Operazioni con soggetti non residenti'),
-        ('BL3','Acquisti di servizi da soggetti non residenti'),
-        ('DR','Documento Riepilogativo')),
-        'Operazione' )
+        ('FA', 'FA - Operazioni documentate da fattura'),
+        ('SA', 'SA - Operazioni senza fattura'),
+        ('BL1', 'BL1 - Operazioni con paesi con fiscalità privilegiata'),
+        ('BL2', 'BL2 - Operazioni con soggetti non residenti'),
+        ('BL3', 'BL3 - Acquisti di servizi da soggetti non residenti'),
+        ('DR', 'DR - Documento Riepilogativo')),
+        'Operazione')
     spesometro_segno = fields.Selection((
-                                         ('attiva','Attiva'), 
-                                         ('passiva','Passiva')),
-                                        'Segno operaz.' )
+        ('attiva', 'Attiva'),
+        ('passiva', 'Passiva')),
+        'Segno operaz.')
     spesometro_IVA_non_esposta = fields.Boolean('IVA non esposta')
+    spesometro_operazione_tipo_importo = fields.Selection((
+        ('INE', 'Imponibile, Non Imponibile, Esente'),
+        ('NS', 'Non Soggette ad IVA'),
+        ('NV', 'Note di variazione')),
+        'Tipo Importo')

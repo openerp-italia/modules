@@ -14,6 +14,7 @@
                     <group string="Comunicazione art.21" colspan="4">
                         <field name="spesometro"/>
                         <field name="spesometro_operazione" attrs="{'invisible': [('spesometro', '=', False)], 'required': [('spesometro', '=', True)]}"/>
+                        <field name="spesometro_operazione_tipo_importo" attrs="{'invisible': ['|',('spesometro', '=', False),('spesometro_operazione', 'not in', ['BL1', 'BL2', 'BL3'])], 'required': [('spesometro_operazione', 'in',  ['BL1', 'BL2', 'BL3'])]}"/>
                         <field name="spesometro_segno" attrs="{'invisible': ['|', ('spesometro', '=', False), ('spesometro_operazione', '=', 'SA')], 'required': [('spesometro_operazione', 'IN', ('FA','BL1','BL2','BL3') )]}" />
                         <field name="spesometro_IVA_non_esposta" attrs="{'invisible': ['|', ('spesometro', '=', False), ('spesometro_operazione', '=', 'SA')]}" />
                     </group>
