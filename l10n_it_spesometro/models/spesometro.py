@@ -2507,6 +2507,12 @@ class spesometro_comunicazione_line_BL(models.Model):
         amount_untaxed = doc_vals.get('amount_untaxed', 0)
         amount_tax = doc_vals.get('amount_tax', 0)
         amount_total = doc_vals.get('amount_total', 0)
+        # Se gli importi sono calcolati sul movimento contabile, il valore
+        # viene messo in amount_total. Quindi per valorizzare questo quadro
+        # che ragiona in termine di imponibile, trasferisco il valore di
+        # amount_total in amount untaxed
+        if move and not invoice:
+            amount_untaxed = amount_total
         # Head
         if not com_line:
             # p.iva
@@ -2547,20 +2553,20 @@ class spesometro_comunicazione_line_BL(models.Model):
             # BL003 - Operazioni imponibili, non imponibili ed esenti
             if operazione_tipo_importo == 'INE':
                 val['attive_importo_complessivo'] = com_line and \
-                    (com_line.attive_importo_complessivo + amount_total) \
-                    or amount_total
+                    (com_line.attive_importo_complessivo + amount_untaxed) \
+                    or amount_untaxed
                 val['attive_imposta'] = com_line and \
                     (com_line.attive_imposta + amount_tax) or amount_tax
             # BL004 - Operazioni non soggette ad IVA
             elif operazione_tipo_importo == 'NS':
                 if tipo_servizio == 'cessioni':
                     val['attive_non_sogg_cessione_beni'] = com_line and \
-                        (com_line.attive_non_sogg_cessione_beni + amount_total)\
-                        or amount_total
+                        (com_line.attive_non_sogg_cessione_beni +
+                         amount_untaxed) or amount_untaxed
                 else:
                     val['attive_non_sogg_servizi'] = com_line and \
-                        (com_line.attive_non_sogg_servizi + amount_total)\
-                        or amount_total
+                        (com_line.attive_non_sogg_servizi + amount_untaxed)\
+                        or amount_untaxed
             # BL005 - Note di variazione
             elif operazione_tipo_importo == 'NV':
                 val['attive_note_variazione'] = com_line and \
@@ -2574,15 +2580,15 @@ class spesometro_comunicazione_line_BL(models.Model):
             # BL006 - Operazioni imponibili, non imponibili ed esenti
             if operazione_tipo_importo == 'INE':
                 val['passive_importo_complessivo'] = com_line and \
-                    (com_line.passive_importo_complessivo + amount_total) \
-                    or amount_total
+                    (com_line.passive_importo_complessivo + amount_untaxed) \
+                    or amount_untaxed
                 val['passive_imposta'] = com_line and \
                     (com_line.passive_imposta + amount_tax) or amount_tax
             # BL007 - Operazioni non soggette ad IVA
             elif operazione_tipo_importo == 'NS':
                 val['passive_non_sogg_importo_complessivo'] = com_line and \
                     (com_line.passive_non_sogg_importo_complessivo +
-                     amount_total) or amount_total
+                     amount_untaxed) or amount_untaxed
             # BL008 - Note di variazione
             elif operazione_tipo_importo == 'NV':
                 val['passive_note_variazione'] = com_line and \
