@@ -1,0 +1,456 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* l10n_it_comunicazione_liquidazione_iva
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-05-12 12:39+0000\n"
+"PO-Revision-Date: 2017-05-12 12:39+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP10</b> Versamenti auto UE"
+msgstr "<b>VP10</b> Versamenti auto UE"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP11</b> Crediti d’imposta"
+msgstr "<b>VP11</b> Crediti d’imposta"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP12</b> Interessi dovuti per liquidazioni trimestrali"
+msgstr "<b>VP12</b> Interessi dovuti per liquidazioni trimestrali"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP13</b> Acconto dovuto"
+msgstr "<b>VP13</b> Acconto dovuto"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP14</b> IVA da versare"
+msgstr "<b>VP14</b> IVA da versare"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP2</b> Totale operazioni attive (al netto dell’IVA)"
+msgstr "<b>VP2</b> Totale operazioni attive (al netto dell’IVA)"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP3</b> Totale operazioni passive (al netto dell’IVA)"
+msgstr "<b>VP3</b> Totale operazioni passive (al netto dell’IVA)"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP4</b> IVA esigibile"
+msgstr "<b>VP4</b> IVA esigibile"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP5</b> IVA detratta"
+msgstr "<b>VP5</b> IVA detratta"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP6</b> IVA dovuta"
+msgstr "<b>VP6</b> IVA dovuta"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP7</b> Debito periodo precedente non superiore 25,82 euro"
+msgstr "<b>VP7</b> Debito periodo precedente non superiore 25,82 euro"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP8</b> Credito periodo precedente"
+msgstr "<b>VP8</b> Credito periodo precedente"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<b>VP9</b> Credito anno precedente"
+msgstr "<b>VP9</b> Credito anno precedente"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "<span> o a credito</span>"
+msgstr "<span> o a credito</span>"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_accounto_dovuto
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Acconto dovuto"
+msgstr "Acconto dovuto"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Annulla"
+msgstr "Annulla"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Clicca su <strong>Esporta</strong> per generare il file della comunicazione liquidazione IVA."
+msgstr "Clicca su <strong>Esporta</strong> per generare il file della comunicazione liquidazione IVA."
+
+#: selection:comunicazione.liquidazione,exceptional_events:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Code 1"
+msgstr "Codice 1"
+
+#: selection:comunicazione.liquidazione,exceptional_events:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Code 9"
+msgstr "Codice 9"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_codice_carica_id
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Codice carica"
+msgstr "Codice carica"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_delegate_commitment
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Commitment"
+msgstr "Impegno"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_company_id
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Company"
+msgstr "Azienda"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione Liquidazione"
+msgstr "Comunicazione Liquidazione"
+
+#: model:ir.actions.act_window,name:l10n_it_comunicazione_liquidazione_iva.action_comunicazione_liquidazione
+#: model:ir.model,name:l10n_it_comunicazione_liquidazione_iva.model_comunicazione_liquidazione
+#: model:ir.ui.menu,name:l10n_it_comunicazione_liquidazione_iva.menu_comunicazione_liquidazione
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione Liquidazione IVA"
+msgstr "Comunicazione Liquidazione IVA"
+
+#: selection:comunicazione.liquidazione,delegate_commitment:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione è stata predisposta da chi effettua l’invio"
+msgstr "Comunicazione è stata predisposta da chi effettua l’invio"
+
+#: selection:comunicazione.liquidazione,delegate_commitment:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione è stata predisposta dal contribuente "
+msgstr "Comunicazione è stata predisposta dal contribuente "
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_tree
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazioni Liquidazione"
+msgstr "Comunicazioni Liquidazione"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Contribuente"
+msgstr "Contribuente"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_controller_vat
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Controller Vat"
+msgstr "Partita IVA della controllante"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_create_uid
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_create_uid
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Created by"
+msgstr "Creato da"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_create_date
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_create_date
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Created on"
+msgstr "Creato il"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_crediti_imposta
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Crediti d’imposta"
+msgstr "Crediti d’imposta"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_credito_anno_precedente
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Credito anno precedente"
+msgstr "Credito anno precedente"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_credito_periodo_precedente
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Credito periodo precedente"
+msgstr "Credito periodo precedente"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_date_commitment
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Date commitment"
+msgstr "Data impegno"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_date_start
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Date start"
+msgstr "Data inizio"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_date_stop
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Date stop"
+msgstr "Data fine"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Dati generali"
+msgstr "Dati generali"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_debito_periodo_precedente
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Debito periodo precedente"
+msgstr "Debito periodo precedente"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_declarant_different
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Declarant different from taxpayer"
+msgstr "Dichiarante diverso dal contribuente"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_declarant_sign
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Declarant sign"
+msgstr "Firma dichiarante"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Dichiarante"
+msgstr "Dichiarante"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_display_name
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_display_name
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Display Name"
+msgstr "Nome Visualizzato"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file_exit
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Esporta"
+msgstr "Esporta"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_exceptional_events
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Exceptional events"
+msgstr "Eventi eccezionali"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Export File"
+msgstr "Export File"
+
+#: model:ir.actions.act_window,name:l10n_it_comunicazione_liquidazione_iva.action_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Export file comunicazione liquidazione IVA"
+msgstr "Export file comunicazione liquidazione IVA"
+
+#: model:ir.model,name:l10n_it_comunicazione_liquidazione_iva.model_comunicazione_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Export file xml della comunicazione della liquidazione IVA"
+msgstr "Export file xml della comunicazione della liquidazione IVA"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_file_export
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "File"
+msgstr "File"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_name
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "File Name"
+msgstr "Nome File"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Firma"
+msgstr "Firma"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_declarant_fiscalcode
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_delegate_fiscalcode
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_taxpayer_fiscalcode
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Fiscalcode"
+msgstr "Codice fiscale"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_declarant_fiscalcode_company
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Fiscalcode company"
+msgstr "Codice fiscale società dichiarante"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Frontespizio"
+msgstr "Frontespizio"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_id
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_id
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "ID"
+msgstr "ID"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_iva_a_credito
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA a credito"
+msgstr "IVA a credito"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_iva_da_versare
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA da versare"
+msgstr "IVA da versare"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_iva_detratta
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA detratta"
+msgstr "IVA detratta"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_iva_dovuta_credito
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA dovuta credito"
+msgstr "IVA dovuta credito"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_iva_dovuta_debito
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA dovuta debito"
+msgstr "IVA dovuta debito"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_iva_esigibile
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA esigibile"
+msgstr "IVA esigibile"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Impegno alla presentazione telematica"
+msgstr "Impegno alla presentazione telematica"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_interessi_dovuti
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Interessi dovuti per liquidazioni trimestrali"
+msgstr "Interessi dovuti per liquidazioni trimestrali"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione___last_update
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file___last_update
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last Modified on"
+msgstr "Ultima modifica il"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_write_uid
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_write_uid
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last Updated by"
+msgstr "Ultima modifica di"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_export_file_write_date
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_write_date
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last Updated on"
+msgstr "Ultima modifica il"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_last_month
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last month"
+msgstr "Last month"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_liquidazione_del_gruppo
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Liquidazione del gruppo"
+msgstr "Liquidazione del gruppo"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Liquidazione dell'imposta"
+msgstr "Liquidazione dell'imposta"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_month
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Month"
+msgstr "Mese"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:25
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Month valid: from 1 to 12"
+msgstr "Mese valido da 1 a 12"
+
+#: selection:comunicazione.liquidazione,period_type:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Monthly"
+msgstr "Mensile"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_name
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Name"
+msgstr "Nome"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_period_type
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Period type"
+msgstr "Tipo periodo"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Periodo di Riferimento"
+msgstr "Periodo di Riferimento"
+
+#: model:ir.ui.view,arch_db:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Quadro VP"
+msgstr "Quadro VP"
+
+#: selection:comunicazione.liquidazione,period_type:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Quarterly"
+msgstr "Trimestrale"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_quarter
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Quoter"
+msgstr "Trimestre"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:32
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Quoter valid: from 1 to 4"
+msgstr "Trimestre valido da 1 a 4"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_subcontracting
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Subcontracting"
+msgstr "Subforniture"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_imponibile_operazioni_attive
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Totale operazioni attive (al netto dell’IVA)"
+msgstr "Totale operazioni attive (al netto dell’IVA)"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_imponibile_operazioni_passive
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Totale operazioni passive (al netto dell’IVA)"
+msgstr "Totale operazioni passive (al netto dell’IVA)"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_taxpayer_vat
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Vat"
+msgstr "Partita IVA"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_versamento_auto_UE
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Versamenti auto UE"
+msgstr "Versamenti auto UE"
+
+#: model:ir.model.fields,field_description:l10n_it_comunicazione_liquidazione_iva.field_comunicazione_liquidazione_year
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Year"
+msgstr "Anno"
+
