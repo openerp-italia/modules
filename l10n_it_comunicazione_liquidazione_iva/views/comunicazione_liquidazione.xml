@@ -23,12 +23,12 @@
                 <form string="Comunicazione Liquidazione">
                     <sheet>
                         <group>
-	                        <group>
-	                        <field name="company_id" widget="selection"/>
-	                        </group>
-	                        <group>
-	                        <field name="identificativo"/>
-	                        </group>
+                            <group>
+                            <field name="company_id" widget="selection"/>
+                            </group>
+                            <group>
+                            <field name="identificativo"/>
+                            </group>
                         </group>
                         <newline/>
                         <notebook>
@@ -39,37 +39,37 @@
                                 </group>
                                 <newline/>
                                 <group>
-	                                <group string="Contribuente" name="contribuente">
-	                                    <field name="taxpayer_vat"/>
-	                                    <field name="taxpayer_fiscalcode"/>
-	                                    <field name="controller_vat"/>
-	                                    <field name="last_month"/>
-	                                    <field name="liquidazione_del_gruppo"/>
-	                                </group>
-	                                <group string="Dichiarante" name="dichiarante" 
-	                                   attrs="{'invisible': [('declarant_different', '!=', True)]}">
-	                                    <field name="declarant_fiscalcode" 
-	                                       attrs="{'required': [('declarant_different', '=', True)]}"/>
-	                                    <field name="codice_carica_id"
-	                                       attrs="{'required': [('declarant_different', '=', True)]}"/>
-	                                    <field name="declarant_fiscalcode_company"/>
-	                                </group>
+                                    <group string="Contribuente" name="contribuente">
+                                        <field name="taxpayer_vat"/>
+                                        <field name="taxpayer_fiscalcode"/>
+                                        <field name="controller_vat"/>
+                                        <field name="last_month"/>
+                                        <field name="liquidazione_del_gruppo"/>
+                                    </group>
+                                    <group string="Dichiarante" name="dichiarante" 
+                                       attrs="{'invisible': [('declarant_different', '!=', True)]}">
+                                        <field name="declarant_fiscalcode" 
+                                           attrs="{'required': [('declarant_different', '=', True)]}"/>
+                                        <field name="codice_carica_id"
+                                           attrs="{'required': [('declarant_different', '=', True)]}"/>
+                                        <field name="declarant_fiscalcode_company"/>
+                                    </group>
                                 </group>
                                 <newline/>
                                 <group string="Firma" name="firma">
                                     <field name="declarant_sign"
                                     attrs="{'required': [('declarant_fiscalcode', '!=', True)]}"/>
                                 </group>
-	                            <group string="Impegno alla presentazione telematica" name="impegno_presentazione">
-	                                <group>
-	                                    <field name="delegate_fiscalcode"/>
-	                                    <field name="delegate_commitment"
-	                                       attrs="{'required': [('delegate_fiscalcode', '!=', False)]}"/>
-	                                    <field name="date_commitment"
-	                                       attrs="{'required': [('delegate_fiscalcode', '!=', False)]}"/>
-	                                    <field name="delegate_sign"/>
-	                                </group>
-	                            </group>
+                                <group string="Impegno alla presentazione telematica" name="impegno_presentazione">
+                                    <group>
+                                        <field name="delegate_fiscalcode"/>
+                                        <field name="delegate_commitment"
+                                           attrs="{'required': [('delegate_fiscalcode', '!=', False)]}"/>
+                                        <field name="date_commitment"
+                                           attrs="{'required': [('delegate_fiscalcode', '!=', False)]}"/>
+                                        <field name="delegate_sign"/>
+                                    </group>
+                                </group>
                             </page>
                             <page string="Quadro VP" name="quadro_vp">
                                 <group string="Periodo di Riferimento" name="periodo">

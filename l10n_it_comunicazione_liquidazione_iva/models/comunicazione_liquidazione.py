@@ -124,7 +124,7 @@ class ComunicazioneLiquidazione(models.Model):
          ('quarter', 'Quarterly')],
         string='Period type', default='quarter')
     month = fields.Integer(string='Month', default=False)
-    quarter = fields.Integer(string='Quoter', default=False)
+    quarter = fields.Integer(string='Quarter', default=False)
     subcontracting = fields.Boolean(string='Subcontracting')
     exceptional_events = fields.Selection(
         [('1', 'Code 1'), ('9', 'Code 9')], string='Exceptional events')
@@ -308,6 +308,16 @@ class ComunicazioneLiquidazione(models.Model):
         x1_1_1_CodiceFornitura = etree.SubElement(
             x1_1_Intestazione, etree.QName(NS_IV, "CodiceFornitura"))
             # x1_1_Intestazione, 'CodiceFornitura')
+        return etree.tostring(x1_Fornitura, encoding='utf8', method='xml')
+
+    def _export_xml_validate(self):
+        return True
+
+    def _export_xml_get_intestazione_1_1(self, x1_Fornitura):
+        x1_1_Intestazione = etree.Element('Intestazione')
+        # Codice Fornitura
+        x1_1_1_CodiceFornitura = etree.SubElement(
+            x1_1_Intestazione, 'CodiceFornitura')
         x1_1_1_CodiceFornitura.text = unicode('IVP17')
         # Codice Fiscale Dichiarante
         if self.declarant_fiscalcode:
@@ -381,8 +391,7 @@ class ComunicazioneLiquidazione(models.Model):
             x1_2_1_11_CFIntermediario.text = self.delegate_fiscalcode
         # ImpegnoPresentazione
         if self.delegate_commitment:
-            x1_2_1_12_ImpegnoPresentazione = etree.SubElement(
-                x1_2_1_Frontespizio,
+            x1_2_1_Frontespizio  = etree.SubElement(
                 etree.QName(NS_IV, "ImpegnoPresentazione"))
             x1_2_1_12_ImpegnoPresentazione.text = self.delegate_commitment
         # DataImpegno
