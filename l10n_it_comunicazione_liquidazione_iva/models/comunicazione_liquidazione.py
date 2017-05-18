@@ -35,8 +35,8 @@ class ComunicazioneLiquidazione(models.Model):
         dichiarazioni = self.search(domain)
         if len(dichiarazioni) > 1:
             raise ValidationError(
-                    _("Dichiarazione già esiste con identificativo {}"
-                      ).format(self.identificativo))
+                _("Dichiarazione già esiste con identificativo {}"
+                  ).format(self.identificativo))
 
     @api.multi
     @api.depends('iva_esigibile', 'iva_detratta')
@@ -77,12 +77,12 @@ class ComunicazioneLiquidazione(models.Model):
 
     def _compute_name(self):
         for dich in self:
-            dich.name = '{} {}'.format(str(dich.year), dich.period_type)
+            dich.name = '{}'.format(str(dich.year))
             if dich.period_type == 'month':
-                dich.name += ' {}'.format(str(dich.month))
+                dich.name += ' {} {}'.format(_('Month'), str(dich.month))
             else:
-                dich.name += ' {}'.format(str(dich.quarter))
-    
+                dich.name += ' {} {}'.format(_('Quarter'), str(dich.quarter))
+
     def _get_identificativo(self):
         dichiarazioni = self.search([])
         if dichiarazioni:
@@ -107,7 +107,7 @@ class ComunicazioneLiquidazione(models.Model):
     declarant_fiscalcode = fields.Char(string='Fiscalcode')
     declarant_fiscalcode_company = fields.Char(string='Fiscalcode company')
     codice_carica_id = fields.Many2one('codice.carica', string='Codice carica')
-    declarant_sign = fields.Boolean(string='Declarant sign')
+    declarant_sign = fields.Boolean(string='Declarant sign', default=True)
 
     delegate_fiscalcode = fields.Char(string='Fiscalcode')
     delegate_commitment = fields.Selection(
@@ -162,7 +162,7 @@ class ComunicazioneLiquidazione(models.Model):
         comunicazione = super(ComunicazioneLiquidazione, self).create(vals)
         comunicazione._validate()
         return comunicazione
-    
+
     @api.multi
     def write(self, vals):
         super(ComunicazioneLiquidazione, self).write(vals)
@@ -185,9 +185,9 @@ class ComunicazioneLiquidazione(models.Model):
         x1_Fornitura = self._export_xml_get_fornitura()
 
         x1_1_Intestazione = self._export_xml_get_intestazione()
-        
+
         attrs = {
-            'identificativo' : str(self.identificativo).zfill(5) 
+            'identificativo': str(self.identificativo).zfill(5)
         }
         x1_2_Comunicazione = etree.Element(
             etree.QName(NS_IV, "Comunicazione"), attrs)
@@ -198,7 +198,7 @@ class ComunicazioneLiquidazione(models.Model):
         # Composizione struttura xml con le varie sezioni generate
         x1_Fornitura.append(x1_1_Intestazione)
         x1_Fornitura.append(x1_2_Comunicazione)
-        
+
         xml_string = etree.tostring(
             x1_Fornitura, encoding='utf8', method='xml', pretty_print=True)
         # self._validate_xml(xml_string)
@@ -211,7 +211,7 @@ class ComunicazioneLiquidazione(models.Model):
         # Anno obbligatorio
         if not self.year:
             raise ValidationError(
-                    _("Year required"))
+                _("Year required"))
         # Controlli su periodo
         if self.period_type == 'quarter':
             if self.quarter not in range(1, 5):
@@ -221,7 +221,7 @@ class ComunicazioneLiquidazione(models.Model):
             if self.month not in range(1, 12):
                 raise ValidationError(
                     _("Month valid: from 1 to 12"))
-                
+
         # Controlli su ultimo mese
         if self.last_month:
             if self.quarter == 1 and self.last_month not in [12, 1, 2, 13]:
@@ -244,9 +244,9 @@ class ComunicazioneLiquidazione(models.Model):
                 raise ValidationError(
                     _("Last Month not valid for quarter. You can choose 9, \
                     10, 11, 13"))
-        # LiquidazioneGruppo: elemento opzionale, di tipo DatoCB_Type. 
+        # LiquidazioneGruppo: elemento opzionale, di tipo DatoCB_Type.
         # Se presente non deve essere presente l’elemento PIVAControllante.
-        # Non può essere presente se l’elemento CodiceFiscale è lungo 16 
+        # Non può essere presente se l’elemento CodiceFiscale è lungo 16
         # caratteri.
         if self.liquidazione_del_gruppo:
             if self.controller_vat:
@@ -283,7 +283,8 @@ class ComunicazioneLiquidazione(models.Model):
 
     def _validate_xml(self, xml_string):
         xsd_etree_obj = etree.parse(
-                tools.file_open('l10n_it_comunicazione_liquidazione_iva/data/%s.xsd'
+            tools.file_open(
+                'l10n_it_comunicazione_liquidazione_iva/data/%s.xsd'
                 % 'fornituraIvp_2017_v1'))
         official_schema = etree.XMLSchema(xsd_etree_obj)
         try:
@@ -293,21 +294,21 @@ class ComunicazioneLiquidazione(models.Model):
             are_xsd_errors = True
             if xsd:
                 for error in xsd.error_log:
-                    dict_error = {'line': str(error.line), 'errormsg': error.message}
-        
+                    dict_error = {
+                        'line': str(error.line), 'errormsg': error.message}
 
     def _export_xml_get_fornitura(self):
         x1_Fornitura = etree.Element(
-            etree.QName(NS_IV, "Fornitura"), nsmap = NS_MAP)
+            etree.QName(NS_IV, "Fornitura"), nsmap=NS_MAP)
         return x1_Fornitura
 
     def _export_xml_get_intestazione(self):
         x1_1_Intestazione = etree.Element(etree.QName(NS_IV, "Intestazione"))
-        
+
         # Codice Fornitura
         x1_1_1_CodiceFornitura = etree.SubElement(
             x1_1_Intestazione, etree.QName(NS_IV, "CodiceFornitura"))
-            # x1_1_Intestazione, 'CodiceFornitura')
+        # x1_1_Intestazione, 'CodiceFornitura')
         return etree.tostring(x1_Fornitura, encoding='utf8', method='xml')
 
     def _export_xml_validate(self):
@@ -322,7 +323,7 @@ class ComunicazioneLiquidazione(models.Model):
         # Codice Fiscale Dichiarante
         if self.declarant_fiscalcode:
             x1_1_2_CodiceFiscaleDichiarante = etree.SubElement(
-                x1_1_Intestazione, etree.QName(NS_IV, 
+                x1_1_Intestazione, etree.QName(NS_IV,
                                                "CodiceFiscaleDichiarante"))
             x1_1_2_CodiceFiscaleDichiarante.text = unicode(
                 self.declarant_fiscalcode)
@@ -391,7 +392,7 @@ class ComunicazioneLiquidazione(models.Model):
             x1_2_1_11_CFIntermediario.text = self.delegate_fiscalcode
         # ImpegnoPresentazione
         if self.delegate_commitment:
-            x1_2_1_Frontespizio  = etree.SubElement(
+            x1_2_1_Frontespizio = etree.SubElement(
                 etree.QName(NS_IV, "ImpegnoPresentazione"))
             x1_2_1_12_ImpegnoPresentazione.text = self.delegate_commitment
         # DataImpegno
