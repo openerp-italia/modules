@@ -1,0 +1,574 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* l10n_it_comunicazione_liquidazione_iva
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-05-18 15:42+0000\n"
+"PO-Revision-Date: 2017-05-18 15:42+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,accounto_dovuto:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Acconto dovuto"
+msgstr "Acconto dovuto"
+
+#: view:comunicazione.liquidazione.export.file:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Annulla"
+msgstr "Annulla"
+
+#: view:comunicazione.liquidazione.export.file:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Clicca su"
+msgstr "Clicca su"
+
+#: selection:comunicazione.liquidazione,exceptional_events:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Code 1"
+msgstr "Codice 1"
+
+#: selection:comunicazione.liquidazione,exceptional_events:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Code 9"
+msgstr "Codice 9"
+
+#: field:comunicazione.liquidazione,codice_carica_id:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Codice carica"
+msgstr "Codice carica"
+
+#: field:comunicazione.liquidazione,delegate_commitment:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Commitment"
+msgstr "Impegno alla presentazione"
+
+#: field:comunicazione.liquidazione,company_id:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Company"
+msgstr "Azienda"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione Liquidazione"
+msgstr "Comunicazione Liquidazione"
+
+#: model:ir.actions.act_window,name:l10n_it_comunicazione_liquidazione_iva.action_comunicazione_liquidazione
+#: model:ir.model,name:l10n_it_comunicazione_liquidazione_iva.model_comunicazione_liquidazione
+#: model:ir.ui.menu,name:l10n_it_comunicazione_liquidazione_iva.menu_comunicazione_liquidazione
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione Liquidazione IVA"
+msgstr "Comunicazione Liquidazione IVA"
+
+#: selection:comunicazione.liquidazione,delegate_commitment:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione è stata predisposta da chi effettua l’invio"
+msgstr "Comunicazione è stata predisposta da chi effettua l’invio"
+
+#: selection:comunicazione.liquidazione,delegate_commitment:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazione è stata predisposta dal contribuente "
+msgstr "Comunicazione è stata predisposta dal contribuente "
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_tree
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Comunicazioni Liquidazione"
+msgstr "Comunicazioni Liquidazione"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Contribuente"
+msgstr "Contribuente"
+
+#: field:comunicazione.liquidazione,controller_vat:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Controller Vat"
+msgstr "Partita IVA della controllante"
+
+#: field:comunicazione.liquidazione,create_uid:0
+#: field:comunicazione.liquidazione.export.file,create_uid:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Created by"
+msgstr "Created by"
+
+#: field:comunicazione.liquidazione,create_date:0
+#: field:comunicazione.liquidazione.export.file,create_date:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Created on"
+msgstr "Created on"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,crediti_imposta:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Crediti d’imposta"
+msgstr "Crediti d’imposta"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,credito_anno_precedente:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Credito anno precedente"
+msgstr "Credito anno precedente"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,credito_periodo_precedente:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Credito periodo precedente"
+msgstr "Credito periodo precedente"
+
+#: field:comunicazione.liquidazione,date_commitment:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Date commitment"
+msgstr "Data impegno"
+
+#: field:comunicazione.liquidazione,date_start:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Date start"
+msgstr "Data inizio"
+
+#: field:comunicazione.liquidazione,date_stop:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Date stop"
+msgstr "Date fine"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Dati generali"
+msgstr "Dati generali"
+
+#: field:comunicazione.liquidazione,debito_periodo_precedente:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Debito periodo precedente"
+msgstr "Debito periodo precedente"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Debito periodo precedente non superiore 25,82 euro"
+msgstr "Debito periodo precedente non superiore 25,82 euro"
+
+#: field:comunicazione.liquidazione,declarant_different:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Declarant different from taxpayer"
+msgstr "Dichiarante diverso dal contribuente"
+
+#: field:comunicazione.liquidazione,declarant_sign:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Declarant sign"
+msgstr "Firma dichiarante"
+
+#: field:comunicazione.liquidazione,delegate_sign:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Delegate sign"
+msgstr "Delegate sign"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Dichiarante"
+msgstr "Dichiarante"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:37
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Dichiarazione già esiste con identificativo {}"
+msgstr "Dichiarazione già esiste con identificativo {}"
+
+#: field:comunicazione.liquidazione,display_name:0
+#: field:comunicazione.liquidazione.export.file,display_name:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Display Name"
+msgstr "Display Name"
+
+#: view:comunicazione.liquidazione.export.file:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#: view:comunicazione.liquidazione.export.file:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file_exit
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Esporta"
+msgstr "Esporta"
+
+#: field:comunicazione.liquidazione,exceptional_events:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Exceptional events"
+msgstr "Eventi eccezionali"
+
+#: view:comunicazione.liquidazione.export.file:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Export File"
+msgstr "Export File"
+
+#: model:ir.actions.act_window,name:l10n_it_comunicazione_liquidazione_iva.action_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Export file comunicazione liquidazione IVA"
+msgstr "Export file comunicazione liquidazione IVA"
+
+#: model:ir.model,name:l10n_it_comunicazione_liquidazione_iva.model_comunicazione_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Export file xml della comunicazione della liquidazione IVA"
+msgstr "Export file xml della comunicazione della liquidazione IVA"
+
+#: field:comunicazione.liquidazione.export.file,file_export:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "File"
+msgstr "File"
+
+#: field:comunicazione.liquidazione.export.file,name:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "File Name"
+msgstr "File Name"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Firma"
+msgstr "Firma"
+
+#: field:comunicazione.liquidazione,declarant_fiscalcode:0
+#: field:comunicazione.liquidazione,delegate_fiscalcode:0
+#: field:comunicazione.liquidazione,taxpayer_fiscalcode:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Fiscalcode"
+msgstr "Codice fiscale"
+
+#: field:comunicazione.liquidazione,declarant_fiscalcode_company:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Fiscalcode company"
+msgstr "Codice fiscale società dichiarante"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Frontespizio"
+msgstr "Frontespizio"
+
+#: field:comunicazione.liquidazione,id:0
+#: field:comunicazione.liquidazione.export.file,id:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "ID"
+msgstr "ID"
+
+#: field:comunicazione.liquidazione,iva_a_credito:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA a credito"
+msgstr "IVA a credito"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,iva_da_versare:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA da versare"
+msgstr "IVA da versare"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,iva_detratta:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA detratta"
+msgstr "IVA detratta"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA dovuta"
+msgstr "IVA dovuta"
+
+#: field:comunicazione.liquidazione,iva_dovuta_credito:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA dovuta credito"
+msgstr "IVA dovuta credito"
+
+#: field:comunicazione.liquidazione,iva_dovuta_debito:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA dovuta debito"
+msgstr "IVA dovuta debito"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,iva_esigibile:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "IVA esigibile"
+msgstr "IVA esigibile"
+
+#: field:comunicazione.liquidazione,identificativo:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Identificativo"
+msgstr "Identificativo"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Impegno alla presentazione telematica"
+msgstr "Impegno alla presentazione telematica"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:266
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Indicare il codice carica del dichiarante"
+msgstr "Indicare il codice carica del dichiarante"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,interessi_dovuti:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Interessi dovuti per liquidazioni trimestrali"
+msgstr "Interessi dovuti per liquidazioni trimestrali"
+
+#: field:comunicazione.liquidazione,__last_update:0
+#: field:comunicazione.liquidazione.export.file,__last_update:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last Modified on"
+msgstr "Last Modified on"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:231
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Last Month not valid for quarter. You can choose 12, 1,                     2, 13"
+msgstr "Valori validi per ultimoi mese sono: 12, 1, 2, 13"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:235
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Last Month not valid for quarter. You can choose 3, 4,                     5, 13"
+msgstr "Ultimo mese non valido per il trimestre. E' possibile scegliere 3, 4, 5, 13"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:239
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Last Month not valid for quarter. You can choose 6, 7,                     8, 13"
+msgstr "Ultimo mese non valido per il trimestre. E' possibile scegliere  6, 7, 8, 13"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:243
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:247
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Last Month not valid for quarter. You can choose 9,                     10, 11, 13"
+msgstr "Ultimo mese non valido per il trimestre. E' possibile scegliere 9, 10, 11, 13"
+
+#: field:comunicazione.liquidazione,write_uid:0
+#: field:comunicazione.liquidazione.export.file,write_uid:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last Updated by"
+msgstr "Last Updated by"
+
+#: field:comunicazione.liquidazione,write_date:0
+#: field:comunicazione.liquidazione.export.file,write_date:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last Updated on"
+msgstr "Last Updated on"
+
+#: field:comunicazione.liquidazione,last_month:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Last month"
+msgstr "Ultimo mese"
+
+#: field:comunicazione.liquidazione,liquidazione_del_gruppo:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Liquidazione del gruppo"
+msgstr "Liquidazione del gruppo"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:260
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Liquidazione del gruppo non valida, visto il codice                     fiscale di 16 caratteri"
+msgstr "Liquidazione del gruppo non valida, visto il codice                     fiscale di 16 caratteri"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Liquidazione dell'imposta"
+msgstr "Liquidazione dell'imposta"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:81
+#: field:comunicazione.liquidazione,month:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Month"
+msgstr "Mese"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:225
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Month valid: from 1 to 12"
+msgstr "Mese valido da 1 a 12"
+
+#: selection:comunicazione.liquidazione,period_type:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Monthly"
+msgstr "Mensile"
+
+#: field:comunicazione.liquidazione,name:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Name"
+msgstr "Name"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:256
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Per liquidazione del gruppo, partita iva controllante                     deve essere vuota"
+msgstr "Per liquidazione del gruppo, partita iva controllante                     deve essere vuota"
+
+#: field:comunicazione.liquidazione,period_type:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Period type"
+msgstr "Tipo periodo"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Periodo di Riferimento"
+msgstr "Periodo di Riferimento"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Quadro VP"
+msgstr "Quadro VP"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:83
+#: field:comunicazione.liquidazione,quarter:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Quarter"
+msgstr "Timestre"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:221
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Quarter valid: from 1 to 5"
+msgstr "Trimestre valido da 1 a 5"
+
+#: selection:comunicazione.liquidazione,period_type:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Quarterly"
+msgstr "Trimestrale"
+
+#: field:comunicazione.liquidazione,subcontracting:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Subcontracting"
+msgstr "Subforniture"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_tree
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Total"
+msgstr "Totale"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,imponibile_operazioni_attive:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Totale operazioni attive (al netto dell’IVA)"
+msgstr "Totale operazioni attive (al netto dell’IVA)"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,imponibile_operazioni_passive:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Totale operazioni passive (al netto dell’IVA)"
+msgstr "Totale operazioni passive (al netto dell’IVA)"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP10"
+msgstr "VP10"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP11"
+msgstr "VP11"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP12"
+msgstr "VP12"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP13"
+msgstr "VP13"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP14"
+msgstr "VP14"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP2"
+msgstr "VP2"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP3"
+msgstr "VP3"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP4"
+msgstr "VP4"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP5"
+msgstr "VP5"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP6"
+msgstr "VP6"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP7"
+msgstr "VP7"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP8"
+msgstr "VP8"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "VP9"
+msgstr "VP9"
+
+#: field:comunicazione.liquidazione,taxpayer_vat:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Vat"
+msgstr "Partita IVA"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#: field:comunicazione.liquidazione,versamento_auto_UE:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Versamenti auto UE"
+msgstr "Versamenti auto UE"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:272
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Visto il codice carica, occorre indicare il codice                     fiscale della socità dichiarante"
+msgstr "Visto il codice carica, occorre indicare il codice                     fiscale della socità dichiarante"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:278
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Visto il codice fiscale dell'intermediario, occorre                     indicare il codice l'impegno"
+msgstr "Visto il codice fiscale dell'intermediario, occorre                     indicare il codice l'impegno"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:282
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Visto il codice fiscale dell'intermediario, occorre                     indicare la data dell'impegno"
+msgstr "Visto il codice fiscale dell'intermediario, occorre                     indicare la data dell'impegno"
+
+#: field:comunicazione.liquidazione,year:0
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "Year"
+msgstr "Anno"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:216
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Year required"
+msgstr "Anno obbligatorio"
+
+#: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "o a credito"
+msgstr "o a credito"
+
+#: view:comunicazione.liquidazione.export.file:l10n_it_comunicazione_liquidazione_iva.wizard_liquidazione_export_file
+#. module: l10n_it_comunicazione_liquidazione_iva
+msgid "per generare il file della comunicazione liquidazione IVA."
+msgstr "per generare il file della comunicazione liquidazione IVA."
+
