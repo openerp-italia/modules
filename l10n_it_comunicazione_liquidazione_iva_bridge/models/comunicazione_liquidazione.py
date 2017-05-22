@@ -15,28 +15,6 @@ class ComunicazioneLiquidazione(models.Model):
         'liquidazione_id',
         string='Liquidazioni')
 
-    def _get_tax_code(self, vat_account_ids, date_start, date_end):
-        tax_code_ids = []
-        if vat_account_ids:
-            sql_filters = {
-                'vat_account_ids': tuple(vat_account_ids)}
-            sql = """
-            SELECT tax_code_id
-                from account_move_line ml
-                left join account_tax_code txc ON 
-                    (txc.vat_statement_account_id = ml.account_id)
-                left join account_period per ON (per.id = ml.period_id)
-            WHERE per.special = False AND date >= '{}' AND date <= '{}'
-            """.format(date_start, date_end)
-            sql += ' AND ml.account_id IN %(vat_account_ids)s '
-            # Group
-            sql += ' GROUP BY ml.tax_code_id '
-            self.env.cr.execute(sql, sql_filters)
-            items = self.env.cr.dictfetchall()
-            for item in items:
-                tax_code_ids.append(item['tax_code_id'])
-        return tax_code_ids
-
     def _reset_values(self):
         for comunicazione in self:
             comunicazione.imponibile_operazioni_attive = 0
@@ -75,37 +53,28 @@ class ComunicazioneLiquidazione(models.Model):
                     date_start = period.date_start
                     date_stop = period.date_stop
                     # Operazioni attive
-                    vat_account_ids = []
                     debit_tax_code_ids = []
                     for debit in liq.debit_vat_account_line_ids:
-                        if debit.account_id.id not in vat_account_ids:
-                            vat_account_ids.append(debit.account_id.id)
-                    if vat_account_ids:
-                        debit_tax_code_ids = self._get_tax_code(
-                            vat_account_ids, date_start, date_stop)
-                        if debit_tax_code_ids:
-                            tax_amounts = self.env['account.tax.code'].\
-                                _get_tax_codes_amounts(
+                        debit_tax_code_ids.append(debit.tax_code_id.id)
+                    if debit_tax_code_ids:
+                        tax_amounts = self.env['account.tax.code'].\
+                            _get_tax_codes_amounts(
                                 period.id, debit_tax_code_ids)
-                            for tax in tax_amounts:
-                                comunicazione.imponibile_operazioni_attive +=\
-                                    tax_amounts[tax]['base']
+                        for tax in tax_amounts:
+                            comunicazione.imponibile_operazioni_attive +=\
+                                tax_amounts[tax]['base']
+
                     # Operazioni passive
-                    vat_account_ids = []
                     credit_tax_code_ids = []
                     for credit in liq.credit_vat_account_line_ids:
-                        if credit.account_id.id not in vat_account_ids:
-                            vat_account_ids.append(credit.account_id.id)
-                    if vat_account_ids:
-                        credit_tax_code_ids = self._get_tax_code(
-                            vat_account_ids, date_start, date_stop)
-                        if credit_tax_code_ids:
-                            tax_amounts = self.env['account.tax.code'].\
-                                _get_tax_codes_amounts(
-                                    period.id, credit_tax_code_ids)
-                            for tax in tax_amounts:
-                                comunicazione.imponibile_operazioni_passive +=\
-                                    -1 * tax_amounts[tax]['base']
+                        credit_tax_code_ids.append(credit.tax_code_id.id)
+                    if credit_tax_code_ids:
+                        tax_amounts = self.env['account.tax.code'].\
+                            _get_tax_codes_amounts(
+                                period.id, credit_tax_code_ids)
+                        for tax in tax_amounts:
+                            comunicazione.imponibile_operazioni_passive +=\
+                                -1 * tax_amounts[tax]['base']
 
                     # Debito periodo precedente (solo periodo + recente)
                     if not previous_debit['date'] \
