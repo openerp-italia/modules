@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-from odoo import api, fields, models, _, tools
-from datetime import datetime, date, timedelta
-from odoo.exceptions import UserError, ValidationError
-# from xml.etree import ElementTree as etree
+from odoo import api, fields, models, _
+from datetime import datetime
+from odoo.exceptions import ValidationError
 from lxml import etree
 
 
@@ -99,7 +98,7 @@ class ComunicazioneLiquidazione(models.Model):
     year = fields.Integer(string='Year', required=True, size=4)
     last_month = fields.Integer(string='Last month')
     liquidazione_del_gruppo = fields.Boolean(string='Liquidazione del gruppo')
-    taxpayer_vat = fields.Char(string='Vat')
+    taxpayer_vat = fields.Char(string='Vat', required=True)
     controller_vat = fields.Char(string='Controller Vat')
     taxpayer_fiscalcode = fields.Char(string='Fiscalcode')
     declarant_different = fields.Boolean(
@@ -116,9 +115,6 @@ class ComunicazioneLiquidazione(models.Model):
         string='Commitment')
     delegate_sign = fields.Boolean(string='Delegate sign')
     date_commitment = fields.Date(string='Date commitment')
-    date_start = fields.Date(string='Date start')
-    date_stop = fields.Date(string='Date stop')
-
     period_type = fields.Selection(
         [('month', 'Monthly'),
          ('quarter', 'Quarterly')],
@@ -201,7 +197,6 @@ class ComunicazioneLiquidazione(models.Model):
 
         xml_string = etree.tostring(
             x1_Fornitura, encoding='utf8', method='xml', pretty_print=True)
-        # self._validate_xml(xml_string)
         return xml_string
 
     def _validate(self):
@@ -281,44 +276,19 @@ class ComunicazioneLiquidazione(models.Model):
                     indicare la data dell'impegno"))
         return True
 
-    def _validate_xml(self, xml_string):
-        xsd_etree_obj = etree.parse(
-            tools.file_open(
-                'l10n_it_comunicazione_liquidazione_iva/data/%s.xsd'
-                % 'fornituraIvp_2017_v1'))
-        official_schema = etree.XMLSchema(xsd_etree_obj)
-        try:
-            root_to_validate = etree.fromstring(xml_string)
-            official_schema.assertValid(root_to_validate)
-        except etree.DocumentInvalid:
-            are_xsd_errors = True
-            if xsd:
-                for error in xsd.error_log:
-                    dict_error = {
-                        'line': str(error.line), 'errormsg': error.message}
-
     def _export_xml_get_fornitura(self):
         x1_Fornitura = etree.Element(
             etree.QName(NS_IV, "Fornitura"), nsmap=NS_MAP)
         return x1_Fornitura
 
-    def _export_xml_get_intestazione(self):
-        x1_1_Intestazione = etree.Element(etree.QName(NS_IV, "Intestazione"))
-
-        # Codice Fornitura
-        x1_1_1_CodiceFornitura = etree.SubElement(
-            x1_1_Intestazione, etree.QName(NS_IV, "CodiceFornitura"))
-        # x1_1_Intestazione, 'CodiceFornitura')
-        return etree.tostring(x1_Fornitura, encoding='utf8', method='xml')
-
     def _export_xml_validate(self):
         return True
 
-    def _export_xml_get_intestazione_1_1(self, x1_Fornitura):
-        x1_1_Intestazione = etree.Element('Intestazione')
+    def _export_xml_get_intestazione(self):
+        x1_1_Intestazione = etree.Element(etree.QName(NS_IV, "Intestazione"))
         # Codice Fornitura
         x1_1_1_CodiceFornitura = etree.SubElement(
-            x1_1_Intestazione, 'CodiceFornitura')
+            x1_1_Intestazione, etree.QName(NS_IV, "CodiceFornitura"))
         x1_1_1_CodiceFornitura.text = unicode('IVP17')
         # Codice Fiscale Dichiarante
         if self.declarant_fiscalcode:
