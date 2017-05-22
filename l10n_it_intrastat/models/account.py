@@ -26,6 +26,7 @@
 from openerp import models, fields, api, _
 import openerp.addons.decimal_precision as dp
 from openerp.exceptions import except_orm, Warning, RedirectWarning
+from openerp.tools import float_is_zero
 
 
 class account_fiscal_position(models.Model):
@@ -275,7 +276,12 @@ class account_invoice(models.Model):
             if invoice.intrastat:
                 total_amount = sum(
                     l.amount_currency for l in invoice.intrastat_line_ids)
-                if not total_amount == invoice.amount_untaxed:
+                precision_digits = self.env[
+                    'decimal.precision'].precision_get('Account')
+                if not float_is_zero(
+                    total_amount - invoice.amount_untaxed,
+                    precision_digits=precision_digits
+                ):
                     raise Warning(_('Total Intrastat must be ugual to\
                         Total Invoice Untaxed'))
         return True
