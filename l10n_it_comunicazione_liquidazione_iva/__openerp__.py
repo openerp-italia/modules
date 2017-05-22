@@ -37,7 +37,7 @@
     'category': 'Account',
     'author': "Openforce di Camilli Alessandro",
     'website': 'http://odoo-italia.net',
-    'license': 'Other proprietary',
+    'license': 'AGPL-3',
     'depends': [
         'account', 'l10n_it_codici_carica', 'l10n_it_fiscalcode'
     ],

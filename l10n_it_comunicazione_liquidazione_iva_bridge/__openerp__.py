@@ -37,7 +37,7 @@
     'category': 'Account',
     'author': "Openforce di Camilli Alessandro",
     'website': 'http://odoo-italia.net',
-    'license': 'Other proprietary',
+    'license': 'LGPL-3',
     'depends': [
         'account_vat_period_end_statement'
     ],
