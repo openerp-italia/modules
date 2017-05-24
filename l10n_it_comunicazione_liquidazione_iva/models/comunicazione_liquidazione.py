@@ -308,9 +308,10 @@ class ComunicazioneLiquidazione(models.Model):
     def _export_xml_get_frontespizio(self):
         x1_2_1_Frontespizio = etree.Element(etree.QName(NS_IV, "Frontespizio"))
         # Codice Fiscale
-        x1_2_1_1_CodiceFiscale = etree.SubElement(
-            x1_2_1_Frontespizio, etree.QName(NS_IV, "CodiceFiscale"))
-        x1_2_1_1_CodiceFiscale.text = unicode(self.taxpayer_fiscalcode)
+        if self.taxpayer_fiscalcode:
+            x1_2_1_1_CodiceFiscale = etree.SubElement(
+                x1_2_1_Frontespizio, etree.QName(NS_IV, "CodiceFiscale"))
+            x1_2_1_1_CodiceFiscale.text = unicode(self.taxpayer_fiscalcode)
         # Anno Imposta
         x1_2_1_2_AnnoImposta = etree.SubElement(
             x1_2_1_Frontespizio, etree.QName(NS_IV, "AnnoImposta"))
