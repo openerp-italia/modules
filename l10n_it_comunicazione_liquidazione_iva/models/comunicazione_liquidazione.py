@@ -225,6 +225,14 @@ class ComunicazioneLiquidazione(models.Model):
                 _("Taxpayer Fiscalcode is required. It's accepted codes \
                     with lenght 11 or 16 chars"))
 
+        # Codice Fiscale dichiarante Obbligatorio se il codice fiscale
+        # del contribuente è di 11 caratteri
+        if self.taxpayer_fiscalcode  and len(self.taxpayer_fiscalcode) == 11\
+                and not self.declarant_fiscalcode:
+            raise ValidationError(
+                _("Declarant Fiscalcode is required. You can enable the \
+                section with different declarant option"))
+
         # Controlli su ultimo mese
         if self.last_month:
             if self.quarter == 1 and self.last_month not in [12, 1, 2, 13]:

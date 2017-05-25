@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 8.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-25 09:48+0000\n"
-"PO-Revision-Date: 2017-05-25 09:48+0000\n"
+"POT-Creation-Date: 2017-05-25 10:06+0000\n"
+"PO-Revision-Date: 2017-05-25 10:06+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -142,6 +142,12 @@ msgstr "Debito periodo precedente"
 #. module: l10n_it_comunicazione_liquidazione_iva
 msgid "Debito periodo precedente non superiore 25,82 euro"
 msgstr "Debito periodo precedente non superiore 25,82 euro"
+
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:233
+#. module: l10n_it_comunicazione_liquidazione_iva
+#, python-format
+msgid "Declarant Fiscalcode is required. You can enable the                 section with different declarant option"
+msgstr "Codice Fiscale Dichiarante richiesto. Per inserirlo abilita la sezione cliccando du \"Dichiarante diverso dal contribuente\""
 
 #: field:comunicazione.liquidazione,declarant_different:0
 #. module: l10n_it_comunicazione_liquidazione_iva
@@ -287,7 +293,7 @@ msgstr "Identificativo"
 msgid "Impegno alla presentazione telematica"
 msgstr "Impegno alla presentazione telematica"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:267
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:275
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Indicare il codice carica del dichiarante"
@@ -305,26 +311,26 @@ msgstr "Interessi dovuti per liquidazioni trimestrali"
 msgid "Last Modified on"
 msgstr "Last Modified on"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:232
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:240
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Last Month not valid for quarter. You can choose 12, 1,                     2, 13"
 msgstr "Valori validi per ultimoi mese sono: 12, 1, 2, 13"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:236
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:244
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Last Month not valid for quarter. You can choose 3, 4,                     5, 13"
 msgstr "Ultimo mese non valido per il trimestre. E' possibile scegliere 3, 4, 5, 13"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:240
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:248
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Last Month not valid for quarter. You can choose 6, 7,                     8, 13"
 msgstr "Ultimo mese non valido per il trimestre. E' possibile scegliere  6, 7, 8, 13"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:244
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:248
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:252
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:256
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Last Month not valid for quarter. You can choose 9,                     10, 11, 13"
@@ -352,7 +358,7 @@ msgstr "Ultimo mese"
 msgid "Liquidazione del gruppo"
 msgstr "Liquidazione del gruppo"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:261
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:269
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Liquidazione del gruppo non valida, visto il codice                     fiscale di 16 caratteri"
@@ -386,7 +392,7 @@ msgstr "Mensile"
 msgid "Name"
 msgstr "Name"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:257
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:265
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Per liquidazione del gruppo, partita iva controllante                     deve essere vuota"
@@ -529,19 +535,19 @@ msgstr "Partita IVA"
 msgid "Versamenti auto UE"
 msgstr "Versamenti auto UE"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:273
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:281
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Visto il codice carica, occorre indicare il codice                     fiscale della socità dichiarante"
 msgstr "Visto il codice carica, occorre indicare il codice                     fiscale della socità dichiarante"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:279
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:287
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Visto il codice fiscale dell'intermediario, occorre                     indicare il codice l'impegno"
 msgstr "Visto il codice fiscale dell'intermediario, occorre                     indicare il codice l'impegno"
 
-#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:283
+#: code:addons/l10n_it_comunicazione_liquidazione_iva/models/comunicazione_liquidazione.py:291
 #. module: l10n_it_comunicazione_liquidazione_iva
 #, python-format
 msgid "Visto il codice fiscale dell'intermediario, occorre                     indicare la data dell'impegno"
