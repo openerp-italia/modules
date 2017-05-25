@@ -218,6 +218,13 @@ class ComunicazioneLiquidazione(models.Model):
                 raise ValidationError(
                     _("Month valid: from 1 to 12"))
 
+        # Codice Fiscale
+        if not self.taxpayer_fiscalcode \
+                or len(self.taxpayer_fiscalcode) not in [11, 16]:
+            raise ValidationError(
+                _("Taxpayer Fiscalcode is required. It's accepted codes \
+                    with lenght 11 or 16 chars"))
+
         # Controlli su ultimo mese
         if self.last_month:
             if self.quarter == 1 and self.last_month not in [12, 1, 2, 13]:
@@ -308,10 +315,10 @@ class ComunicazioneLiquidazione(models.Model):
     def _export_xml_get_frontespizio(self):
         x1_2_1_Frontespizio = etree.Element(etree.QName(NS_IV, "Frontespizio"))
         # Codice Fiscale
-        if self.taxpayer_fiscalcode:
-            x1_2_1_1_CodiceFiscale = etree.SubElement(
-                x1_2_1_Frontespizio, etree.QName(NS_IV, "CodiceFiscale"))
-            x1_2_1_1_CodiceFiscale.text = unicode(self.taxpayer_fiscalcode)
+        x1_2_1_1_CodiceFiscale = etree.SubElement(
+            x1_2_1_Frontespizio, etree.QName(NS_IV, "CodiceFiscale"))
+        x1_2_1_1_CodiceFiscale.text = unicode(self.taxpayer_fiscalcode) \
+            if self.taxpayer_fiscalcode else ''
         # Anno Imposta
         x1_2_1_2_AnnoImposta = etree.SubElement(
             x1_2_1_Frontespizio, etree.QName(NS_IV, "AnnoImposta"))
