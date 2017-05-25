@@ -8,8 +8,6 @@
             <field name="arch" type="xml">
                 <tree string="Comunicazioni Liquidazione">
                     <field name="name"/>
-                    <field name="iva_da_versare" sum="Total"/>
-                    <field name="iva_a_credito" sum="Total"/>
                     <field name="identificativo"/>
                     <field name="company_id"/>
                 </tree>
@@ -78,8 +76,8 @@
 	                                       <field name="period_type"/>
 	                                       <field name="month"/>
 	                                       <field name="quarter"/>
-	                                       <field name="iva_da_versare"/>
-	                                       <field name="iva_a_credito"/>
+	                                       <field name="iva_da_versare" sum="Total"/>
+	                                       <field name="iva_a_credito" sum="Total"/>
 	                                   </tree>
 	                                </field>
                                 </group>

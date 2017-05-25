@@ -58,16 +58,6 @@ class ComunicazioneLiquidazione(models.Model):
         else:
             return 1
 
-    @api.multi
-    @api.depends('quadri_vp_ids.iva_da_versare', 'quadri_vp_ids.iva_a_credito')
-    def _compute_iva_da_versare_credito(self):
-        for dich in self:
-            dich.iva_da_versare = 0
-            dich.iva_a_credito = 0
-            for quadro_vp in dich.quadri_vp_ids:
-                dich.iva_da_versare += quadro_vp.iva_da_versare
-                dich.iva_a_credito += quadro_vp.iva_a_credito
-
     company_id = fields.Many2one(
         'res.company', string='Company', required=True,
         default=_default_company)
@@ -98,11 +88,9 @@ class ComunicazioneLiquidazione(models.Model):
         'comunicazione.liquidazione.vp', 'comunicazione_id',
         string="Quadri VP")
     iva_da_versare = fields.Float(
-        string='IVA da versare',
-        compute="_compute_iva_da_versare_credito", store=True)
+        string='IVA da versare', readonly=True)
     iva_a_credito = fields.Float(
-        string='IVA a credito',
-        compute="_compute_iva_da_versare_credito", store=True)
+        string='IVA a credito', readonly=True)
 
     @api.model
     def create(self, vals):
@@ -139,8 +127,13 @@ class ComunicazioneLiquidazione(models.Model):
         x1_2_Comunicazione = etree.Element(
             etree.QName(NS_IV, "Comunicazione"), attrs)
         x1_2_1_Frontespizio = self._export_xml_get_frontespizio()
-        x1_2_2_DatiContabili = self._export_xml_get_dati_contabili()
         x1_2_Comunicazione.append(x1_2_1_Frontespizio)
+
+        x1_2_2_DatiContabili = etree.Element(
+            etree.QName(NS_IV, "DatiContabili"))
+        for quadro in self.quadri_vp_ids:
+            modulo = self._export_xml_get_dati_contabili(quadro)
+            x1_2_2_DatiContabili.append(modulo)
         x1_2_Comunicazione.append(x1_2_2_DatiContabili)
         # Composizione struttura xml con le varie sezioni generate
         x1_Fornitura.append(x1_1_Intestazione)
@@ -158,16 +151,6 @@ class ComunicazioneLiquidazione(models.Model):
         if not self.year:
             raise ValidationError(
                 _("Year required"))
-        # Controlli su periodo
-        """
-        if self.period_type == 'quarter':
-            if self.quarter not in range(1, 5):
-                raise ValidationError(
-                    _("Quarter valid: from 1 to 5"))
-        if self.period_type == 'month':
-            if self.month not in range(1, 12):
-                raise ValidationError(
-                    _("Month valid: from 1 to 12"))"""
 
         # Codice Fiscale
         if not self.taxpayer_fiscalcode \
@@ -184,29 +167,6 @@ class ComunicazioneLiquidazione(models.Model):
                 _("Declarant Fiscalcode is required. You can enable the \
                 section with different declarant option"))
 
-        # Controlli su ultimo mese
-        """
-        if self.last_month:
-            if self.quarter == 1 and self.last_month not in [12, 1, 2, 13]:
-                raise ValidationError(
-                    _("Last Month not valid for quarter. You can choose 12, 1,\
-                     2, 13"))
-            if self.quarter == 2 and self.last_month not in [3, 4, 5, 13]:
-                raise ValidationError(
-                    _("Last Month not valid for quarter. You can choose 3, 4,\
-                     5, 13"))
-            if self.quarter == 3 and self.last_month not in [6, 7, 8, 13]:
-                raise ValidationError(
-                    _("Last Month not valid for quarter. You can choose 6, 7,\
-                     8, 13"))
-            if self.quarter == 4 and self.last_month not in [9, 10, 11, 13]:
-                raise ValidationError(
-                    _("Last Month not valid for quarter. You can choose 9, \
-                    10, 11, 13"))
-            if self.last_month == 99 and self.quarter != 4:
-                raise ValidationError(
-                    _("Last Month not valid for quarter. You can choose 9, \
-                    10, 11, 13"))"""
         # LiquidazioneGruppo: elemento opzionale, di tipo DatoCB_Type.
         # Se presente non deve essere presente l’elemento PIVAControllante.
         # Non può essere presente se l’elemento CodiceFiscale è lungo 16
@@ -355,114 +315,112 @@ class ComunicazioneLiquidazione(models.Model):
 
         return x1_2_1_Frontespizio
 
-    def _export_xml_get_dati_contabili(self):
-        x1_2_2_DatiContabili = etree.Element(
-            etree.QName(NS_IV, "DatiContabili"))
+    def _export_xml_get_dati_contabili(self, quadro):
         # 1.2.2.1 Modulo
-        xModulo = etree.SubElement(
-            x1_2_2_DatiContabili, etree.QName(NS_IV, "Modulo"))
-        if self.period_type == 'month':
+        xModulo = etree.Element(
+            etree.QName(NS_IV, "Modulo"))
+        if quadro.period_type == 'month':
             # 1.2.2.1.1 Mese
             Mese = etree.SubElement(
                 xModulo, etree.QName(NS_IV, "Mese"))
-            Mese.text = str(self.month)
+            Mese.text = str(quadro.month)
         else:
             # 1.2.2.1.2 Trimestre
             Trimestre = etree.SubElement(
                 xModulo, etree.QName(NS_IV, "Trimestre"))
-            Trimestre.text = str(self.quarter)
+            Trimestre.text = str(quadro.quarter)
         # Da escludere per liquidazione del gruppo
         if not self.liquidazione_del_gruppo:
             # 1.2.2.1.3 Subfornitura
-            if self.subcontracting:
+            if quadro.subcontracting:
                 Subfornitura = etree.SubElement(
                     xModulo, etree.QName(NS_IV, "Subfornitura"))
-                Subfornitura.text = '1' if self.subcontracting \
+                Subfornitura.text = '1' if quadro.subcontracting \
                     else '0'
             # 1.2.2.1.4 EventiEccezionali
-            if self.exceptional_events:
+            if quadro.exceptional_events:
                 EventiEccezionali = etree.SubElement(
                     xModulo, etree.QName(NS_IV, "EventiEccezionali"))
-                EventiEccezionali.text = self.exceptional_events
+                EventiEccezionali.text = quadro.exceptional_events
             # 1.2.2.1.5 TotaleOperazioniAttive
             TotaleOperazioniAttive = etree.SubElement(
                 xModulo, etree.QName(NS_IV, "TotaleOperazioniAttive"))
             TotaleOperazioniAttive.text = "{:.2f}"\
-                .format(self.imponibile_operazioni_attive).replace('.', ',')
+                .format(quadro.imponibile_operazioni_attive).replace('.', ',')
             # 1.2.2.1.6  TotaleOperazioniPassive
             TotaleOperazioniPassive = etree.SubElement(
                 xModulo, etree.QName(NS_IV, "TotaleOperazioniPassive"))
             TotaleOperazioniPassive.text = "{:.2f}"\
-                .format(self.imponibile_operazioni_passive).replace('.', ',')
+                .format(quadro.imponibile_operazioni_passive).replace('.', ',')
         # 1.2.2.1.7  IvaEsigibile
         IvaEsigibile = etree.SubElement(
             xModulo, etree.QName(NS_IV, "IvaEsigibile"))
-        IvaEsigibile.text = "{:.2f}".format(self.iva_esigibile)\
+        IvaEsigibile.text = "{:.2f}".format(quadro.iva_esigibile)\
             .replace('.', ',')
         # 1.2.2.1.8  IvaDetratta
         IvaDetratta = etree.SubElement(
             xModulo, etree.QName(NS_IV, "IvaDetratta"))
-        IvaDetratta.text = "{:.2f}".format(self.iva_detratta)\
+        IvaDetratta.text = "{:.2f}".format(quadro.iva_detratta)\
             .replace('.', ',')
         # 1.2.2.1.9  IvaDovuta
-        if self.iva_dovuta_debito:
+        if quadro.iva_dovuta_debito:
             IvaDovuta = etree.SubElement(
                 xModulo, etree.QName(NS_IV, "IvaDovuta"))
-            IvaDovuta.text = "{:.2f}".format(self.iva_dovuta_debito)\
+            IvaDovuta.text = "{:.2f}".format(quadro.iva_dovuta_debito)\
                 .replace('.', ',')
         # 1.2.2.1.10  IvaCredito
-        if self.iva_dovuta_credito:
+        if quadro.iva_dovuta_credito:
             IvaCredito = etree.SubElement(
                 xModulo, etree.QName(NS_IV, "IvaCredito"))
-            IvaCredito.text = "{:.2f}".format(self.iva_dovuta_credito)\
+            IvaCredito.text = "{:.2f}".format(quadro.iva_dovuta_credito)\
                 .replace('.', ',')
         # 1.2.2.1.11 DebitoPrecedente
         DebitoPrecedente = etree.SubElement(
             xModulo, etree.QName(NS_IV, "DebitoPrecedente"))
         DebitoPrecedente.text = "{:.2f}".format(
-            self.debito_periodo_precedente).replace('.', ',')
+            quadro.debito_periodo_precedente).replace('.', ',')
         # 1.2.2.1.12 CreditoPeriodoPrecedente
         CreditoPeriodoPrecedente = etree.SubElement(
             xModulo, etree.QName(NS_IV, "CreditoPeriodoPrecedente"))
         CreditoPeriodoPrecedente.text = "{:.2f}".format(
-            self.credito_periodo_precedente).replace('.', ',')
+            quadro.credito_periodo_precedente).replace('.', ',')
         # 1.2.2.1.13 CreditoAnnoPrecedente
         CreditoAnnoPrecedente = etree.SubElement(
             xModulo, etree.QName(NS_IV, "CreditoAnnoPrecedente"))
         CreditoAnnoPrecedente.text = "{:.2f}".format(
-            self.credito_anno_precedente).replace('.', ',')
+            quadro.credito_anno_precedente).replace('.', ',')
         # 1.2.2.1.14 VersamentiAutoUE
         VersamentiAutoUE = etree.SubElement(
             xModulo, etree.QName(NS_IV, "VersamentiAutoUE"))
         VersamentiAutoUE.text = "{:.2f}".format(
-            self.versamento_auto_UE).replace('.', ',')
+            quadro.versamento_auto_UE).replace('.', ',')
         # 1.2.2.1.15 CreditiImposta
         CreditiImposta = etree.SubElement(
             xModulo, etree.QName(NS_IV, "CreditiImposta"))
         CreditiImposta.text = "{:.2f}".format(
-            self.crediti_imposta).replace('.', ',')
+            quadro.crediti_imposta).replace('.', ',')
         # 1.2.2.1.16 InteressiDovuti
         InteressiDovuti = etree.SubElement(
             xModulo, etree.QName(NS_IV, "InteressiDovuti"))
         InteressiDovuti.text = "{:.2f}".format(
-            self.interessi_dovuti).replace('.', ',')
+            quadro.interessi_dovuti).replace('.', ',')
         # 1.2.2.1.17 Acconto
         Acconto = etree.SubElement(
             xModulo, etree.QName(NS_IV, "Acconto"))
         Acconto.text = "{:.2f}".format(
-            self.accounto_dovuto).replace('.', ',')
+            quadro.accounto_dovuto).replace('.', ',')
         # 1.2.2.1.18 ImportoDaVersare
         ImportoDaVersare = etree.SubElement(
             xModulo, etree.QName(NS_IV, "ImportoDaVersare"))
         ImportoDaVersare.text = "{:.2f}".format(
-            self.iva_da_versare).replace('.', ',')
+            quadro.iva_da_versare).replace('.', ',')
         # 1.2.2.1.19 ImportoACredito
         ImportoACredito = etree.SubElement(
             xModulo, etree.QName(NS_IV, "ImportoACredito"))
         ImportoACredito.text = "{:.2f}".format(
-            self.iva_a_credito).replace('.', ',')
+            quadro.iva_a_credito).replace('.', ',')
 
-        return x1_2_2_DatiContabili
+        return xModulo
 
 
 class ComunicazioneLiquidazioneVp(models.Model):
@@ -472,14 +430,15 @@ class ComunicazioneLiquidazioneVp(models.Model):
     @api.multi
     @api.depends('iva_esigibile', 'iva_detratta')
     def _compute_VP6_iva_dovuta_credito(self):
-        for dich in self:
-            dich.iva_dovuta_debito = 0
-            dich.iva_dovuta_credito = 0
-            if dich.iva_esigibile >= dich.iva_detratta:
-                dich.iva_dovuta_debito = dich.iva_esigibile - dich.iva_detratta
+        for quadro in self:
+            quadro.iva_dovuta_debito = 0
+            quadro.iva_dovuta_credito = 0
+            if quadro.iva_esigibile >= quadro.iva_detratta:
+                quadro.iva_dovuta_debito = quadro.iva_esigibile - \
+                    quadro.iva_detratta
             else:
-                dich.iva_dovuta_credito = dich.iva_detratta - \
-                    dich.iva_esigibile
+                quadro.iva_dovuta_credito = quadro.iva_detratta - \
+                    quadro.iva_esigibile
 
     @api.multi
     @api.depends('iva_dovuta_debito', 'iva_dovuta_credito',
@@ -491,20 +450,20 @@ class ComunicazioneLiquidazioneVp(models.Model):
         Tot Iva a debito = (VP6, col.1 + VP7 + VP12) 
         Tot Iva a credito = (VP6, col.2 + VP8 + VP9 + VP10 + VP11 + VP13)
         """
-        for dich in self:
-            dich.iva_da_versare = 0
-            dich.iva_a_credito = 0
-            debito = dich.iva_dovuta_debito + dich.debito_periodo_precedente\
-                + dich.interessi_dovuti
-            credito = dich.iva_dovuta_credito \
-                + dich.credito_periodo_precedente\
-                + dich.credito_anno_precedente \
-                + dich.versamento_auto_UE + dich.crediti_imposta \
-                + dich.accounto_dovuto
+        for quadro in self:
+            quadro.iva_da_versare = 0
+            quadro.iva_a_credito = 0
+            debito = quadro.iva_dovuta_debito + quadro.debito_periodo_precedente\
+                + quadro.interessi_dovuti
+            credito = quadro.iva_dovuta_credito \
+                + quadro.credito_periodo_precedente\
+                + quadro.credito_anno_precedente \
+                + quadro.versamento_auto_UE + quadro.crediti_imposta \
+                + quadro.accounto_dovuto
             if debito >= credito:
-                dich.iva_da_versare = debito - credito
+                quadro.iva_da_versare = debito - credito
             else:
-                dich.iva_a_credito = credito - debito
+                quadro.iva_a_credito = credito - debito
 
     comunicazione_id = fields.Many2one('comunicazione.liquidazione',
                                        string='Comunicazione', readonly=True)
