@@ -76,8 +76,8 @@
 	                                       <field name="period_type"/>
 	                                       <field name="month"/>
 	                                       <field name="quarter"/>
-	                                       <field name="iva_da_versare" sum="Total"/>
-	                                       <field name="iva_a_credito" sum="Total"/>
+	                                       <field name="iva_da_versare"/>
+	                                       <field name="iva_a_credito"/>
 	                                   </tree>
 	                                </field>
                                 </group>
