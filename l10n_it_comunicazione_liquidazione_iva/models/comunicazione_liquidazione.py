@@ -290,6 +290,12 @@ class ComunicazioneLiquidazione(models.Model):
                 raise ValidationError(
                     _("Visto il codice fiscale dell'intermediario, occorre \
                     indicare la data dell'impegno"))
+        # ImpegnoPresentazione::
+        if self.delegate_fiscalcode and not self.delegate_sign:
+            raise ValidationError(
+                _("In presenza dell'incaricato nella sezione impegno \
+                    alla presentazione telematica, è necessario vistare \
+                    l'opzione firma dell'incaricato"))
         return True
 
     def _export_xml_get_fornitura(self):
@@ -379,8 +385,8 @@ class ComunicazioneLiquidazione(models.Model):
             x1_2_1_11_CFIntermediario.text = self.delegate_fiscalcode
         # ImpegnoPresentazione
         if self.delegate_commitment:
-            x1_2_1_Frontespizio = etree.SubElement(
-                etree.QName(NS_IV, "ImpegnoPresentazione"))
+            x1_2_1_12_ImpegnoPresentazione = etree.SubElement(
+                x1_2_1_Frontespizio, etree.QName(NS_IV, "ImpegnoPresentazione"))
             x1_2_1_12_ImpegnoPresentazione.text = self.delegate_commitment
         # DataImpegno
         if self.date_commitment:

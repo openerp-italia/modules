@@ -162,7 +162,7 @@ msgstr "Firma dichiarante"
 #: field:comunicazione.liquidazione,delegate_sign:0
 #. module: l10n_it_comunicazione_liquidazione_iva
 msgid "Delegate sign"
-msgstr "Delegate sign"
+msgstr "Firma dell'incaricato"
 
 #: view:comunicazione.liquidazione:l10n_it_comunicazione_liquidazione_iva.view_comunicazione_liquidazione_form
 #. module: l10n_it_comunicazione_liquidazione_iva
