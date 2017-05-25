@@ -39,7 +39,8 @@
     'website': 'http://odoo-italia.net',
     'license': 'LGPL-3',
     'depends': [
-        'account_vat_period_end_statement'
+        'account_vat_period_end_statement',
+        'l10n_it_comunicazione_liquidazione_iva'
     ],
     'data': [
         'views/comunicazione_liquidazione.xml',
