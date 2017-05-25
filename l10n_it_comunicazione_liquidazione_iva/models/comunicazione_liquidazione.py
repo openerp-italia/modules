@@ -38,49 +38,18 @@ class ComunicazioneLiquidazione(models.Model):
                   ).format(self.identificativo))
 
     @api.multi
-    @api.depends('iva_esigibile', 'iva_detratta')
-    def _compute_VP6_iva_dovuta_credito(self):
-        for dich in self:
-            dich.iva_dovuta_debito = 0
-            dich.iva_dovuta_credito = 0
-            if dich.iva_esigibile >= dich.iva_detratta:
-                dich.iva_dovuta_debito = dich.iva_esigibile - dich.iva_detratta
-            else:
-                dich.iva_dovuta_credito = dich.iva_detratta - \
-                    dich.iva_esigibile
-
-    @api.multi
-    @api.depends('iva_dovuta_debito', 'iva_dovuta_credito',
-                 'debito_periodo_precedente', 'credito_periodo_precedente',
-                 'credito_anno_precedente', 'versamento_auto_UE',
-                 'crediti_imposta', 'interessi_dovuti', 'accounto_dovuto')
-    def _compute_VP14_iva_da_versare_credito(self):
-        """
-        Tot Iva a debito = (VP6, col.1 + VP7 + VP12) 
-        Tot Iva a credito = (VP6, col.2 + VP8 + VP9 + VP10 + VP11 + VP13)
-        """
-        for dich in self:
-            dich.iva_da_versare = 0
-            dich.iva_a_credito = 0
-            debito = dich.iva_dovuta_debito + dich.debito_periodo_precedente\
-                + dich.interessi_dovuti
-            credito = dich.iva_dovuta_credito \
-                + dich.credito_periodo_precedente\
-                + dich.credito_anno_precedente \
-                + dich.versamento_auto_UE + dich.crediti_imposta \
-                + dich.accounto_dovuto
-            if debito >= credito:
-                dich.iva_da_versare = debito - credito
-            else:
-                dich.iva_a_credito = credito - debito
-
     def _compute_name(self):
+        name = ""
         for dich in self:
-            dich.name = '{}'.format(str(dich.year))
-            if dich.period_type == 'month':
-                dich.name += ' {} {}'.format(_('Month'), str(dich.month))
-            else:
-                dich.name += ' {} {}'.format(_('Quarter'), str(dich.quarter))
+            for quadro in dich.quadri_vp_ids:
+                if not name:
+                    name += '{} {}'.format(str(dich.year),
+                                           quadro.period_type)
+                if quadro.period_type == 'month':
+                    name += ', {}'.format(str(quadro.month))
+                else:
+                    name += ', {}'.format(str(quadro.quarter))
+            dich.name = name
 
     def _get_identificativo(self):
         dichiarazioni = self.search([])
@@ -88,6 +57,16 @@ class ComunicazioneLiquidazione(models.Model):
             return len(dichiarazioni) + 1
         else:
             return 1
+
+    @api.multi
+    @api.depends('quadri_vp_ids.iva_da_versare', 'quadri_vp_ids.iva_a_credito')
+    def _compute_iva_da_versare_credito(self):
+        for dich in self:
+            dich.iva_da_versare = 0
+            dich.iva_a_credito = 0
+            for quadro_vp in dich.quadri_vp_ids:
+                dich.iva_da_versare += quadro_vp.iva_da_versare
+                dich.iva_a_credito += quadro_vp.iva_a_credito
 
     company_id = fields.Many2one(
         'res.company', string='Company', required=True,
@@ -115,44 +94,15 @@ class ComunicazioneLiquidazione(models.Model):
         string='Commitment')
     delegate_sign = fields.Boolean(string='Delegate sign')
     date_commitment = fields.Date(string='Date commitment')
-    period_type = fields.Selection(
-        [('month', 'Monthly'),
-         ('quarter', 'Quarterly')],
-        string='Period type', default='quarter')
-    month = fields.Integer(string='Month', default=False)
-    quarter = fields.Integer(string='Quarter', default=False)
-    subcontracting = fields.Boolean(string='Subcontracting')
-    exceptional_events = fields.Selection(
-        [('1', 'Code 1'), ('9', 'Code 9')], string='Exceptional events')
-
-    imponibile_operazioni_attive = fields.Float(
-        string='Totale operazioni attive (al netto dell’IVA)')
-    imponibile_operazioni_passive = fields.Float(
-        string='Totale operazioni passive (al netto dell’IVA)')
-    iva_esigibile = fields.Float(string='IVA esigibile')
-    iva_detratta = fields.Float(string='IVA detratta')
-    iva_dovuta_debito = fields.Float(
-        string='IVA dovuta debito',
-        compute="_compute_VP6_iva_dovuta_credito", store=True)
-    iva_dovuta_credito = fields.Float(
-        string='IVA dovuta credito',
-        compute="_compute_VP6_iva_dovuta_credito", store=True)
-    debito_periodo_precedente = fields.Float(
-        string='Debito periodo precedente')
-    credito_periodo_precedente = fields.Float(
-        string='Credito periodo precedente')
-    credito_anno_precedente = fields.Float(string='Credito anno precedente')
-    versamento_auto_UE = fields.Float(string='Versamenti auto UE')
-    crediti_imposta = fields.Float(string='Crediti d’imposta')
-    interessi_dovuti = fields.Float(
-        string='Interessi dovuti per liquidazioni trimestrali')
-    accounto_dovuto = fields.Float(string='Acconto dovuto')
+    quadri_vp_ids = fields.One2many(
+        'comunicazione.liquidazione.vp', 'comunicazione_id',
+        string="Quadri VP")
     iva_da_versare = fields.Float(
         string='IVA da versare',
-        compute="_compute_VP14_iva_da_versare_credito", store=True)
+        compute="_compute_iva_da_versare_credito", store=True)
     iva_a_credito = fields.Float(
         string='IVA a credito',
-        compute="_compute_VP14_iva_da_versare_credito", store=True)
+        compute="_compute_iva_da_versare_credito", store=True)
 
     @api.model
     def create(self, vals):
@@ -209,6 +159,7 @@ class ComunicazioneLiquidazione(models.Model):
             raise ValidationError(
                 _("Year required"))
         # Controlli su periodo
+        """
         if self.period_type == 'quarter':
             if self.quarter not in range(1, 5):
                 raise ValidationError(
@@ -216,7 +167,7 @@ class ComunicazioneLiquidazione(models.Model):
         if self.period_type == 'month':
             if self.month not in range(1, 12):
                 raise ValidationError(
-                    _("Month valid: from 1 to 12"))
+                    _("Month valid: from 1 to 12"))"""
 
         # Codice Fiscale
         if not self.taxpayer_fiscalcode \
@@ -234,6 +185,7 @@ class ComunicazioneLiquidazione(models.Model):
                 section with different declarant option"))
 
         # Controlli su ultimo mese
+        """
         if self.last_month:
             if self.quarter == 1 and self.last_month not in [12, 1, 2, 13]:
                 raise ValidationError(
@@ -254,7 +206,7 @@ class ComunicazioneLiquidazione(models.Model):
             if self.last_month == 99 and self.quarter != 4:
                 raise ValidationError(
                     _("Last Month not valid for quarter. You can choose 9, \
-                    10, 11, 13"))
+                    10, 11, 13"))"""
         # LiquidazioneGruppo: elemento opzionale, di tipo DatoCB_Type.
         # Se presente non deve essere presente l’elemento PIVAControllante.
         # Non può essere presente se l’elemento CodiceFiscale è lungo 16
@@ -511,3 +463,86 @@ class ComunicazioneLiquidazione(models.Model):
             self.iva_a_credito).replace('.', ',')
 
         return x1_2_2_DatiContabili
+
+
+class ComunicazioneLiquidazioneVp(models.Model):
+    _name = 'comunicazione.liquidazione.vp'
+    _description = 'Comunicazione Liquidazione IVA - Quadro VP'
+
+    @api.multi
+    @api.depends('iva_esigibile', 'iva_detratta')
+    def _compute_VP6_iva_dovuta_credito(self):
+        for dich in self:
+            dich.iva_dovuta_debito = 0
+            dich.iva_dovuta_credito = 0
+            if dich.iva_esigibile >= dich.iva_detratta:
+                dich.iva_dovuta_debito = dich.iva_esigibile - dich.iva_detratta
+            else:
+                dich.iva_dovuta_credito = dich.iva_detratta - \
+                    dich.iva_esigibile
+
+    @api.multi
+    @api.depends('iva_dovuta_debito', 'iva_dovuta_credito',
+                 'debito_periodo_precedente', 'credito_periodo_precedente',
+                 'credito_anno_precedente', 'versamento_auto_UE',
+                 'crediti_imposta', 'interessi_dovuti', 'accounto_dovuto')
+    def _compute_VP14_iva_da_versare_credito(self):
+        """
+        Tot Iva a debito = (VP6, col.1 + VP7 + VP12) 
+        Tot Iva a credito = (VP6, col.2 + VP8 + VP9 + VP10 + VP11 + VP13)
+        """
+        for dich in self:
+            dich.iva_da_versare = 0
+            dich.iva_a_credito = 0
+            debito = dich.iva_dovuta_debito + dich.debito_periodo_precedente\
+                + dich.interessi_dovuti
+            credito = dich.iva_dovuta_credito \
+                + dich.credito_periodo_precedente\
+                + dich.credito_anno_precedente \
+                + dich.versamento_auto_UE + dich.crediti_imposta \
+                + dich.accounto_dovuto
+            if debito >= credito:
+                dich.iva_da_versare = debito - credito
+            else:
+                dich.iva_a_credito = credito - debito
+
+    comunicazione_id = fields.Many2one('comunicazione.liquidazione',
+                                       string='Comunicazione', readonly=True)
+    period_type = fields.Selection(
+        [('month', 'Monthly'),
+         ('quarter', 'Quarterly')],
+        string='Period type', default='month')
+    month = fields.Integer(string='Month', default=False)
+    quarter = fields.Integer(string='Quarter', default=False)
+    subcontracting = fields.Boolean(string='Subcontracting')
+    exceptional_events = fields.Selection(
+        [('1', 'Code 1'), ('9', 'Code 9')], string='Exceptional events')
+
+    imponibile_operazioni_attive = fields.Float(
+        string='Totale operazioni attive (al netto dell’IVA)')
+    imponibile_operazioni_passive = fields.Float(
+        string='Totale operazioni passive (al netto dell’IVA)')
+    iva_esigibile = fields.Float(string='IVA esigibile')
+    iva_detratta = fields.Float(string='IVA detratta')
+    iva_dovuta_debito = fields.Float(
+        string='IVA dovuta debito',
+        compute="_compute_VP6_iva_dovuta_credito", store=True)
+    iva_dovuta_credito = fields.Float(
+        string='IVA dovuta credito',
+        compute="_compute_VP6_iva_dovuta_credito", store=True)
+    debito_periodo_precedente = fields.Float(
+        string='Debito periodo precedente')
+    credito_periodo_precedente = fields.Float(
+        string='Credito periodo precedente')
+    credito_anno_precedente = fields.Float(string='Credito anno precedente')
+    versamento_auto_UE = fields.Float(string='Versamenti auto UE')
+    crediti_imposta = fields.Float(string='Crediti d’imposta')
+    interessi_dovuti = fields.Float(
+        string='Interessi dovuti per liquidazioni trimestrali')
+    accounto_dovuto = fields.Float(string='Acconto dovuto')
+    iva_da_versare = fields.Float(
+        string='IVA da versare',
+        compute="_compute_VP14_iva_da_versare_credito", store=True)
+    iva_a_credito = fields.Float(
+        string='IVA a credito',
+        compute="_compute_VP14_iva_da_versare_credito", store=True)
