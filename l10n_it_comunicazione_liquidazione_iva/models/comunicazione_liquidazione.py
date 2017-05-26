@@ -132,7 +132,7 @@ class ComunicazioneLiquidazione(models.Model):
         x1_2_2_DatiContabili = etree.Element(
             etree.QName(NS_IV, "DatiContabili"))
         for quadro in self.quadri_vp_ids:
-            modulo = self._export_xml_get_dati_contabili(quadro)
+            modulo = self._export_xml_get_dati_modulo(quadro)
             x1_2_2_DatiContabili.append(modulo)
         x1_2_Comunicazione.append(x1_2_2_DatiContabili)
         # Composizione struttura xml con le varie sezioni generate
@@ -315,7 +315,7 @@ class ComunicazioneLiquidazione(models.Model):
 
         return x1_2_1_Frontespizio
 
-    def _export_xml_get_dati_contabili(self, quadro):
+    def _export_xml_get_dati_modulo(self, quadro):
         # 1.2.2.1 Modulo
         xModulo = etree.Element(
             etree.QName(NS_IV, "Modulo"))
