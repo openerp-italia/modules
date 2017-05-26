@@ -271,6 +271,9 @@ class account_invoice(models.Model):
 
     @api.multi
     def action_move_create(self):
+        for invoice in self:
+            if not invoice.intrastat_line_ids:
+                invoice.compute_intrastat_lines()
         super(account_invoice, self).action_move_create()
         for invoice in self:
             if invoice.intrastat:
