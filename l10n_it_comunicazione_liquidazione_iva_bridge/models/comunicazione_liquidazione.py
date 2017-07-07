@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from openerp import api, fields, models, _
-from openerp.exceptions import ValidationError
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class ComunicazioneLiquidazioneVp(models.Model):
@@ -42,32 +42,32 @@ class ComunicazioneLiquidazioneVp(models.Model):
 
             for liq in quadro.liquidazioni_ids:
 
-                for period in liq.period_ids:
-                    date_start = period.date_start
-                    date_stop = period.date_stop
+                for period in liq.date_range_ids:
+
                     # Operazioni attive
-                    debit_tax_code_ids = []
+                    debit_taxes = self.env['account.tax']
                     for debit in liq.debit_vat_account_line_ids:
-                        debit_tax_code_ids.append(debit.tax_code_id.id)
-                    if debit_tax_code_ids:
-                        tax_amounts = self.env['account.tax.code'].\
-                            _get_tax_codes_amounts(
-                                period.id, debit_tax_code_ids)
-                        for tax in tax_amounts:
-                            quadro.imponibile_operazioni_attive +=\
-                                tax_amounts[tax]['base']
+                        debit_taxes |= debit.tax_id
+                    for debit_tax in debit_taxes:
+                        tax = debit_taxes.with_context({
+                            'from_date': period.date_start,
+                            'to_date': period.date_end,
+                        }).browse(debit_tax.id)
+                        quadro.imponibile_operazioni_attive += (
+                            tax.base_balance)
 
                     # Operazioni passive
-                    credit_tax_code_ids = []
-                    for credit in liq.credit_vat_account_line_ids:
-                        credit_tax_code_ids.append(credit.tax_code_id.id)
-                    if credit_tax_code_ids:
-                        tax_amounts = self.env['account.tax.code'].\
-                            _get_tax_codes_amounts(
-                                period.id, credit_tax_code_ids)
-                        for tax in tax_amounts:
-                            quadro.imponibile_operazioni_passive +=\
-                                -1 * tax_amounts[tax]['base']
+                    credit_taxes = self.env['account.tax']
+                    for credit in liq.debit_vat_account_line_ids:
+                        credit_taxes |= credit.tax_id
+                    for credit_tax in credit_taxes:
+                        tax = credit_taxes.with_context({
+                            'from_date': period.date_start,
+                            'to_date': period.date_end,
+                        }).browse(credit_tax.id)
+                        quadro.imponibile_operazioni_passive += (
+                            tax.base_balance)
+
                 # Iva esigibile
                 for vat_amount in liq.debit_vat_account_line_ids:
                     quadro.iva_esigibile += vat_amount.amount

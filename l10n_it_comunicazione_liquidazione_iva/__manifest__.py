@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # © 2017 Alessandro Camilli - Openforce
+# © 2017 Lorenzo Battistini - Agile Business Group
 #
 # Odoo Proprietary License v1.0
 #
@@ -30,20 +31,21 @@
 # SOFTWARE.
 
 {
-    'name': 'Comunicazione liquidazione IVA Bridge',
-    'summary': 'Bridge per importare i dati della liquidazione iva nella'
-    'comunicazione liquidazione IVA',
-    'version': '8.0.1.0.0',
+    'name': 'Comunicazione liquidazione IVA',
+    'summary': 'Gestione Comunicazione liquidazione IVA ed export file xml'
+            'conforme alle specifiche dell''Agenzia delle Entrate',
+    'version': '10.0.0.1.0',
     'category': 'Account',
     'author': "Openforce di Camilli Alessandro",
-    'website': 'http://odoo-italia.net',
-    'license': 'LGPL-3',
+    'website': 'https://www.odoo-italia.net',
+    'license': 'Other proprietary',
     'depends': [
-        'account_vat_period_end_statement',
-        'l10n_it_comunicazione_liquidazione_iva'
+        'account_accountant', 'l10n_it_codici_carica', 'l10n_it_fiscalcode'
     ],
     'data': [
+        'security/ir.model.access.csv',
         'views/comunicazione_liquidazione.xml',
+        'wizard/export_file_view.xml',
     ],
     'installable': True,
 }

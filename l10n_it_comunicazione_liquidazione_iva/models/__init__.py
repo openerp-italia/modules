@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-import comunicazione_liquidazione
+from . import comunicazione_liquidazione

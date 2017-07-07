@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-from openerp import api, fields, models, _
+from odoo import api, fields, models, _
 from datetime import datetime
-from openerp.exceptions import ValidationError
+from odoo.exceptions import ValidationError
 from lxml import etree
 
 
@@ -80,7 +80,7 @@ class ComunicazioneLiquidazione(models.Model):
     delegate_fiscalcode = fields.Char(string='Fiscalcode')
     delegate_commitment = fields.Selection(
         [('1', 'Comunicazione è stata predisposta dal contribuente '),
-         ('2', 'Comunicazione è stata predisposta da chi effettua l’invio')],
+         ('2', 'Comunicazione è stata predisposta da chi effettua l\'invio')],
         string='Commitment')
     delegate_sign = fields.Boolean(string='Delegate sign')
     date_commitment = fields.Date(string='Date commitment')
@@ -168,8 +168,8 @@ class ComunicazioneLiquidazione(models.Model):
                 section with different declarant option"))
 
         # LiquidazioneGruppo: elemento opzionale, di tipo DatoCB_Type.
-        # Se presente non deve essere presente l’elemento PIVAControllante.
-        # Non può essere presente se l’elemento CodiceFiscale è lungo 16
+        # Se presente non deve essere presente l'elemento PIVAControllante.
+        # Non può essere presente se l'elemento CodiceFiscale è lungo 16
         # caratteri.
         if self.liquidazione_del_gruppo:
             if self.controller_vat:
@@ -478,9 +478,9 @@ class ComunicazioneLiquidazioneVp(models.Model):
         [('1', 'Code 1'), ('9', 'Code 9')], string='Exceptional events')
 
     imponibile_operazioni_attive = fields.Float(
-        string='Totale operazioni attive (al netto dell’IVA)')
+        string='Totale operazioni attive (al netto dell\'IVA)')
     imponibile_operazioni_passive = fields.Float(
-        string='Totale operazioni passive (al netto dell’IVA)')
+        string='Totale operazioni passive (al netto dell\'IVA)')
     iva_esigibile = fields.Float(string='IVA esigibile')
     iva_detratta = fields.Float(string='IVA detratta')
     iva_dovuta_debito = fields.Float(
@@ -495,7 +495,7 @@ class ComunicazioneLiquidazioneVp(models.Model):
         string='Credito periodo precedente')
     credito_anno_precedente = fields.Float(string='Credito anno precedente')
     versamento_auto_UE = fields.Float(string='Versamenti auto UE')
-    crediti_imposta = fields.Float(string='Crediti d’imposta')
+    crediti_imposta = fields.Float(string='Crediti d\'imposta')
     interessi_dovuti = fields.Float(
         string='Interessi dovuti per liquidazioni trimestrali')
     accounto_dovuto = fields.Float(string='Acconto dovuto')

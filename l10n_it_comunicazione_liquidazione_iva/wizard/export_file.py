@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import base64
-from openerp import api, fields, models, exceptions
+from odoo import api, fields, models, exceptions
 
 
 class ComunicazioneLiquidazioneExportFile(models.TransientModel):
