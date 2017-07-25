@@ -76,7 +76,8 @@ class account_invoice_line(models.Model):
         # Amount
         amount_currency = self.price_subtotal
         company_currency = self.invoice_id.company_id.currency_id
-        amount_euro = company_currency.compute(amount_currency,
+        invoice_currency = self.invoice_id.currency_id
+        amount_euro = invoice_currency.compute(amount_currency,
                                                company_currency)
         statistic_amount_euro = amount_euro
         res.update({'amount_currency': amount_currency})
@@ -386,7 +387,8 @@ class account_invoice_intrastat(models.Model):
     @api.depends('amount_currency')
     def _compute_amount_euro(self):
         company_currency = self.invoice_id.company_id.currency_id
-        self.amount_euro = company_currency.compute(self.amount_currency,
+        invoice_currency = self.invoice_id.currency_id
+        self.amount_euro = invoice_currency.compute(self.amount_currency,
                                                     company_currency)
 
     @api.one
