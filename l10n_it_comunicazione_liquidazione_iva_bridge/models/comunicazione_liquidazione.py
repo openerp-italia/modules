@@ -88,5 +88,5 @@ class ComunicazioneLiquidazioneVp(models.Model):
                 if interests_account_id:
                     for line in liq.generic_vat_account_line_ids:
                         if line.account_id.id == interests_account_id:
-                            interessi_dovuti += line.amount
+                            interessi_dovuti += (-1 * line.amount)
                 quadro.interessi_dovuti += interessi_dovuti
