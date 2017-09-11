@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # © 2017 Alessandro Camilli - Openforce
 #
-# Odoo Proprietary License v1.0
-#
 # This software and associated files (the "Software") may only be used
 # (executed, modified, executed after modifications) if you have purchased a
 # valid license from the authors, typically via Odoo Apps, or if you have
