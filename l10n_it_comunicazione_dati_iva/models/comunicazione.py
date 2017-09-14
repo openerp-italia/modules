@@ -109,6 +109,14 @@ class ComunicazioneDatiIva(models.Model):
 
         return True
 
+    def group_invoices_for_partner(self, invoices):
+        group_invoices = {}
+        for invoice in invoices:
+            if invoice.partner_id not in group_invoices:
+                group_invoices.update({invoice.partner_id: []})
+            group_invoices[invoice.partner_id].append(invoice)
+        return group_invoices
+
     def _validate(self):
         """
         Controllo congruità dati della comunicazione
@@ -128,7 +136,7 @@ class ComunicazioneDatiIva(models.Model):
         # ----- 1.1 - Progressivo Invio
         x_1_1_progressivo_invio = etree.SubElement(
             x_1_dati_fattura_header,
-            etree.QName(NS_XSI, "ProgressivoInvio"), nsmap=NS_MAP)
+            etree.QName(NS_IV, "ProgressivoInvio"), nsmap=NS_MAP)
         x_1_1_progressivo_invio.text = str(self.identificativo)
         # ----- 1.2 - Dichiarante
         x_1_2_dichiarante = etree.SubElement(
@@ -272,191 +280,243 @@ class ComunicazioneDatiIva(models.Model):
         x_2_1_2_6_4_cognome = etree.SubElement(
             x_2_1_2_6_rappresentante_fiscale,
             etree.QName(NS_IV, "Cognome"), nsmap=NS_MAP)
-        # -----     2.2 - Cessionario Committente DTE
-        x_2_2_cessionario_committente = etree.SubElement(
-            x_2_dte,
-            etree.QName(NS_IV, "CessionarioCommittenteDTE"), nsmap=NS_MAP)
-        # -----         2.2.1 - IdentificativiFiscali
-        x_2_2_1_identificativi_fiscali = etree.SubElement(
-            x_2_2_cessionario_committente,
-            etree.QName(NS_IV, "IdentificativiFiscali"), nsmap=NS_MAP)
-        # -----             2.2.1.1 - Id Fiscale IVA
-        x_2_2_1_1_id_fiscale_iva = etree.SubElement(
-            x_2_2_1_identificativi_fiscali,
-            etree.QName(NS_IV, "IdFiscaleIVA"), nsmap=NS_MAP)
-        # -----                 2.2.1.1.1 - Id Paese
-        x_2_2_1_1_1_id_paese = etree.SubElement(
-            x_2_2_1_1_id_fiscale_iva,
-            etree.QName(NS_IV, "IdPaese"), nsmap=NS_MAP)
-        # -----                 2.2.1.1.2 - Id Paese
-        x_2_2_1_1_2_id_codice = etree.SubElement(
-            x_2_2_1_1_id_fiscale_iva,
-            etree.QName(NS_IV, "IdCodice"), nsmap=NS_MAP)
-        # -----             2.2.1.2 - Codice Fiscale
-        x_2_2_1_2_codice_fiscale = etree.SubElement(
-            x_2_2_1_identificativi_fiscali,
-            etree.QName(NS_IV, "CodiceFiscale"), nsmap=NS_MAP)
-        # -----         2.2.2 - AltriDatiIdentificativi
-        x_2_2_2_altri_identificativi = etree.SubElement(
-            x_2_2_cessionario_committente,
-            etree.QName(NS_IV, "AltriDatiIdentificativi"), nsmap=NS_MAP)
-        # -----             2.2.2.1 - Denominazione
-        x_2_2_2_1_altri_identificativi = etree.SubElement(
-            x_2_2_2_altri_identificativi,
-            etree.QName(NS_IV, "Denominazione"), nsmap=NS_MAP)
-        # -----             2.2.2.2 - Nome
-        x_2_2_2_2_nome = etree.SubElement(
-            x_2_2_2_altri_identificativi,
-            etree.QName(NS_IV, "Nome"), nsmap=NS_MAP)
-        # -----             2.2.2.3 - Cognome
-        x_2_2_2_3_cognome = etree.SubElement(
-            x_2_2_2_altri_identificativi,
-            etree.QName(NS_IV, "Cognome"), nsmap=NS_MAP)
-        # -----             2.2.2.4 - Sede
-        x_2_2_2_4_sede = etree.SubElement(
-            x_2_2_2_altri_identificativi,
-            etree.QName(NS_IV, "Sede"), nsmap=NS_MAP)
-        # -----                 2.2.2.4.1 - Indirizzo
-        x_2_2_2_4_1_indirizzo = etree.SubElement(
-            x_2_2_2_4_sede,
-            etree.QName(NS_IV, "Indirizzo"), nsmap=NS_MAP)
-        # -----                 2.2.2.4.2 - Numero Civico
-        x_2_2_2_4_2_numero_civico = etree.SubElement(
-            x_2_2_2_4_sede,
-            etree.QName(NS_IV, "NumeroCivico"), nsmap=NS_MAP)
-        # -----                 2.2.2.4.3 - CAP
-        x_2_2_2_4_3_cap = etree.SubElement(
-            x_2_2_2_4_sede,
-            etree.QName(NS_IV, "CAP"), nsmap=NS_MAP)
-        # -----                 2.2.2.4.4 - Comune
-        x_2_2_2_4_4_comune = etree.SubElement(
-            x_2_2_2_4_sede,
-            etree.QName(NS_IV, "Comune"), nsmap=NS_MAP)
-        # -----                 2.2.2.4.5 - Provincia
-        x_2_2_2_4_5_comune = etree.SubElement(
-            x_2_2_2_4_sede,
-            etree.QName(NS_IV, "Provincia"), nsmap=NS_MAP)
-        # -----                 2.2.2.4.6 - Nazione
-        x_2_2_2_4_6_nazione = etree.SubElement(
-            x_2_2_2_4_sede,
-            etree.QName(NS_IV, "Nazione"), nsmap=NS_MAP)
-        # -----             2.2.2.5 - Stabile Organizzazione
-        x_2_2_2_5_stabile_organizzazione = etree.SubElement(
-            x_2_2_2_altri_identificativi,
-            etree.QName(NS_IV, "StabileOrganizzazione"), nsmap=NS_MAP)
-        # -----                 2.2.2.5.1 - Indirizzo
-        x_2_2_2_5_1_indirizzo = etree.SubElement(
-            x_2_2_2_5_stabile_organizzazione,
-            etree.QName(NS_IV, "Indirizzo"), nsmap=NS_MAP)
-        # -----                 2.2.2.5.2 - Numero Civico
-        x_2_2_2_5_2_numero_civico = etree.SubElement(
-            x_2_2_2_5_stabile_organizzazione,
-            etree.QName(NS_IV, "NumeroCivico"), nsmap=NS_MAP)
-        # -----                 2.2.2.5.3 - CAP
-        x_2_2_2_5_3_cap = etree.SubElement(
-            x_2_2_2_5_stabile_organizzazione,
-            etree.QName(NS_IV, "CAP"), nsmap=NS_MAP)
-        # -----                 2.2.2.5.4 - Comune
-        x_2_2_2_5_4_comune = etree.SubElement(
-            x_2_2_2_5_stabile_organizzazione,
-            etree.QName(NS_IV, "Comune"), nsmap=NS_MAP)
-        # -----                 2.2.2.5.5 - Provincia
-        x_2_2_2_5_5_provincia = etree.SubElement(
-            x_2_2_2_5_stabile_organizzazione,
-            etree.QName(NS_IV, "Provincia"), nsmap=NS_MAP)
-        # -----                 2.2.2.5.6 - Nazione
-        x_2_2_2_5_6_nazione = etree.SubElement(
-            x_2_2_2_5_stabile_organizzazione,
-            etree.QName(NS_IV, "Nazione"), nsmap=NS_MAP)
-        # -----             2.2.2.6 - Rappresentante Fiscale
-        x_2_2_2_6_rappresentante_fiscale = etree.SubElement(
-            x_2_2_2_altri_identificativi,
-            etree.QName(NS_IV, "RappresentanteFiscale"), nsmap=NS_MAP)
-        # -----                 2.2.2.6.1 - Id Fiscale IVA
-        x_2_2_2_6_1_id_fiscale_iva = etree.SubElement(
-            x_2_2_2_6_rappresentante_fiscale,
-            etree.QName(NS_IV, "IdFiscaleIVA"), nsmap=NS_MAP)
-        # -----                     2.2.2.6.1.1 - Id Paese
-        x_2_2_2_6_1_1_id_paese = etree.SubElement(
-            x_2_2_2_6_1_id_fiscale_iva,
-            etree.QName(NS_IV, "IdPaese"), nsmap=NS_MAP)
-        # -----                     2.2.2.6.1.2 - Id Codice
-        x_2_2_2_6_1_2_id_codice = etree.SubElement(
-            x_2_2_2_6_1_id_fiscale_iva,
-            etree.QName(NS_IV, "IdCodice"), nsmap=NS_MAP)
-        # -----                 2.2.2.6.2 - Denominazione
-        x_2_2_2_6_2_denominazione = etree.SubElement(
-            x_2_2_2_6_rappresentante_fiscale,
-            etree.QName(NS_IV, "Denominazione"), nsmap=NS_MAP)
-        # -----                 2.2.2.6.3 - Nome
-        x_2_2_2_6_3_nome = etree.SubElement(
-            x_2_2_2_6_rappresentante_fiscale,
-            etree.QName(NS_IV, "Nome"), nsmap=NS_MAP)
-        # -----                 2.2.2.6.4 - Cognome
-        x_2_2_2_6_4_cognome = etree.SubElement(
-            x_2_2_2_6_rappresentante_fiscale,
-            etree.QName(NS_IV, "Cognome"), nsmap=NS_MAP)
-        for invoice in self.fatture_emesse_ids:
-            # -----         2.2.3 - Dati Fattura Body DTE
-            x_2_2_3_dati_fattura_body_dte = etree.SubElement(
+        invoices_grouped = self.group_invoices_for_partner(
+            self.fatture_emesse_ids)
+        for partner in invoices_grouped:
+            first_invoice = invoices_grouped[partner][0]
+            # -----     2.2 - Cessionario Committente DTE
+            x_2_2_cessionario_committente = etree.SubElement(
+                x_2_dte,
+                etree.QName(NS_IV, "CessionarioCommittenteDTE"), nsmap=NS_MAP)
+            # -----         2.2.1 - IdentificativiFiscali
+            x_2_2_1_identificativi_fiscali = etree.SubElement(
                 x_2_2_cessionario_committente,
-                etree.QName(NS_IV, "DatiFatturaBodyDTE"), nsmap=NS_MAP)
-            # -----             2.2.3.1 - Dati Generali
-            x_2_2_3_1_dati_generali = etree.SubElement(
-                x_2_2_3_dati_fattura_body_dte,
-                etree.QName(NS_IV, "DatiGenerali"), nsmap=NS_MAP)
-            # -----                 2.2.3.1.1 - Tipo Documento
-            x_2_2_3_1_1_tipo_documento = etree.SubElement(
-                x_2_2_3_1_dati_generali,
-                etree.QName(NS_XSI, "TipoDocumento"), nsmap=NS_MAP)
-            x_2_2_3_1_1_tipo_documento.text = \
-                invoice.dati_fattura_TipoDocumento.code
-            # -----                 2.2.3.1.2 - Data
-            x_2_2_3_1_2_data = etree.SubElement(
-                x_2_2_3_1_dati_generali,
-                etree.QName(NS_XSI, "Data"), nsmap=NS_MAP)
-            x_2_2_3_1_2_data.text = invoice.dati_fattura_Data
-            # -----                 2.2.3.1.3 - Numero
-            x_2_2_3_1_2_numero = etree.SubElement(
-                x_2_2_3_1_dati_generali,
-                etree.QName(NS_XSI, "Numero"), nsmap=NS_MAP)
-            x_2_2_3_1_2_numero.text = invoice.dati_fattura_Numero
-            # -----             2.2.3.2 - Dati Riepilogo
-            x_2_2_3_2_riepilogo = etree.SubElement(
-                x_2_2_3_dati_fattura_body_dte,
-                etree.QName(NS_IV, "DatiRiepilogo"), nsmap=NS_MAP)
-            # -----                 2.2.3.2.1 - Imponibile Importo
-            x_2_2_3_2_1_imponibile_importo = etree.SubElement(
-                x_2_2_3_2_riepilogo,
-                etree.QName(NS_IV, "ImponibileImporto"), nsmap=NS_MAP)
-            # -----                 2.2.3.2.2 - Dati IVA
-            x_2_2_3_2_2_dati_iva = etree.SubElement(
-                x_2_2_3_2_riepilogo,
-                etree.QName(NS_IV, "DatiIVA"), nsmap=NS_MAP)
-            # -----                     2.2.3.2.2.1 - Imposta
-            x_2_2_3_2_2_1_imposta = etree.SubElement(
-                x_2_2_3_2_2_dati_iva,
-                etree.QName(NS_IV, "Imposta"), nsmap=NS_MAP)
-            # -----                     2.2.3.2.2.2 - Aliquota
-            x_2_2_3_2_2_2_aliquota = etree.SubElement(
-                x_2_2_3_2_2_dati_iva,
-                etree.QName(NS_IV, "Aliquota"), nsmap=NS_MAP)
-            # -----                 2.2.3.2.3 - Natura
-            x_2_2_3_2_3_natura = etree.SubElement(
-                x_2_2_3_2_riepilogo,
-                etree.QName(NS_IV, "Natura"), nsmap=NS_MAP)
-            # -----                 2.2.3.2.4 - Detraibile
-            x_2_2_3_2_4_detraibile = etree.SubElement(
-                x_2_2_3_2_riepilogo,
-                etree.QName(NS_IV, "Detraibile"), nsmap=NS_MAP)
-            # -----                 2.2.3.2.5 - Deducibile
-            x_2_2_3_2_5_deducibile = etree.SubElement(
-                x_2_2_3_2_riepilogo,
-                etree.QName(NS_IV, "Deducibile"), nsmap=NS_MAP)
-            # -----                 2.2.3.2.6 - Esigibilita IVA
-            x_2_2_3_2_6_esagibilita_iva = etree.SubElement(
-                x_2_2_3_2_riepilogo,
-                etree.QName(NS_IV, "EsigibilitaIVA"), nsmap=NS_MAP)
+                etree.QName(NS_IV, "IdentificativiFiscali"), nsmap=NS_MAP)
+            # -----             2.2.1.1 - Id Fiscale IVA
+            x_2_2_1_1_id_fiscale_iva = etree.SubElement(
+                x_2_2_1_identificativi_fiscali,
+                etree.QName(NS_IV, "IdFiscaleIVA"), nsmap=NS_MAP)
+            # -----                 2.2.1.1.1 - Id Paese
+            x_2_2_1_1_1_id_paese = etree.SubElement(
+                x_2_2_1_1_id_fiscale_iva,
+                etree.QName(NS_IV, "IdPaese"), nsmap=NS_MAP)
+            x_2_2_1_1_1_id_paese.text = \
+                first_invoice.cessionario_IdFiscaleIVA_IdPaese or ''
+            # -----                 2.2.1.1.2 - Id Codice
+            x_2_2_1_1_2_id_codice = etree.SubElement(
+                x_2_2_1_1_id_fiscale_iva,
+                etree.QName(NS_IV, "IdCodice"), nsmap=NS_MAP)
+            x_2_2_1_1_2_id_codice.text = \
+                first_invoice.cessionario_IdFiscaleIVA_IdCodice or ''
+            # -----             2.2.1.2 - Codice Fiscale
+            x_2_2_1_2_codice_fiscale = etree.SubElement(
+                x_2_2_1_identificativi_fiscali,
+                etree.QName(NS_IV, "CodiceFiscale"), nsmap=NS_MAP)
+            x_2_2_1_2_codice_fiscale.text = \
+                first_invoice.cessionario_CodiceFiscale or ''
+            # -----         2.2.2 - AltriDatiIdentificativi
+            x_2_2_2_altri_identificativi = etree.SubElement(
+                x_2_2_cessionario_committente,
+                etree.QName(NS_IV, "AltriDatiIdentificativi"), nsmap=NS_MAP)
+            # -----             2.2.2.1 - Denominazione
+            x_2_2_2_1_altri_identificativi_denominazione = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName(NS_IV, "Denominazione"), nsmap=NS_MAP)
+            x_2_2_2_1_altri_identificativi_denominazione.text = \
+                first_invoice.cessionario_Denominazione or ''
+            # -----             2.2.2.2 - Nome
+            x_2_2_2_2_nome = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName(NS_IV, "Nome"), nsmap=NS_MAP)
+            x_2_2_2_2_nome.text = \
+                first_invoice.cessionario_Nome or ''
+            # -----             2.2.2.3 - Cognome
+            x_2_2_2_3_cognome = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName(NS_IV, "Cognome"), nsmap=NS_MAP)
+            x_2_2_2_3_cognome.text = \
+                first_invoice.cessionario_Cognome or ''
+            # -----             2.2.2.4 - Sede
+            x_2_2_2_4_sede = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName(NS_IV, "Sede"), nsmap=NS_MAP)
+            # -----                 2.2.2.4.1 - Indirizzo
+            x_2_2_2_4_1_indirizzo = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName(NS_IV, "Indirizzo"), nsmap=NS_MAP)
+            x_2_2_2_4_1_indirizzo.text = \
+                first_invoice.cessionario_sede_Indirizzo or ''
+            # -----                 2.2.2.4.2 - Numero Civico
+            x_2_2_2_4_2_numero_civico = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName(NS_IV, "NumeroCivico"), nsmap=NS_MAP)
+            x_2_2_2_4_2_numero_civico.text = \
+                first_invoice.cessionario_sede_NumeroCivico or ''
+            # -----                 2.2.2.4.3 - CAP
+            x_2_2_2_4_3_cap = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName(NS_IV, "CAP"), nsmap=NS_MAP)
+            x_2_2_2_4_3_cap.text = \
+                first_invoice.cessionario_sede_Cap or ''
+            # -----                 2.2.2.4.4 - Comune
+            x_2_2_2_4_4_comune = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName(NS_IV, "Comune"), nsmap=NS_MAP)
+            x_2_2_2_4_4_comune.text = \
+                first_invoice.cessionario_sede_Comune or ''
+            # -----                 2.2.2.4.5 - Provincia
+            x_2_2_2_4_5_provincia = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName(NS_IV, "Provincia"), nsmap=NS_MAP)
+            x_2_2_2_4_5_provincia.text = \
+                first_invoice.cessionario_sede_Provincia or ''
+            # -----                 2.2.2.4.6 - Nazione
+            x_2_2_2_4_6_nazione = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName(NS_IV, "Nazione"), nsmap=NS_MAP)
+            x_2_2_2_4_6_nazione.text = \
+                first_invoice.cessionario_sede_Nazione or ''
+            # -----             2.2.2.5 - Stabile Organizzazione
+            x_2_2_2_5_stabile_organizzazione = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName(NS_IV, "StabileOrganizzazione"), nsmap=NS_MAP)
+            # -----                 2.2.2.5.1 - Indirizzo
+            x_2_2_2_5_1_indirizzo = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName(NS_IV, "Indirizzo"), nsmap=NS_MAP)
+            x_2_2_2_5_1_indirizzo.text = \
+                first_invoice.cessionario_so_Indirizzo or ''
+            # -----                 2.2.2.5.2 - Numero Civico
+            x_2_2_2_5_2_numero_civico = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName(NS_IV, "NumeroCivico"), nsmap=NS_MAP)
+            x_2_2_2_5_2_numero_civico.text = \
+                first_invoice.cessionario_so_NumeroCivico or ''
+            # -----                 2.2.2.5.3 - CAP
+            x_2_2_2_5_3_cap = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName(NS_IV, "CAP"), nsmap=NS_MAP)
+            x_2_2_2_5_3_cap.text = \
+                first_invoice.cessionario_so_Cap or ''
+            # -----                 2.2.2.5.4 - Comune
+            x_2_2_2_5_4_comune = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName(NS_IV, "Comune"), nsmap=NS_MAP)
+            x_2_2_2_5_4_comune.text = \
+                first_invoice.cessionario_so_Comune or ''
+            # -----                 2.2.2.5.5 - Provincia
+            x_2_2_2_5_5_provincia = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName(NS_IV, "Provincia"), nsmap=NS_MAP)
+            x_2_2_2_5_5_provincia.text = \
+                first_invoice.cessionario_so_Provincia or ''
+            # -----                 2.2.2.5.6 - Nazione
+            x_2_2_2_5_6_nazione = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName(NS_IV, "Nazione"), nsmap=NS_MAP)
+            x_2_2_2_5_6_nazione.text = \
+                first_invoice.cessionario_so_Nazione or ''
+            # -----             2.2.2.6 - Rappresentante Fiscale
+            x_2_2_2_6_rappresentante_fiscale = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName(NS_IV, "RappresentanteFiscale"), nsmap=NS_MAP)
+            # -----                 2.2.2.6.1 - Id Fiscale IVA
+            x_2_2_2_6_1_id_fiscale_iva = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName(NS_IV, "IdFiscaleIVA"), nsmap=NS_MAP)
+            x_2_2_2_6_rappresentante_fiscale.text = \
+                first_invoice.cessionario_rf_IdFiscaleIVA_IdPaese or ''
+            # -----                     2.2.2.6.1.1 - Id Paese
+            x_2_2_2_6_1_1_id_paese = etree.SubElement(
+                x_2_2_2_6_1_id_fiscale_iva,
+                etree.QName(NS_IV, "IdPaese"), nsmap=NS_MAP)
+            x_2_2_2_6_1_1_id_paese.text = \
+                first_invoice.cessionario_rf_IdFiscaleIVA_IdPaese or ''
+            # -----                     2.2.2.6.1.2 - Id Codice
+            x_2_2_2_6_1_2_id_codice = etree.SubElement(
+                x_2_2_2_6_1_id_fiscale_iva,
+                etree.QName(NS_IV, "IdCodice"), nsmap=NS_MAP)
+            x_2_2_2_6_1_2_id_codice.text = \
+                first_invoice.cessionario_rf_IdFiscaleIVA_IdCodice or ''
+            # -----                 2.2.2.6.2 - Denominazione
+            x_2_2_2_6_2_denominazione = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName(NS_IV, "Denominazione"), nsmap=NS_MAP)
+            x_2_2_2_6_2_denominazione.text = \
+                first_invoice.cessionario_rf_Denominazione or ''
+            # -----                 2.2.2.6.3 - Nome
+            x_2_2_2_6_3_nome = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName(NS_IV, "Nome"), nsmap=NS_MAP)
+            x_2_2_2_6_3_nome.text = \
+                first_invoice.cessionario_rf_Nome or ''
+            # -----                 2.2.2.6.4 - Cognome
+            x_2_2_2_6_4_cognome = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName(NS_IV, "Cognome"), nsmap=NS_MAP)
+            x_2_2_2_6_4_cognome.text = \
+                first_invoice.cessionario_rf_Cognome or ''
+            for invoice in invoices_grouped[partner]:
+                # -----         2.2.3 - Dati Fattura Body DTE
+                x_2_2_3_dati_fattura_body_dte = etree.SubElement(
+                    x_2_2_cessionario_committente,
+                    etree.QName(NS_IV, "DatiFatturaBodyDTE"), nsmap=NS_MAP)
+                # -----             2.2.3.1 - Dati Generali
+                x_2_2_3_1_dati_generali = etree.SubElement(
+                    x_2_2_3_dati_fattura_body_dte,
+                    etree.QName(NS_IV, "DatiGenerali"), nsmap=NS_MAP)
+                # -----                 2.2.3.1.1 - Tipo Documento
+                x_2_2_3_1_1_tipo_documento = etree.SubElement(
+                    x_2_2_3_1_dati_generali,
+                    etree.QName(NS_IV, "TipoDocumento"), nsmap=NS_MAP)
+                x_2_2_3_1_1_tipo_documento.text = \
+                    invoice.dati_fattura_TipoDocumento.code
+                # -----                 2.2.3.1.2 - Data
+                x_2_2_3_1_2_data = etree.SubElement(
+                    x_2_2_3_1_dati_generali,
+                    etree.QName(NS_IV, "Data"), nsmap=NS_MAP)
+                x_2_2_3_1_2_data.text = invoice.dati_fattura_Data
+                # -----                 2.2.3.1.3 - Numero
+                x_2_2_3_1_2_numero = etree.SubElement(
+                    x_2_2_3_1_dati_generali,
+                    etree.QName(NS_IV, "Numero"), nsmap=NS_MAP)
+                x_2_2_3_1_2_numero.text = invoice.dati_fattura_Numero
+                # -----             2.2.3.2 - Dati Riepilogo
+                x_2_2_3_2_riepilogo = etree.SubElement(
+                    x_2_2_3_dati_fattura_body_dte,
+                    etree.QName(NS_IV, "DatiRiepilogo"), nsmap=NS_MAP)
+                # -----                 2.2.3.2.1 - Imponibile Importo
+                x_2_2_3_2_1_imponibile_importo = etree.SubElement(
+                    x_2_2_3_2_riepilogo,
+                    etree.QName(NS_IV, "ImponibileImporto"), nsmap=NS_MAP)
+                # -----                 2.2.3.2.2 - Dati IVA
+                x_2_2_3_2_2_dati_iva = etree.SubElement(
+                    x_2_2_3_2_riepilogo,
+                    etree.QName(NS_IV, "DatiIVA"), nsmap=NS_MAP)
+                # -----                     2.2.3.2.2.1 - Imposta
+                x_2_2_3_2_2_1_imposta = etree.SubElement(
+                    x_2_2_3_2_2_dati_iva,
+                    etree.QName(NS_IV, "Imposta"), nsmap=NS_MAP)
+                # -----                     2.2.3.2.2.2 - Aliquota
+                x_2_2_3_2_2_2_aliquota = etree.SubElement(
+                    x_2_2_3_2_2_dati_iva,
+                    etree.QName(NS_IV, "Aliquota"), nsmap=NS_MAP)
+                # -----                 2.2.3.2.3 - Natura
+                x_2_2_3_2_3_natura = etree.SubElement(
+                    x_2_2_3_2_riepilogo,
+                    etree.QName(NS_IV, "Natura"), nsmap=NS_MAP)
+                # -----                 2.2.3.2.4 - Detraibile
+                x_2_2_3_2_4_detraibile = etree.SubElement(
+                    x_2_2_3_2_riepilogo,
+                    etree.QName(NS_IV, "Detraibile"), nsmap=NS_MAP)
+                # -----                 2.2.3.2.5 - Deducibile
+                x_2_2_3_2_5_deducibile = etree.SubElement(
+                    x_2_2_3_2_riepilogo,
+                    etree.QName(NS_IV, "Deducibile"), nsmap=NS_MAP)
+                # -----                 2.2.3.2.6 - Esigibilita IVA
+                x_2_2_3_2_6_esagibilita_iva = etree.SubElement(
+                    x_2_2_3_2_riepilogo,
+                    etree.QName(NS_IV, "EsigibilitaIVA"), nsmap=NS_MAP)
         # -----     2.3 - Rettifica
         x_2_3_rettifica = etree.SubElement(
             x_2_dte,
@@ -465,14 +525,14 @@ class ComunicazioneDatiIva(models.Model):
         x_2_3_1_id_file = etree.SubElement(
             x_2_3_rettifica,
             etree.QName(NS_IV, "IdFile"), nsmap=NS_MAP)
-        x_2_3_1_id_file.text = self.rettifica_IdFIle \
-        if self.rettifica_IdFIle else ''
+        # x_2_3_1_id_file.text = self.rettifica_IdFIle \
+        #     if self.rettifica_IdFIle else ''
         # -----         2.3.2 - Posizione
         x_2_3_2_posizione = etree.SubElement(
             x_2_3_rettifica,
             etree.QName(NS_IV, "Posizione"), nsmap=NS_MAP)
-        x_2_3_2_posizione.text = self.rettifica_Posizione \
-        if self.rettifica_Posizione else ''
+        # x_2_3_2_posizione.text = self.rettifica_Posizione \
+        #     if self.rettifica_Posizione else ''
         return x_2_dte
 
     '''
