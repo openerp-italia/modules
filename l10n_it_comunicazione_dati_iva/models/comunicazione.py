@@ -107,10 +107,7 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
 
     comunicazione_id = fields.Many2one(
         'comunicazione.dati.iva', string='Comunicazione', readonly=True)
-    posizione = fields.Integer(
-        "Posizione della fattura all'interno del file trasmesso")
     invoice_id = fields.Many2one('account.invoice', string='Invoice')
-    partner_id = fields.Many2one('res.partner', string='Partner')
     partner_company_id = fields.Many2one('res.partner', string='Partner')
 
     # Cedente
@@ -178,72 +175,7 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
          insieme all'elemento 2.1.2.6.3 <Nome>  ed in alternativa \
          all'elemento 2.1.2.6.2 <Denominazione>")
 
-    # Cessionario
-    cessionario_IdFiscaleIVA_IdPaese = fields.Char(
-        string='Id Paese', size=2, help="Codice della nazione espresso secondo\
-         lo standard ISO 3166-1 alpha-2 code")
-    cessionario_IdFiscaleIVA_IdCodice = fields.Char(
-        string='Codice identificativo fiscale', size=28)
-    cessionario_CodiceFiscale = fields.Char(
-        string='Codice Fiscale', size=16)
-    cessionario_Denominazione = fields.Char(
-        string='Ditta, denominazione o ragione sociale', size=80)
-    cessionario_Nome = fields.Char(
-        string='Nome della persona fisica', size=60, help="Obbligatorio ma da\
-         valorizzare insieme all'elemento 2.1.2.3 <Cognome>  ed in \
-         alternativa all'elemento 2.1.2.1 <Denominazione> ")
-    cessionario_Cognome = fields.Char(
-        string='Cognome della persona fisica', size=60, help="Obbligatorio \
-        ma da valorizzare insieme all'elemento 2.1.2.2 <Nome>  ed in \
-        alternativa all'elemento 2.1.2.1 <Denominazione>")
-    cessionario_sede_Indirizzo = fields.Char(
-        string='Indirizzo della sede', size=60)
-    cessionario_sede_NumeroCivico = fields.Char(
-        string='Numero civico', size=8)
-    cessionario_sede_Cap = fields.Char(
-        string='Numero civico', size=5)
-    cessionario_sede_Comune = fields.Char(
-        string='Comune', size=60)
-    cessionario_sede_Provincia = fields.Char(
-        string='Provincia', size=2)
-    cessionario_sede_Nazione = fields.Char(
-        string='Nazione', size=2, help="Codice della nazione espresso secondo\
-         lo standard ISO 3166-1 alpha-2 code")
-    cessionario_so_Indirizzo = fields.Char(
-        string='Indirizzo della stabile organizzazione in Italia', size=60)
-    cessionario_so_NumeroCivico = fields.Char(
-        string='Numero civico', size=8)
-    cessionario_so_Cap = fields.Char(
-        string='Numero civico', size=5)
-    cessionario_so_Comune = fields.Char(
-        string='Comune', size=60)
-    cessionario_so_Provincia = fields.Char(
-        string='Provincia', size=2)
-    cessionario_so_Nazione = fields.Char(
-        string='Nazione', size=2, help="Codice della nazione espresso secondo\
-         lo standard ISO 3166-1 alpha-2 code")
-    cessionario_rf_IdFiscaleIVA_IdPaese = fields.Char(
-        string='Id Paese', size=2, help="Accetta solo IT")
-    cessionario_rf_IdFiscaleIVA_IdCodice = fields.Char(
-        string='Codice identificativo fiscale', size=11)
-    cessionario_rf_Denominazione = fields.Char(
-        string='Ditta, denominazione o ragione sociale', size=80,
-        help="Ditta, denominazione o ragione sociale (ditta, impresa, \
-        società, ente) del rappresentante fiscale. Obbligatorio ma da \
-        valorizzare in alternativa agli elementi 2.1.2.6.3 <Nome>  e  \
-        2.1.2.6.4 <Cognome>")
-    cessionario_rf_Nome = fields.Char(
-        string='Nome della persona fisica', size=60, help="Nome del \
-        rappresentante fiscale persona fisica Obbligatorio ma da valorizzare\
-         insieme all'elemento 2.1.2.6.4 <Cognome>  ed in alternativa \
-         all'elemento 2.1.2.6.2 <Denominazione>")
-    cessionario_rf_Cognome = fields.Char(
-        string='Cognome della persona fisica', size=60, help="Cognome del \
-        rappresentante fiscale persona fisica. Obbligatorio ma da valorizzare\
-         insieme all'elemento 2.1.2.6.3 <Nome>  ed in alternativa \
-         all'elemento 2.1.2.6.2 <Denominazione>")
-
-    # Dati fattura
+    # Dati Cessionario e Fattura
     fatture_emesse_body_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.emesse.body', 'fattura_emessa_id',
         string='Body Fatture Emesse')
@@ -257,33 +189,6 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
     rettifica_Posizione = fields.Integer(
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
-
-    @api.onchange('partner_id')
-    def onchange_partner_id(self):
-        for fattura in self:
-            if fattura.partner_id:
-                fattura.cessionario_IdFiscaleIVA_IdPaese = \
-                    fattura.partner_id.country_id.code or ''
-                fattura.cessionario_IdFiscaleIVA_IdCodice = \
-                    fattura.partner_id.vat[2:] if fattura.partner_id.vat \
-                    else ''
-                fattura.cessionario_CodiceFiscale = \
-                    fattura.partner_id.fiscalcode or ''
-                fattura.cessionario_Denominazione = \
-                    fattura.partner_id.name or ''
-                # Sede
-                fattura.cessionario_sede_Indirizzo = '{} {}'.format(
-                    fattura.partner_id.street, fattura.partner_id.street2)
-                fattura.cessionario_sede_Cap = \
-                    fattura.partner_id.zip or ''
-                fattura.cessionario_sede_Comune = \
-                    fattura.partner_id.city or ''
-                fattura.cessionario_sede_Provincia = \
-                    fattura.partner_id.state_id and \
-                    fattura.partner_id.state_id.code or ''
-                fattura.cessionario_sede_Nazione = \
-                    fattura.partner_id.country_id and \
-                    fattura.partner_id.country_id.code or ''
 
     @api.onchange('partner_company_id')
     def onchange_partner_company_id(self):
@@ -320,6 +225,72 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
 
     fattura_emessa_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
+    partner_id = fields.Many2one('res.partner', string='Partner')
+    posizione = fields.Integer(
+        "Posizione della fattura all'interno del file trasmesso")
+    cessionario_IdFiscaleIVA_IdPaese = fields.Char(
+        string='Id Paese', size=2, help="Codice della nazione espresso secondo\
+             lo standard ISO 3166-1 alpha-2 code")
+    cessionario_IdFiscaleIVA_IdCodice = fields.Char(
+        string='Codice identificativo fiscale', size=28)
+    cessionario_CodiceFiscale = fields.Char(
+        string='Codice Fiscale', size=16)
+    cessionario_Denominazione = fields.Char(
+        string='Ditta, denominazione o ragione sociale', size=80)
+    cessionario_Nome = fields.Char(
+        string='Nome della persona fisica', size=60, help="Obbligatorio ma da\
+             valorizzare insieme all'elemento 2.1.2.3 <Cognome>  ed in \
+             alternativa all'elemento 2.1.2.1 <Denominazione> ")
+    cessionario_Cognome = fields.Char(
+        string='Cognome della persona fisica', size=60, help="Obbligatorio \
+            ma da valorizzare insieme all'elemento 2.1.2.2 <Nome>  ed in \
+            alternativa all'elemento 2.1.2.1 <Denominazione>")
+    cessionario_sede_Indirizzo = fields.Char(
+        string='Indirizzo della sede', size=60)
+    cessionario_sede_NumeroCivico = fields.Char(
+        string='Numero civico', size=8)
+    cessionario_sede_Cap = fields.Char(
+        string='Numero civico', size=5)
+    cessionario_sede_Comune = fields.Char(
+        string='Comune', size=60)
+    cessionario_sede_Provincia = fields.Char(
+        string='Provincia', size=2)
+    cessionario_sede_Nazione = fields.Char(
+        string='Nazione', size=2, help="Codice della nazione espresso secondo\
+             lo standard ISO 3166-1 alpha-2 code")
+    cessionario_so_Indirizzo = fields.Char(
+        string='Indirizzo della stabile organizzazione in Italia', size=60)
+    cessionario_so_NumeroCivico = fields.Char(
+        string='Numero civico', size=8)
+    cessionario_so_Cap = fields.Char(
+        string='Numero civico', size=5)
+    cessionario_so_Comune = fields.Char(
+        string='Comune', size=60)
+    cessionario_so_Provincia = fields.Char(
+        string='Provincia', size=2)
+    cessionario_so_Nazione = fields.Char(
+        string='Nazione', size=2, help="Codice della nazione espresso secondo\
+             lo standard ISO 3166-1 alpha-2 code")
+    cessionario_rf_IdFiscaleIVA_IdPaese = fields.Char(
+        string='Id Paese', size=2, help="Accetta solo IT")
+    cessionario_rf_IdFiscaleIVA_IdCodice = fields.Char(
+        string='Codice identificativo fiscale', size=11)
+    cessionario_rf_Denominazione = fields.Char(
+        string='Ditta, denominazione o ragione sociale', size=80,
+        help="Ditta, denominazione o ragione sociale (ditta, impresa, \
+            società, ente) del rappresentante fiscale. Obbligatorio ma da \
+            valorizzare in alternativa agli elementi 2.1.2.6.3 <Nome>  e  \
+            2.1.2.6.4 <Cognome>")
+    cessionario_rf_Nome = fields.Char(
+        string='Nome della persona fisica', size=60, help="Nome del \
+            rappresentante fiscale persona fisica Obbligatorio ma da valorizzare\
+             insieme all'elemento 2.1.2.6.4 <Cognome>  ed in alternativa \
+             all'elemento 2.1.2.6.2 <Denominazione>")
+    cessionario_rf_Cognome = fields.Char(
+        string='Cognome della persona fisica', size=60, help="Cognome del \
+            rappresentante fiscale persona fisica. Obbligatorio ma da valorizzare\
+             insieme all'elemento 2.1.2.6.3 <Nome>  ed in alternativa \
+             all'elemento 2.1.2.6.2 <Denominazione>")
     dati_fattura_TipoDocumento = fields.Many2one(
         'fiscal.document.type', string='Tipo Documento', required=True)
     dati_fattura_Data = fields.Date(string='Data Documento', required=True)
@@ -357,6 +328,33 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
                     }
                     tax_lines.append((0, 0, val))
                 fattura.dati_fattura_iva_ids = tax_lines
+
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        for fattura in self:
+            if fattura.partner_id:
+                fattura.cessionario_IdFiscaleIVA_IdPaese = \
+                    fattura.partner_id.country_id.code or ''
+                fattura.cessionario_IdFiscaleIVA_IdCodice = \
+                    fattura.partner_id.vat[2:] if fattura.partner_id.vat \
+                    else ''
+                fattura.cessionario_CodiceFiscale = \
+                    fattura.partner_id.fiscalcode or ''
+                fattura.cessionario_Denominazione = \
+                    fattura.partner_id.name or ''
+                # Sede
+                fattura.cessionario_sede_Indirizzo = '{} {}'.format(
+                    fattura.partner_id.street, fattura.partner_id.street2)
+                fattura.cessionario_sede_Cap = \
+                    fattura.partner_id.zip or ''
+                fattura.cessionario_sede_Comune = \
+                    fattura.partner_id.city or ''
+                fattura.cessionario_sede_Provincia = \
+                    fattura.partner_id.state_id and \
+                    fattura.partner_id.state_id.code or ''
+                fattura.cessionario_sede_Nazione = \
+                    fattura.partner_id.country_id and \
+                    fattura.partner_id.country_id.code or ''
 
 
 class ComunicazioneDatiIvaFattureEmesseIva(models.Model):
@@ -404,10 +402,7 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
 
     comunicazione_id = fields.Many2one(
         'comunicazione.dati.iva', string='Comunicazione', readonly=True)
-    posizione = fields.Integer(
-        "Posizione della fattura all'interno del file trasmesso")
     invoice_id = fields.Many2one('account.invoice', string='Invoice')
-    partner_id = fields.Many2one('res.partner', string='Partner')
     partner_company_id = fields.Many2one('res.partner', string='Partner')
 
     # Cessionario
@@ -475,72 +470,7 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
          insieme all'elemento 3.1.2.6.3 <Nome>  ed in alternativa \
          all'elemento 3.1.2.6.2 <Denominazione>")
 
-    # Cedente
-    cedente_IdFiscaleIVA_IdPaese = fields.Char(
-        string='Id Paese', size=2, help="Codice della nazione espresso secondo\
-         lo standard ISO 3166-1 alpha-2 code")
-    cedente_IdFiscaleIVA_IdCodice = fields.Char(
-        string='Codice identificativo fiscale', size=28)
-    cedente_CodiceFiscale = fields.Char(
-        string='Codice Fiscale', size=16)
-    cedente_Denominazione = fields.Char(
-        string='Ditta, denominazione o ragione sociale', size=80)
-    cedente_Nome = fields.Char(
-        string='Nome della persona fisica', size=60, help="Obbligatorio ma da\
-         valorizzare insieme all'elemento 3.2.2.3 <Cognome>  ed in \
-         alternativa all'elemento 3.2.2.1 <Denominazione> ")
-    cedente_Cognome = fields.Char(
-        string='Cognome della persona fisica', size=60, help="Obbligatorio \
-        ma da valorizzare insieme all'elemento 3.2.2.2 <Nome>  ed in \
-        alternativa all'elemento 3.2.2.1 <Denominazione>")
-    cedente_sede_Indirizzo = fields.Char(
-        string='Indirizzo della sede', size=60)
-    cedente_sede_NumeroCivico = fields.Char(
-        string='Numero civico', size=8)
-    cedente_sede_Cap = fields.Char(
-        string='Numero civico', size=5)
-    cedente_sede_Comune = fields.Char(
-        string='Comune', size=60)
-    cedente_sede_Provincia = fields.Char(
-        string='Provincia', size=2)
-    cedente_sede_Nazione = fields.Char(
-        string='Nazione', size=2, help="Codice della nazione espresso secondo\
-         lo standard ISO 3166-1 alpha-2 code")
-    cedente_so_Indirizzo = fields.Char(
-        string='Indirizzo della stabile organizzazione in Italia', size=60)
-    cedente_so_NumeroCivico = fields.Char(
-        string='Numero civico', size=8)
-    cedente_so_Cap = fields.Char(
-        string='Numero civico', size=5)
-    cedente_so_Comune = fields.Char(
-        string='Comune', size=60)
-    cedente_so_Provincia = fields.Char(
-        string='Provincia', size=2)
-    cedente_so_Nazione = fields.Char(
-        string='Nazione', size=2, help="Codice della nazione espresso secondo\
-         lo standard ISO 3166-1 alpha-2 code")
-    cedente_rf_IdFiscaleIVA_IdPaese = fields.Char(
-        string='Id Paese', size=2, help="Accetta solo IT")
-    cedente_rf_IdFiscaleIVA_IdCodice = fields.Char(
-        string='Codice identificativo fiscale', size=11)
-    cedente_rf_Denominazione = fields.Char(
-        string='Ditta, denominazione o ragione sociale', size=80,
-        help="Ditta, denominazione o ragione sociale (ditta, impresa, \
-        società, ente) del rappresentante fiscale. Obbligatorio ma da \
-        valorizzare in alternativa agli elementi 3.2.2.6.3 <Nome>  e  \
-        3.2.2.6.4 <Cognome>")
-    cedente_rf_Nome = fields.Char(
-        string='Nome della persona fisica', size=60, help="Nome del \
-        rappresentante fiscale persona fisica Obbligatorio ma da valorizzare\
-         insieme all'elemento 3.2.2.6.4 <Cognome>  ed in alternativa \
-         all'elemento 3.2.2.6.2 <Denominazione>")
-    cedente_rf_Cognome = fields.Char(
-        string='Cognome della persona fisica', size=60, help="Cognome del \
-        rappresentante fiscale persona fisica. Obbligatorio ma da valorizzare\
-         insieme all'elemento 3.2.2.6.3 <Nome>  ed in alternativa \
-         all'elemento 3.2.2.6.2 <Denominazione>")
-
-    # Dati fattura
+    # Dati Cedente e Fattura
     fatture_ricevute_body_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.ricevute.body', 'fattura_ricevuta_id',
         string='Body Fatture Ricevute')
@@ -555,33 +485,6 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
 
-    @api.onchange('partner_id')
-    def onchange_partner_id(self):
-        for fattura in self:
-            if fattura.partner_id:
-                fattura.cedente_IdFiscaleIVA_IdPaese = \
-                    fattura.partner_id.country_id.code or ''
-                fattura.cedente_IdFiscaleIVA_IdCodice = \
-                    fattura.partner_id.vat[2:] if fattura.partner_id.vat \
-                    else ''
-                fattura.cedente_CodiceFiscale = \
-                    fattura.partner_id.fiscalcode or ''
-                fattura.cedente_Denominazione = \
-                    fattura.partner_id.name or ''
-                # Sede
-                fattura.cedente_sede_Indirizzo = '{} {}'.format(
-                    fattura.partner_id.street, fattura.partner_id.street2)
-                fattura.cedente_sede_Cap = \
-                    fattura.partner_id.zip or ''
-                fattura.cedente_sede_Comune = \
-                    fattura.partner_id.city or ''
-                fattura.cedente_sede_Provincia = \
-                    fattura.partner_id.state_id and \
-                    fattura.partner_id.state_id.code or ''
-                fattura.cedente_sede_Nazione = \
-                    fattura.partner_id.country_id and \
-                    fattura.partner_id.country_id.code or ''
-
     @api.onchange('partner_company_id')
     def onchange_partner_company_id(self):
         for fattura in self:
@@ -590,7 +493,7 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
                     fattura.partner_company_id.country_id.code or ''
                 fattura.cessionario_IdFiscaleIVA_IdCodice = \
                     fattura.partner_company_id.vat[2:] if \
-                    fattura.partner_company_id.vat else ''
+                        fattura.partner_company_id.vat else ''
                 fattura.cessionario_CodiceFiscale = \
                     fattura.partner_company_id.fiscalcode or ''
                 fattura.cessionario_Denominazione = \
@@ -617,6 +520,72 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
 
     fattura_ricevuta_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta")
+    posizione = fields.Integer(
+        "Posizione della fattura all'interno del file trasmesso")
+    partner_id = fields.Many2one('res.partner', string='Partner')
+    cedente_IdFiscaleIVA_IdPaese = fields.Char(
+        string='Id Paese', size=2, help="Codice della nazione espresso secondo\
+             lo standard ISO 3166-1 alpha-2 code")
+    cedente_IdFiscaleIVA_IdCodice = fields.Char(
+        string='Codice identificativo fiscale', size=28)
+    cedente_CodiceFiscale = fields.Char(
+        string='Codice Fiscale', size=16)
+    cedente_Denominazione = fields.Char(
+        string='Ditta, denominazione o ragione sociale', size=80)
+    cedente_Nome = fields.Char(
+        string='Nome della persona fisica', size=60, help="Obbligatorio ma da\
+             valorizzare insieme all'elemento 3.2.2.3 <Cognome>  ed in \
+             alternativa all'elemento 3.2.2.1 <Denominazione> ")
+    cedente_Cognome = fields.Char(
+        string='Cognome della persona fisica', size=60, help="Obbligatorio \
+            ma da valorizzare insieme all'elemento 3.2.2.2 <Nome>  ed in \
+            alternativa all'elemento 3.2.2.1 <Denominazione>")
+    cedente_sede_Indirizzo = fields.Char(
+        string='Indirizzo della sede', size=60)
+    cedente_sede_NumeroCivico = fields.Char(
+        string='Numero civico', size=8)
+    cedente_sede_Cap = fields.Char(
+        string='Numero civico', size=5)
+    cedente_sede_Comune = fields.Char(
+        string='Comune', size=60)
+    cedente_sede_Provincia = fields.Char(
+        string='Provincia', size=2)
+    cedente_sede_Nazione = fields.Char(
+        string='Nazione', size=2, help="Codice della nazione espresso secondo\
+             lo standard ISO 3166-1 alpha-2 code")
+    cedente_so_Indirizzo = fields.Char(
+        string='Indirizzo della stabile organizzazione in Italia', size=60)
+    cedente_so_NumeroCivico = fields.Char(
+        string='Numero civico', size=8)
+    cedente_so_Cap = fields.Char(
+        string='Numero civico', size=5)
+    cedente_so_Comune = fields.Char(
+        string='Comune', size=60)
+    cedente_so_Provincia = fields.Char(
+        string='Provincia', size=2)
+    cedente_so_Nazione = fields.Char(
+        string='Nazione', size=2, help="Codice della nazione espresso secondo\
+             lo standard ISO 3166-1 alpha-2 code")
+    cedente_rf_IdFiscaleIVA_IdPaese = fields.Char(
+        string='Id Paese', size=2, help="Accetta solo IT")
+    cedente_rf_IdFiscaleIVA_IdCodice = fields.Char(
+        string='Codice identificativo fiscale', size=11)
+    cedente_rf_Denominazione = fields.Char(
+        string='Ditta, denominazione o ragione sociale', size=80,
+        help="Ditta, denominazione o ragione sociale (ditta, impresa, \
+            società, ente) del rappresentante fiscale. Obbligatorio ma da \
+            valorizzare in alternativa agli elementi 3.2.2.6.3 <Nome>  e  \
+            3.2.2.6.4 <Cognome>")
+    cedente_rf_Nome = fields.Char(
+        string='Nome della persona fisica', size=60, help="Nome del \
+            rappresentante fiscale persona fisica Obbligatorio ma da valorizzare\
+             insieme all'elemento 3.2.2.6.4 <Cognome>  ed in alternativa \
+             all'elemento 3.2.2.6.2 <Denominazione>")
+    cedente_rf_Cognome = fields.Char(
+        string='Cognome della persona fisica', size=60, help="Cognome del \
+            rappresentante fiscale persona fisica. Obbligatorio ma da valorizzare\
+             insieme all'elemento 3.2.2.6.3 <Nome>  ed in alternativa \
+             all'elemento 3.2.2.6.2 <Denominazione>")
     dati_fattura_TipoDocumento = fields.Many2one(
         'fiscal.document.type', string='Tipo Documento', required=True)
     dati_fattura_Data = fields.Date(string='Data Documento', required=True)
@@ -655,6 +624,32 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
                     tax_lines.append((0, 0, val))
                 fattura.dati_fattura_iva_ids = tax_lines
 
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        for fattura in self:
+            if fattura.partner_id:
+                fattura.cedente_IdFiscaleIVA_IdPaese = \
+                    fattura.partner_id.country_id.code or ''
+                fattura.cedente_IdFiscaleIVA_IdCodice = \
+                    fattura.partner_id.vat[2:] if fattura.partner_id.vat \
+                        else ''
+                fattura.cedente_CodiceFiscale = \
+                    fattura.partner_id.fiscalcode or ''
+                fattura.cedente_Denominazione = \
+                    fattura.partner_id.name or ''
+                # Sede
+                fattura.cedente_sede_Indirizzo = '{} {}'.format(
+                    fattura.partner_id.street, fattura.partner_id.street2)
+                fattura.cedente_sede_Cap = \
+                    fattura.partner_id.zip or ''
+                fattura.cedente_sede_Comune = \
+                    fattura.partner_id.city or ''
+                fattura.cedente_sede_Provincia = \
+                    fattura.partner_id.state_id and \
+                    fattura.partner_id.state_id.code or ''
+                fattura.cedente_sede_Nazione = \
+                    fattura.partner_id.country_id and \
+                    fattura.partner_id.country_id.code or ''
 
 
 class ComunicazioneDatiIvaFattureRicevuteIva(models.Model):
