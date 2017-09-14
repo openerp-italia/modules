@@ -48,6 +48,12 @@
                                     </field>
                                 </group>
                             </page>
+                            <page string="Fatture Ricevute">
+                                <group>
+                                    <field name="fatture_ricevute_ids" nolabel="1">
+                                    </field>
+                                </group>
+                            </page>
                         </notebook>
                     </sheet>
                 </form>
