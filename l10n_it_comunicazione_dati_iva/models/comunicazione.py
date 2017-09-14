@@ -107,7 +107,6 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
 
     comunicazione_id = fields.Many2one(
         'comunicazione.dati.iva', string='Comunicazione', readonly=True)
-    invoice_id = fields.Many2one('account.invoice', string='Invoice')
     partner_company_id = fields.Many2one('res.partner', string='Partner')
 
     # Cedente
@@ -226,6 +225,7 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
     fattura_emessa_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
     partner_id = fields.Many2one('res.partner', string='Partner')
+    invoice_id = fields.Many2one('account.invoice', string='Invoice')
     posizione = fields.Integer(
         "Posizione della fattura all'interno del file trasmesso")
     cessionario_IdFiscaleIVA_IdPaese = fields.Char(
@@ -402,7 +402,6 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
 
     comunicazione_id = fields.Many2one(
         'comunicazione.dati.iva', string='Comunicazione', readonly=True)
-    invoice_id = fields.Many2one('account.invoice', string='Invoice')
     partner_company_id = fields.Many2one('res.partner', string='Partner')
 
     # Cessionario
@@ -523,6 +522,7 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
     posizione = fields.Integer(
         "Posizione della fattura all'interno del file trasmesso")
     partner_id = fields.Many2one('res.partner', string='Partner')
+    invoice_id = fields.Many2one('account.invoice', string='Invoice')
     cedente_IdFiscaleIVA_IdPaese = fields.Char(
         string='Id Paese', size=2, help="Codice della nazione espresso secondo\
              lo standard ISO 3166-1 alpha-2 code")
@@ -657,7 +657,7 @@ class ComunicazioneDatiIvaFattureRicevuteIva(models.Model):
     _description = 'Comunicazione Dati IVA - Fatture Ricevute Iva'
 
     fattura_ricevuta_body_id = fields.Many2one(
-        'comunicazione.dati.iva.fatture.ricevute,body',
+        'comunicazione.dati.iva.fatture.ricevute.body',
         string='Body Fattura Ricevuta', readonly=True)
     ImponibileImporto = fields.Float(
         string='Base imponibile', help="Ammontare (base) imponibile ( per le\
