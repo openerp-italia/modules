@@ -18,7 +18,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/comunicazione.xml',
-        # 'wizard/export_file_view.xml',
+        'wizard/export_file_view.xml',
     ],
     'installable': True,
 }
