@@ -61,6 +61,13 @@ class ComunicazioneDatiIva(models.Model):
     fatture_emesse_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.emesse', 'comunicazione_id',
         string='Fatture Emesse')
+    fatture_ricevute_ids = fields.One2many(
+        'comunicazione.dati.iva.fatture.ricevute', 'comunicazione_id',
+        string='Fatture Ricevute')
+    fatture_emesse = fields.Boolean(string="Fatture Emesse")
+    fatture_ricevute = fields.Boolean(string="Fatture Ricevute")
+    annullamento_dati_precedenti = fields.Boolean(string="Annullamento Dati"
+                                                         " Precedenti")
 
     @api.multi
     def _compute_name(self):
@@ -1041,13 +1048,9 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
          all'elemento 2.1.2.6.2 <Denominazione>")
 
     # Dati fattura
-    dati_fattura_TipoDocumento = fields.Many2one(
-        'fiscal.document.type', string='Tipo Documento', required=True)
-    dati_fattura_Data = fields.Date(string='Data Documento', required=True)
-    dati_fattura_Numero = fields.Char(string='Numero Documento', required=True)
-    dati_fattura_iva_ids = fields.One2many(
-        'comunicazione.dati.iva.fatture.emesse.iva', 'fattura_emessa_id',
-        string='Riepilogo Iva')
+    fatture_emesse_body_ids = fields.One2many(
+        'comunicazione.dati.iva.fatture.emesse.body', 'fattura_emessa_id',
+        string='Body Fatture Emesse')
 
     # Rettifica
     rettifica_IdFile = fields.Char(
@@ -1058,36 +1061,6 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
     rettifica_Posizione = fields.Integer(
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
-
-    @api.onchange('invoice_id')
-    def onchange_invoice_id(self):
-        for fattura in self:
-            if fattura.invoice_id:
-                fattura.dati_fattura_TipoDocumento = \
-                    fattura.invoice_id.fiscal_document_type_id and \
-                    fattura.invoice_id.fiscal_document_type_id.id or False
-                fattura.dati_fattura_Numero = fattura.invoice_id.number
-                fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
-                fattura.partner_id = fattura.invoice_id.partner_id.id
-                fattura.partner_company_id = \
-                    fattura.invoice_id.company_id.partner_id.id
-                # tax
-                tax_lines = []
-                for tax_line in fattura.invoice_id.tax_line:
-                    # aliquota
-                    aliquota = 0
-                    domain = [('tax_code_id', '=', tax_line.tax_code_id.id)]
-                    tax = self.env['account.tax'].search(
-                        domain, order='id', limit=1)
-                    if tax:
-                        aliquota = tax.amount * 100
-                    val = {
-                        'ImponibileImporto': tax_line.base_amount,
-                        'Imposta': tax_line.amount,
-                        'Aliquota': aliquota,
-                    }
-                    tax_lines.append((0, 0, val))
-                fattura.dati_fattura_iva_ids = tax_lines
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -1145,13 +1118,58 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
                     fattura.partner_company_id.country_id.code or ''
 
 
+class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
+    _name = 'comunicazione.dati.iva.fatture.emesse.body'
+    _description = 'Comunicazione Dati IVA - Body Fatture Emesse'
+
+    fattura_emessa_id = fields.Many2one(
+        'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
+    dati_fattura_TipoDocumento = fields.Many2one(
+        'fiscal.document.type', string='Tipo Documento', required=True)
+    dati_fattura_Data = fields.Date(string='Data Documento', required=True)
+    dati_fattura_Numero = fields.Char(string='Numero Documento', required=True)
+    dati_fattura_iva_ids = fields.One2many(
+        'comunicazione.dati.iva.fatture.emesse.iva', 'fattura_emessa_body_id',
+        string='Riepilogo Iva')
+
+    @api.onchange('invoice_id')
+    def onchange_invoice_id(self):
+        for fattura in self:
+            if fattura.invoice_id:
+                fattura.dati_fattura_TipoDocumento = \
+                    fattura.invoice_id.fiscal_document_type_id and \
+                    fattura.invoice_id.fiscal_document_type_id.id or False
+                fattura.dati_fattura_Numero = fattura.invoice_id.number
+                fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
+                fattura.partner_id = fattura.invoice_id.partner_id.id
+                fattura.partner_company_id = \
+                    fattura.invoice_id.company_id.partner_id.id
+                # tax
+                tax_lines = []
+                for tax_line in fattura.invoice_id.tax_line:
+                    # aliquota
+                    aliquota = 0
+                    domain = [('tax_code_id', '=', tax_line.tax_code_id.id)]
+                    tax = self.env['account.tax'].search(
+                        domain, order='id', limit=1)
+                    if tax:
+                        aliquota = tax.amount * 100
+                    val = {
+                        'ImponibileImporto': tax_line.base_amount,
+                        'Imposta': tax_line.amount,
+                        'Aliquota': aliquota,
+                    }
+                    tax_lines.append((0, 0, val))
+                fattura.dati_fattura_iva_ids = tax_lines
+
+
 class ComunicazioneDatiIvaFattureEmesseIva(models.Model):
     _name = 'comunicazione.dati.iva.fatture.emesse.iva'
     _description = 'Comunicazione Dati IVA - Fatture Emesse Iva'
 
-    fattura_emessa_id = fields.Many2one(
-        'comunicazione.dati.iva.fatture.emesse', string='Fattura Emessa',
-        readonly=True)
+    fattura_emessa_body_id = fields.Many2one(
+        'comunicazione.dati.iva.fatture.emesse.body',
+        string='Body Fattura Emessa', readonly=True)
     ImponibileImporto = fields.Float(
         string='Base imponibile', help="Ammontare (base) imponibile ( per le\
          operazioni soggette ad IVA )  o importo non imponibile (per le \
@@ -1327,13 +1345,9 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
          all'elemento 3.2.2.6.2 <Denominazione>")
 
     # Dati fattura
-    dati_fattura_TipoDocumento = fields.Many2one(
-        'fiscal.document.type', string='Tipo Documento', required=True)
-    dati_fattura_Data = fields.Date(string='Data Documento', required=True)
-    dati_fattura_Numero = fields.Char(string='Numero Documento', required=True)
-    dati_fattura_iva_ids = fields.One2many(
-        'comunicazione.dati.iva.fatture.emesse.iva', 'fattura_emessa_id',
-        string='Riepilogo Iva')
+    fatture_ricevute_body_ids = fields.One2many(
+        'comunicazione.dati.iva.fatture.ricevute.body', 'fattura_ricevuta_id',
+        string='Body Fatture Ricevute')
 
     # Rettifica
     rettifica_IdFile = fields.Char(
@@ -1344,36 +1358,6 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
     rettifica_Posizione = fields.Integer(
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
-
-    @api.onchange('invoice_id')
-    def onchange_invoice_id(self):
-        for fattura in self:
-            if fattura.invoice_id:
-                fattura.dati_fattura_TipoDocumento = \
-                    fattura.invoice_id.fiscal_document_type_id and \
-                    fattura.invoice_id.fiscal_document_type_id.id or False
-                fattura.dati_fattura_Numero = fattura.invoice_id.number
-                fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
-                fattura.partner_id = fattura.invoice_id.partner_id.id
-                fattura.partner_company_id = \
-                    fattura.invoice_id.company_id.partner_id.id
-                # tax
-                tax_lines = []
-                for tax_line in fattura.invoice_id.tax_line:
-                    # aliquota
-                    aliquota = 0
-                    domain = [('tax_code_id', '=', tax_line.tax_code_id.id)]
-                    tax = self.env['account.tax'].search(
-                        domain, order='id', limit=1)
-                    if tax:
-                        aliquota = tax.amount * 100
-                    val = {
-                        'ImponibileImporto': tax_line.base_amount,
-                        'Imposta': tax_line.amount,
-                        'Aliquota': aliquota,
-                    }
-                    tax_lines.append((0, 0, val))
-                fattura.dati_fattura_iva_ids = tax_lines
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -1431,13 +1415,59 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
                     fattura.partner_company_id.country_id.code or ''
 
 
+class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
+    _name = 'comunicazione.dati.iva.fatture.ricevute.body'
+    _description = 'Comunicazione Dati IVA - Body Fatture Ricevute'
+
+    fattura_ricevuta_id = fields.Many2one(
+        'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta")
+    dati_fattura_TipoDocumento = fields.Many2one(
+        'fiscal.document.type', string='Tipo Documento', required=True)
+    dati_fattura_Data = fields.Date(string='Data Documento', required=True)
+    dati_fattura_Numero = fields.Char(string='Numero Documento', required=True)
+    dati_fattura_iva_ids = fields.One2many(
+        'comunicazione.dati.iva.fatture.ricevute.iva', 'fattura_ricevuta_body_id',
+        string='Riepilogo Iva')
+
+    @api.onchange('invoice_id')
+    def onchange_invoice_id(self):
+        for fattura in self:
+            if fattura.invoice_id:
+                fattura.dati_fattura_TipoDocumento = \
+                    fattura.invoice_id.fiscal_document_type_id and \
+                    fattura.invoice_id.fiscal_document_type_id.id or False
+                fattura.dati_fattura_Numero = fattura.invoice_id.number
+                fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
+                fattura.partner_id = fattura.invoice_id.partner_id.id
+                fattura.partner_company_id = \
+                    fattura.invoice_id.company_id.partner_id.id
+                # tax
+                tax_lines = []
+                for tax_line in fattura.invoice_id.tax_line:
+                    # aliquota
+                    aliquota = 0
+                    domain = [('tax_code_id', '=', tax_line.tax_code_id.id)]
+                    tax = self.env['account.tax'].search(
+                        domain, order='id', limit=1)
+                    if tax:
+                        aliquota = tax.amount * 100
+                    val = {
+                        'ImponibileImporto': tax_line.base_amount,
+                        'Imposta': tax_line.amount,
+                        'Aliquota': aliquota,
+                    }
+                    tax_lines.append((0, 0, val))
+                fattura.dati_fattura_iva_ids = tax_lines
+
+
+
 class ComunicazioneDatiIvaFattureRicevuteIva(models.Model):
     _name = 'comunicazione.dati.iva.fatture.ricevute.iva'
     _description = 'Comunicazione Dati IVA - Fatture Ricevute Iva'
 
-    fattura_ricevuta_id = fields.Many2one(
-        'comunicazione.dati.iva.fatture.ricevute', string='Fattura Ricevuta',
-        readonly=True)
+    fattura_ricevuta_body_id = fields.Many2one(
+        'comunicazione.dati.iva.fatture.ricevute,body',
+        string='Body Fattura Ricevuta', readonly=True)
     ImponibileImporto = fields.Float(
         string='Base imponibile', help="Ammontare (base) imponibile ( per le\
          operazioni soggette ad IVA )  o importo non imponibile (per le \
