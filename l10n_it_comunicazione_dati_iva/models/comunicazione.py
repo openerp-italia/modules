@@ -265,6 +265,12 @@ class ComunicazioneDatiIva(models.Model):
                     fattura.partner_cessionario_id.country_id and \
                     fattura.partner_cessionario_id.country_id.code or ''
 
+    def _prepare_fattura_emessa(self, vals, fattura):
+        return vals
+
+    def _prepare_fattura_ricevuta(self, vals, fattura):
+        return vals
+
     @api.multi
     def compute_values(self):
         # Unlink existing lines
@@ -274,51 +280,41 @@ class ComunicazioneDatiIva(models.Model):
             if comunicazione.fatture_emesse:
 
                 fatture_emesse = self._get_fatture_emesse()
-                # Cedente
-                cedenti = fatture_emesse.mapped('company_id.partner_id')
-                for cedente in cedenti:
-                    # Fatture
-                    fatture = fatture_emesse.filtered(
-                        lambda fatture_emesse:
-                        fatture_emesse.company_id.partner_id.id == cedente.id)
-                    vals_fatture = []
-                    for fattura in fatture:
-                        val = {
-                            'partner_id': fattura.partner_id.id,
-                            'invoice_id': fattura.id,
-                            'dati_fattura_TipoDocumento': fattura.fiscal_document_type_id.id,
-                            'dati_fattura_Data': fattura.date_invoice,
-                            'dati_fattura_Numero': fattura.number,
-                        }
-                        vals_fatture.append((0, 0, val))
+                if fatture_emesse:
+                    dati_fatture = []
+                    # Cedente
+                    comunicazione.partner_cedente_id = \
+                        fatture_emesse[0].company_id.partner_id.id
+                    comunicazione.onchange_partner_cedente_id()
 
-                    val_cedente = {
-                        'partner_company_id': cedente.id,
-                        'fatture_emesse_body_ids': vals_fatture
-                    }
-                    comunicazione.fatture_emesse_ids = [(0, 0, val_cedente)]
-                """
-                # Fatture
-                for fatture_emessa in comunicazione.fatture_emesse_ids:
-                    fatture_emessa.onchange_partner_company_id()
-                    fatture = fatture_emesse.filtered(
-                        lambda fatture_emesse:
-                        fatture_emesse.company_id.partner_id.id == cedente.id)
-                    vals = []
-                    for fattura in fatture:
-                        val = {
-                            'fattura_emessa_id': fatture_emessa.id,
-                            'partner_id': fattura.partner_id.id,
-                            'invoice_id': fattura.id
+                    # Cessionari
+                    cessionari = fatture_emesse.mapped('partner_id')
+                    for cessionario in cessionari:
+                        # Fatture
+                        fatture = fatture_emesse.filtered(
+                            lambda fatture_emesse:
+                            fatture_emesse.partner_id.id ==
+                                cessionario.id)
+                        vals_fatture = []
+                        for fattura in fatture:
+                            val = {
+                                'invoice_id': fattura.id,
+                                'dati_fattura_TipoDocumento':
+                                    fattura.fiscal_document_type_id.id,
+                                'dati_fattura_Data': fattura.date_invoice,
+                                'dati_fattura_Numero': fattura.number,
+                                'dati_fattura_iva_ids':
+                                    fattura._get_tax_comunicazione_dati_iva()
+                            }
+                            val = self._prepare_fattura_emessa(val, fattura)
+                            vals_fatture.append((0, 0, val))
+
+                        val_cessionario = {
+                            'partner_id': cessionario.id,
+                            'fatture_emesse_body_ids': vals_fatture
                         }
-                        import pdb
-                        pdb.set_trace()
-                        self.env[
-                            'comunicazione.dati.iva.fatture.emesse.body'].create(val)
-                        vals.append((0, 0, val))
-                    import pdb
-                    pdb.set_trace()"""
-                #sezione.fatture_emesse_body_ids = vals
+                        dati_fatture.append((0, 0, val_cessionario))
+                    comunicazione.fatture_emesse_ids = dati_fatture
 
     def _get_fatture_emesse(self):
         invoices = False
@@ -459,7 +455,6 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
         'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
     posizione = fields.Integer(
         "Posizione della fattura all'interno del file trasmesso")
-
     invoice_id = fields.Many2one('account.invoice', string='Invoice')
     dati_fattura_TipoDocumento = fields.Many2one(
         'fiscal.document.type', string='Tipo Documento', required=True)
@@ -478,26 +473,8 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
                     fattura.invoice_id.fiscal_document_type_id.id or False
                 fattura.dati_fattura_Numero = fattura.invoice_id.number
                 fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
-                fattura.partner_id = fattura.invoice_id.partner_id.id
-                fattura.partner_company_id = \
-                    fattura.invoice_id.company_id.partner_id.id
-                # tax
-                tax_lines = []
-                for tax_line in fattura.invoice_id.tax_line:
-                    # aliquota
-                    aliquota = 0
-                    domain = [('tax_code_id', '=', tax_line.tax_code_id.id)]
-                    tax = self.env['account.tax'].search(
-                        domain, order='id', limit=1)
-                    if tax:
-                        aliquota = tax.amount * 100
-                    val = {
-                        'ImponibileImporto': tax_line.base_amount,
-                        'Imposta': tax_line.amount,
-                        'Aliquota': aliquota,
-                    }
-                    tax_lines.append((0, 0, val))
-                fattura.dati_fattura_iva_ids = tax_lines
+                fattura.dati_fattura_iva_ids = \
+                    fattura.invoice_id._get_tax_comunicazione_dati_iva()
 
 
 class ComunicazioneDatiIvaFattureEmesseIva(models.Model):
@@ -663,7 +640,6 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
     posizione = fields.Integer(
         "Posizione della fattura all'interno del file trasmesso")
     invoice_id = fields.Many2one('account.invoice', string='Invoice')
-
     dati_fattura_TipoDocumento = fields.Many2one(
         'fiscal.document.type', string='Tipo Documento', required=True)
     dati_fattura_Data = fields.Date(string='Data Documento', required=True)
@@ -681,9 +657,6 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
                     fattura.invoice_id.fiscal_document_type_id.id or False
                 fattura.dati_fattura_Numero = fattura.invoice_id.number
                 fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
-                fattura.partner_id = fattura.invoice_id.partner_id.id
-                fattura.partner_company_id = \
-                    fattura.invoice_id.company_id.partner_id.id
                 # tax
                 tax_lines = []
                 for tax_line in fattura.invoice_id.tax_line:
