@@ -184,6 +184,7 @@
                     <notebook>
                         <page string="Cessionario" name="page_cessionario">
                             <group name="cessionario">
+                                <field name="partner_id"/>
                                 <field name="cessionario_IdFiscaleIVA_IdPaese"/>
                                 <field name="cessionario_IdFiscaleIVA_IdCodice"/>
                                 <field name="cessionario_CodiceFiscale"/>

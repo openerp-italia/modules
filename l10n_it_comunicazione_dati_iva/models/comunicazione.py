@@ -423,34 +423,6 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
 
-    @api.onchange('partner_cedente_id')
-    def onchange_partner_cedente_id(self):
-        for fattura in self:
-            if fattura.partner_company_id:
-                fattura.cedente_IdFiscaleIVA_IdPaese = \
-                    fattura.partner_company_id.country_id.code or ''
-                fattura.cedente_IdFiscaleIVA_IdCodice = \
-                    fattura.partner_company_id.vat[2:] if \
-                    fattura.partner_company_id.vat else ''
-                fattura.cedente_CodiceFiscale = \
-                    fattura.partner_company_id.fiscalcode or ''
-                fattura.cedente_Denominazione = \
-                    fattura.partner_company_id.name or ''
-                # Sede
-                fattura.cedente_sede_Indirizzo = '{} {}'.format(
-                    fattura.partner_company_id.street,
-                    fattura.partner_company_id.street2)
-                fattura.cedente_sede_Cap = \
-                    fattura.partner_company_id.zip or ''
-                fattura.cedente_sede_Comune = \
-                    fattura.partner_company_id.city or ''
-                fattura.cedente_sede_Provincia = \
-                    fattura.partner_company_id.state_id and \
-                    fattura.partner_company_id.state_id.code or ''
-                fattura.cedente_sede_Nazione = \
-                    fattura.partner_company_id.country_id and \
-                    fattura.partner_company_id.country_id.code or ''
-
     @api.onchange('partner_id')
     def onchange_partner_id(self):
         for fattura in self:
