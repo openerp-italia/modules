@@ -313,6 +313,7 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree string="Fatture emesse">
+                    <field name="posizione" />
                     <field name="invoice_id" />
                     <field name="dati_fattura_Numero" />
                     <field name="dati_fattura_Data" />
@@ -357,6 +358,7 @@
             <field name="type">tree</field>
             <field name="arch" type="xml">
                 <tree>
+                    <field name="posizione" />
                     <field name="invoice_id" />
                     <field name="dati_fattura_Numero" />
                     <field name="dati_fattura_Data" />

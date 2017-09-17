@@ -328,6 +328,7 @@ class ComunicazioneDatiIva(models.Model):
             self.onchange_partner_cedente_id()
 
             # Cessionari
+            posizione = 0
             cessionari = fatture_emesse.mapped('partner_id')
             for cessionario in cessionari:
                 # Fatture
@@ -337,7 +338,9 @@ class ComunicazioneDatiIva(models.Model):
                         cessionario.id)
                 vals_fatture = []
                 for fattura in fatture:
+                    posizione += 1
                     val = {
+                        'posizione': posizione,
                         'invoice_id': fattura.id,
                         'dati_fattura_TipoDocumento':
                             fattura.fiscal_document_type_id.id,
@@ -381,6 +384,7 @@ class ComunicazioneDatiIva(models.Model):
             self.onchange_partner_cessionario_id()
 
             # Cedenti
+            posizione = 0
             cedenti = fatture_ricevute.mapped('partner_id')
             for cedente in cedenti:
                 # Fatture
@@ -390,7 +394,9 @@ class ComunicazioneDatiIva(models.Model):
                         cedente.id)
                 vals_fatture = []
                 for fattura in fatture:
+                    posizione += 1
                     val = {
+                        'posizione': posizione,
                         'invoice_id': fattura.id,
                         'dati_fattura_TipoDocumento':
                             fattura.fiscal_document_type_id.id,
@@ -564,7 +570,8 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
     fattura_emessa_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
     posizione = fields.Integer(
-        "Posizione della fattura all'interno del file trasmesso")
+        "Posizione", help="della fattura all'interno del file trasmesso",
+        required=True)
     invoice_id = fields.Many2one('account.invoice', string='Invoice')
     dati_fattura_TipoDocumento = fields.Many2one(
         'fiscal.document.type', string='Tipo Documento', required=True)
@@ -764,7 +771,8 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
     fattura_ricevuta_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta")
     posizione = fields.Integer(
-        "Posizione della fattura all'interno del file trasmesso")
+        "Posizione", help="della fattura all'interno del file trasmesso",
+        required=True)
     invoice_id = fields.Many2one('account.invoice', string='Invoice')
     dati_fattura_TipoDocumento = fields.Many2one(
         'fiscal.document.type', string='Tipo Documento', required=True)
