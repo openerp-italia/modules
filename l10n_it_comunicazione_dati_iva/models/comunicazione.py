@@ -212,58 +212,94 @@ class ComunicazioneDatiIva(models.Model):
     def onchange_partner_cedente_id(self):
         for comunicazione in self:
             if comunicazione.partner_cedente_id:
+                vals = fattura.comunicazione_id.\
+                    _prepare_cedente_partner_id(
+                        comunicazione.partner_cedente_id)
                 comunicazione.cedente_IdFiscaleIVA_IdPaese = \
-                    comunicazione.partner_cedente_id.country_id.code or ''
-                comunicazione.cedente_IdFiscaleIVA_IdCodice = \
-                    comunicazione.partner_cedente_id.vat[2:] if \
-                    comunicazione.partner_cedente_id.vat else ''
+                    vals['cedente_IdFiscaleIVA_IdPaese']
+                comunicazionera.cedente_IdFiscaleIVA_IdCodice = \
+                    vals['cedente_IdFiscaleIVA_IdCodice']
                 comunicazione.cedente_CodiceFiscale = \
-                    comunicazione.partner_cedente_id.fiscalcode or ''
+                    vals['cedente_CodiceFiscale']
                 comunicazione.cedente_Denominazione = \
-                    comunicazione.partner_cedente_id.name or ''
+                    vals['cedente_Denominazione']
                 # Sede
-                comunicazione.cedente_sede_Indirizzo = '{} {}'.format(
-                    comunicazione.partner_cedente_id.street,
-                    comunicazione.partner_cedente_id.street2)
-                comunicazione.cedente_sede_Cap = \
-                    comunicazione.partner_cedente_id.zip or ''
+                comunicazione.cedente_sede_Indirizzo =\
+                    vals['cedente_sede_Indirizzo']
+                comunicazione.cessionario_sede_Cap = \
+                    vals['cedente_sede_Cap']
                 comunicazione.cedente_sede_Comune = \
-                    comunicazione.partner_cedente_id.city or ''
+                    vals['cedente_sede_Comune']
                 comunicazione.cedente_sede_Provincia = \
-                    comunicazione.partner_cedente_id.state_id and \
-                    comunicazione.partner_cedente_id.state_id.code or ''
+                    vals['cedente_sede_Provincia']
                 comunicazione.cedente_sede_Nazione = \
-                    comunicazione.partner_cedente_id.country_id and \
-                    comunicazione.partner_cedente_id.country_id.code or ''
+                    vals['cedente_sede_Nazione']
 
+    def _prepare_cedente_partner_id(self, partner, vals=None):
+        vals = {}
+        vals['cedente_IdFiscaleIVA_IdPaese'] = \
+            partner.country_id.code or ''
+        vals['cedente_IdFiscaleIVA_IdCodice'] = \
+            partner.vat[2:] if partner.vat else ''
+        vals['cedente_CodiceFiscale'] = partner.fiscalcode or ''
+        vals['cedente_Denominazione'] = partner.name or ''
+        # Sede
+        vals['cedente_sede_Indirizzo'] = '{} {}'.format(
+            partner.street or '', partner.street2 or '')
+        vals['cedente_sede_Cap'] = partner.zip or ''
+        vals['cedente_sede_Comune'] = partner.city or ''
+        vals['cedente_sede_Provincia'] = partner.state_id and \
+            partner.state_id.code or ''
+        vals['cedente_sede_Nazione'] = partner.country_id and \
+            partner.country_id.code or ''
+        return vals
+
+    @api.multi
     @api.onchange('partner_cessionario_id')
     def onchange_partner_cessionario_id(self):
         for comunicazione in self:
             if comunicazione.partner_cessionario_id:
+                vals = fattura.comunicazione_id.\
+                    _prepare_cessionario_partner_id(
+                        comunicazione.partner_cessionario_id)
                 comunicazione.cessionario_IdFiscaleIVA_IdPaese = \
-                    fattura.partner_cessionario_id.country_id.code or ''
-                comunicazione.cessionario_IdFiscaleIVA_IdCodice = \
-                    fattura.partner_cessionario_id.vat[2:] if \
-                    fattura.partner_cessionario_id.vat \
-                    else ''
+                    vals['cessionario_IdFiscaleIVA_IdPaese']
+                fattucomunicazionera.cessionario_IdFiscaleIVA_IdCodice = \
+                    vals['cessionario_IdFiscaleIVA_IdCodice']
                 comunicazione.cessionario_CodiceFiscale = \
-                    fattura.partner_cessionario_id.fiscalcode or ''
+                    vals['cessionario_CodiceFiscale']
                 comunicazione.cessionario_Denominazione = \
-                    fattura.partner_cessionario_id.name or ''
+                    vals['cessionario_Denominazione']
                 # Sede
-                comunicazione.cessionario_sede_Indirizzo = '{} {}'.format(
-                    fattura.partner_cessionario_id.street,
-                    fattura.partner_cessionario_id.street2)
+                comunicazione.cessionario_sede_Indirizzo =\
+                    vals['cessionario_sede_Indirizzo']
                 comunicazione.cessionario_sede_Cap = \
-                    fattura.partner_cessionario_id.zip or ''
+                    vals['cessionario_sede_Cap']
                 comunicazione.cessionario_sede_Comune = \
-                    fattura.partner_cessionario_id.city or ''
+                    vals['cessionario_sede_Comune']
                 comunicazione.cessionario_sede_Provincia = \
-                    fattura.partner_cessionario_id.state_id and \
-                    fattura.partner_cessionario_id.state_id.code or ''
+                    vals['cessionario_sede_Provincia']
                 comunicazione.cessionario_sede_Nazione = \
-                    fattura.partner_cessionario_id.country_id and \
-                    fattura.partner_cessionario_id.country_id.code or ''
+                    vals['cessionario_sede_Nazione']
+
+    def _prepare_cessionario_partner_id(self, partner, vals=None):
+        vals = {}
+        vals['cessionario_IdFiscaleIVA_IdPaese'] = \
+            partner.country_id.code or ''
+        vals['cessionario_IdFiscaleIVA_IdCodice'] = \
+            partner.vat[2:] if partner.vat else ''
+        vals['cessionario_CodiceFiscale'] = partner.fiscalcode or ''
+        vals['cessionario_Denominazione'] = partner.name or ''
+        # Sede
+        vals['cessionario_sede_Indirizzo'] = '{} {}'.format(
+            partner.street or '', partner.street2 or '')
+        vals['cessionario_sede_Cap'] = partner.zip or ''
+        vals['cessionario_sede_Comune'] = partner.city or ''
+        vals['cessionario_sede_Provincia'] = partner.state_id and \
+            partner.state_id.code or ''
+        vals['cessionario_sede_Nazione'] = partner.country_id and \
+            partner.country_id.code or ''
+        return vals
 
     def _prepare_fattura_emessa(self, vals, fattura):
         return vals
@@ -313,6 +349,9 @@ class ComunicazioneDatiIva(models.Model):
                             'partner_id': cessionario.id,
                             'fatture_emesse_body_ids': vals_fatture
                         }
+                        vals = self._prepare_cessionario_partner_id(
+                            cessionario)
+                        val_cessionario.update(vals)
                         dati_fatture.append((0, 0, val_cessionario))
                     comunicazione.fatture_emesse_ids = dati_fatture
 
@@ -420,32 +459,32 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
 
+    @api.multi
     @api.onchange('partner_id')
     def onchange_partner_id(self):
         for fattura in self:
             if fattura.partner_id:
+                vals = fattura.comunicazione_id.\
+                    _prepare_cessionario_partner_id(fattura.partner_id)
                 fattura.cessionario_IdFiscaleIVA_IdPaese = \
-                    fattura.partner_id.country_id.code or ''
+                    vals['cessionario_IdFiscaleIVA_IdPaese']
                 fattura.cessionario_IdFiscaleIVA_IdCodice = \
-                    fattura.partner_id.vat[2:] if fattura.partner_id.vat \
-                    else ''
+                    vals['cessionario_IdFiscaleIVA_IdCodice']
                 fattura.cessionario_CodiceFiscale = \
-                    fattura.partner_id.fiscalcode or ''
+                    vals['cessionario_CodiceFiscale']
                 fattura.cessionario_Denominazione = \
-                    fattura.partner_id.name or ''
+                    vals['cessionario_Denominazione']
                 # Sede
-                fattura.cessionario_sede_Indirizzo = '{} {}'.format(
-                    fattura.partner_id.street, fattura.partner_id.street2)
+                fattura.cessionario_sede_Indirizzo =\
+                    vals['cessionario_sede_Indirizzo']
                 fattura.cessionario_sede_Cap = \
-                    fattura.partner_id.zip or ''
+                    vals['cessionario_sede_Cap']
                 fattura.cessionario_sede_Comune = \
-                    fattura.partner_id.city or ''
+                    vals['cessionario_sede_Comune']
                 fattura.cessionario_sede_Provincia = \
-                    fattura.partner_id.state_id and \
-                    fattura.partner_id.state_id.code or ''
+                    vals['cessionario_sede_Provincia']
                 fattura.cessionario_sede_Nazione = \
-                    fattura.partner_id.country_id and \
-                    fattura.partner_id.country_id.code or ''
+                    vals['cessionario_sede_Nazione']
 
 
 class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
