@@ -23,8 +23,9 @@ class account_invoice(models.Model):
                     'ImponibileImporto': tax_line.base_amount,
                     'Imposta': tax_line.amount,
                     'Aliquota': aliquota,
-                    'Natura_id': tax.kind_id.code if tax.kind_id else False,
-                    #'EsigiblitaIva': tax.payability if tax.payability else False,
+                    'Natura_id': tax.kind_id.id if tax.kind_id else False,
+                    'EsigibilitaIVA': tax.payability
+                    if tax.payability else False,
                 }
                 val = self._check_tax_comunicazione_dati_iva(tax, val)
                 tax_lines.append((0, 0, val))
@@ -36,6 +37,10 @@ class account_invoice(models.Model):
         if val['Aliquota'] == 0 and not val['Natura_id']:
             raise ValidationError(
                 _("Specificare la natura dell'esenzione per l'imposta: {}"
+                  ).format(tax.name))
+        if not val['EsigibilitaIVA']:
+            raise ValidationError(
+                _("Specificare l'esigibilità IVA per l'imposta: {}"
                   ).format(tax.name))
 
         return val

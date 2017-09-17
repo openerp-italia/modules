@@ -564,7 +564,7 @@ class ComunicazioneDatiIvaFattureEmesseIva(models.Model):
          (fattura semplificata), si può indicare in alternativa all'elemento \
          2.2.3.2.2.1 <Imposta>. Per tutti gli altri valori dell'elemento \
          2.2.3.1.1 <TipoDocumento> deve essere valorizzata.")
-    Natura_id = fields.Char('Natura')
+    Natura_id = fields.Many2one('account.tax.kind', string='Natura')
     Detraibile = fields.Float(string='Detraibile %')
     Deducibile = fields.Char(string='Deducibile', size=2,
                              help="valori ammessi: [SI] = spesa deducibile")
