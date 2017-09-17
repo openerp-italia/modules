@@ -212,12 +212,11 @@ class ComunicazioneDatiIva(models.Model):
     def onchange_partner_cedente_id(self):
         for comunicazione in self:
             if comunicazione.partner_cedente_id:
-                vals = fattura.comunicazione_id.\
-                    _prepare_cedente_partner_id(
-                        comunicazione.partner_cedente_id)
+                vals = self._prepare_cedente_partner_id(
+                    comunicazione.partner_cedente_id)
                 comunicazione.cedente_IdFiscaleIVA_IdPaese = \
                     vals['cedente_IdFiscaleIVA_IdPaese']
-                comunicazionera.cedente_IdFiscaleIVA_IdCodice = \
+                comunicazione.cedente_IdFiscaleIVA_IdCodice = \
                     vals['cedente_IdFiscaleIVA_IdCodice']
                 comunicazione.cedente_CodiceFiscale = \
                     vals['cedente_CodiceFiscale']
@@ -259,9 +258,8 @@ class ComunicazioneDatiIva(models.Model):
     def onchange_partner_cessionario_id(self):
         for comunicazione in self:
             if comunicazione.partner_cessionario_id:
-                vals = fattura.comunicazione_id.\
-                    _prepare_cessionario_partner_id(
-                        comunicazione.partner_cessionario_id)
+                vals = self._prepare_cessionario_partner_id(
+                    comunicazione.partner_cessionario_id)
                 comunicazione.cessionario_IdFiscaleIVA_IdPaese = \
                     vals['cessionario_IdFiscaleIVA_IdPaese']
                 fattucomunicazionera.cessionario_IdFiscaleIVA_IdCodice = \
@@ -491,6 +489,18 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
     _name = 'comunicazione.dati.iva.fatture.emesse.body'
     _description = 'Comunicazione Dati IVA - Body Fatture Emesse'
 
+    @api.depends('dati_fattura_iva_ids.ImponibileImporto',
+                 'dati_fattura_iva_ids.Imposta')
+    def _compute_total(self):
+        for ft in self:
+            totale_imponibile = 0
+            totale_iva = 0
+            for tax_line in ft.dati_fattura_iva_ids:
+                totale_imponibile += tax_line.ImponibileImporto
+                totale_iva += tax_line.Imposta
+            ft.totale_imponibile = totale_imponibile
+            ft.totale_iva = totale_iva
+
     fattura_emessa_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
     posizione = fields.Integer(
@@ -503,6 +513,10 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
     dati_fattura_iva_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.emesse.iva', 'fattura_emessa_body_id',
         string='Riepilogo Iva')
+    totale_imponibile = fields.Float('Totale Imponibile',
+                                     compute="_compute_total", store=True)
+    totale_iva = fields.Float('Totale IVA',
+                              compute="_compute_total", store=True)
 
     @api.onchange('invoice_id')
     def onchange_invoice_id(self):
@@ -675,6 +689,18 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
     _name = 'comunicazione.dati.iva.fatture.ricevute.body'
     _description = 'Comunicazione Dati IVA - Body Fatture Ricevute'
 
+    @api.depends('dati_fattura_iva_ids.ImponibileImporto',
+                 'dati_fattura_iva_ids.Imposta')
+    def _compute_total(self):
+        for ft in self:
+            totale_imponibile = 0
+            totale_iva = 0
+            for tax_line in ft.dati_fattura_iva_ids:
+                totale_imponibile += tax_line.ImponibileImporto
+                totale_iva += tax_line.Imposta
+            ft.totale_imponibile = totale_imponibile
+            ft.totale_iva = totale_iva
+
     fattura_ricevuta_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta")
     posizione = fields.Integer(
@@ -685,8 +711,13 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
     dati_fattura_Data = fields.Date(string='Data Documento', required=True)
     dati_fattura_Numero = fields.Char(string='Numero Documento', required=True)
     dati_fattura_iva_ids = fields.One2many(
-        'comunicazione.dati.iva.fatture.ricevute.iva', 'fattura_ricevuta_body_id',
+        'comunicazione.dati.iva.fatture.ricevute.iva',
+        'fattura_ricevuta_body_id',
         string='Riepilogo Iva')
+    totale_imponibile = fields.Float('Totale Imponibile',
+                                     compute="_compute_total", store=True)
+    totale_iva = fields.Float('Totale IVA',
+                              compute="_compute_total", store=True)
 
     @api.onchange('invoice_id')
     def onchange_invoice_id(self):
