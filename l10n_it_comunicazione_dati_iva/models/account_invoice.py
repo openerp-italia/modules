@@ -20,7 +20,7 @@ class account_invoice(models.Model):
                 if tax:
                     aliquota = tax.amount * 100
                 val = {
-                    'ImponibileImporto': tax_line.base_amount,
+                    'ImponibileImporto': tax_line.base,
                     'Imposta': tax_line.amount,
                     'Aliquota': aliquota,
                     'Natura_id': tax.kind_id.id if tax.kind_id else False,

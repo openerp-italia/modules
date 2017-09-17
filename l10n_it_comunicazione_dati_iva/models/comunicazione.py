@@ -48,10 +48,10 @@ class ComunicazioneDatiIva(models.Model):
     fatture_ricevute_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.ricevute', 'comunicazione_id',
         string='Fatture Ricevute')
-    fatture_emesse = fields.Boolean(string="Fatture Emesse")
-    fatture_ricevute = fields.Boolean(string="Fatture Ricevute")
-    annullamento_dati_precedenti = fields.Boolean(string="Annullamento Dati"
-                                                         " Precedenti")
+    dati_trasmissione = fields.Selection(
+        [('DTE', 'Fatture Emesse'), ('DTR', 'Fatture Ricevute'),
+         ('ANN', 'Annullamento dai inviati in precedenza')],
+        string='Trasmissione dati', required=True)
     # Cedente
     partner_cedente_id = fields.Many2one('res.partner', string='Partner')
     cedente_IdFiscaleIVA_IdPaese = fields.Char(
@@ -262,7 +262,7 @@ class ComunicazioneDatiIva(models.Model):
                     comunicazione.partner_cessionario_id)
                 comunicazione.cessionario_IdFiscaleIVA_IdPaese = \
                     vals['cessionario_IdFiscaleIVA_IdPaese']
-                fattucomunicazionera.cessionario_IdFiscaleIVA_IdCodice = \
+                comunicazione.cessionario_IdFiscaleIVA_IdCodice = \
                     vals['cessionario_IdFiscaleIVA_IdCodice']
                 comunicazione.cessionario_CodiceFiscale = \
                     vals['cessionario_CodiceFiscale']
@@ -311,8 +311,11 @@ class ComunicazioneDatiIva(models.Model):
         self._unlink_sections()
         for comunicazione in self:
             # Fatture Emesse
-            if comunicazione.fatture_emesse:
+            if comunicazione.dati_trasmissione == 'DTE':
                 comunicazione.compute_fatture_emesse()
+            # Fatture Ricevute
+            if comunicazione.dati_trasmissione == 'DTR':
+                comunicazione.compute_fatture_ricevute()
 
     @api.one
     def compute_fatture_emesse(self):
@@ -367,9 +370,63 @@ class ComunicazioneDatiIva(models.Model):
             invoices = self.env['account.invoice'].search(domain)
         return invoices
 
+    @api.one
+    def compute_fatture_ricevute(self):
+        fatture_ricevute = self._get_fatture_ricevute()
+        if fatture_ricevute:
+            dati_fatture = []
+            # Cedente
+            self.partner_cedente_id = \
+                fatture_ricevute[0].company_id.partner_id.id
+            self.onchange_partner_cessionario_id()
+
+            # Cedenti
+            cedenti = fatture_ricevute.mapped('partner_id')
+            for cedente in cedenti:
+                # Fatture
+                fatture = fatture_ricevute.filtered(
+                    lambda fatture_ricevute:
+                    fatture_ricevute.partner_id.id ==
+                        cedente.id)
+                vals_fatture = []
+                for fattura in fatture:
+                    val = {
+                        'invoice_id': fattura.id,
+                        'dati_fattura_TipoDocumento':
+                            fattura.fiscal_document_type_id.id,
+                        'dati_fattura_Data': fattura.date_invoice,
+                        'dati_fattura_Numero': fattura.number,
+                        'dati_fattura_iva_ids':
+                            fattura._get_tax_comunicazione_dati_iva()
+                    }
+                    val = self._prepare_fattura_ricevuta(val, fattura)
+                    vals_fatture.append((0, 0, val))
+
+                val_cedente = {
+                    'partner_id': cedente.id,
+                    'fatture_ricevute_body_ids': vals_fatture
+                }
+                vals = self._prepare_cedente_partner_id(
+                    cedente)
+                val_cedente.update(vals)
+                dati_fatture.append((0, 0, val_cedente))
+            self.fatture_ricevute_ids = dati_fatture
+
+    def _get_fatture_ricevute(self):
+        invoices = False
+        for comunicazione in self:
+            domain = [('fiscal_document_type_id.type', 'in',
+                       ['in_invoice', 'in_refund']),
+                      ('company_id', '>=', comunicazione.company_id.id),
+                      ('registration_date', '>=', comunicazione.date_start),
+                      ('registration_date', '<=', comunicazione.date_end)]
+            invoices = self.env['account.invoice'].search(domain)
+        return invoices
+
     def _unlink_sections(self):
         for comunicazione in self:
             comunicazione.fatture_emesse_ids = False
+            comunicazione.fatture_ricevute_ids = False
 
         return True
 

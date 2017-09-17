@@ -8,6 +8,7 @@
             <field name="arch" type="xml">
                 <tree string="Comunicazioni dati IVA">
                     <field name="identificativo"/>
+                    <field name="dati_trasmissione"/>
                     <field name="date_start"/>
                     <field name="date_end"/>
                     <field name="company_id"/>
@@ -42,11 +43,9 @@
                             </group>
                         </group>
                         <group name="Riepilogo">
-                            <field name="fatture_emesse"/>
-                            <field name="fatture_ricevute"/>
-                            <field name="annullamento_dati_precedenti" />
+                            <field name="dati_trasmissione" widget="radio"/>
                         </group>
-                        <notebook attrs="{'invisible':[('fatture_emesse', '!=', True)]}">
+                        <notebook attrs="{'invisible':[('dati_trasmissione', '!=', 'DTE')]}">
 	                        <page string="Cedente" name="page_cedente">
 	                            <group name="cedente">
 	                                <field name="partner_cedente_id"/>
@@ -88,7 +87,7 @@
 	                            </group>
 	                        </page>
 	                    </notebook>
-	                    <notebook attrs="{'invisible':[('fatture_ricevute', '!=', True)]}">
+	                    <notebook attrs="{'invisible':[('dati_trasmissione', '!=', 'DTR')]}">
 	                       <page string="Cessionario" name="page_cessionario">
 	                            <group name="cessionario">
 	                                <field name="partner_cessionario_id"/>
@@ -131,13 +130,15 @@
 	                        </page>
 	                    </notebook>
                         <notebook>
-                            <page string="Fatture Emesse">
+                            <page string="Fatture Emesse"
+                                attrs="{'invisible':[('dati_trasmissione', '!=', 'DTE')]}">
                                 <group>
                                     <field name="fatture_emesse_ids" nolabel="1">
                                     </field>
                                 </group>
                             </page>
-                            <page string="Fatture Ricevute">
+                            <page string="Fatture Ricevute"
+                                attrs="{'invisible':[('dati_trasmissione', '!=', 'DTR')]}">
                                 <group>
                                     <field name="fatture_ricevute_ids" nolabel="1">
                                     </field>
