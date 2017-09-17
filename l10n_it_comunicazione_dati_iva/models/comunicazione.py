@@ -321,6 +321,7 @@ class ComunicazioneDatiIva(models.Model):
         for comunicazione in self:
             domain = [('fiscal_document_type_id.type', 'in',
                        ['out_invoice', 'out_refund']),
+                      ('company_id', '>=', comunicazione.company_id.id),
                       ('date_invoice', '>=', comunicazione.date_start),
                       ('date_invoice', '<=', comunicazione.date_end)]
             invoices = self.env['account.invoice'].search(domain)
