@@ -312,46 +312,49 @@ class ComunicazioneDatiIva(models.Model):
         for comunicazione in self:
             # Fatture Emesse
             if comunicazione.fatture_emesse:
+                comunicazione.compute_fatture_emesse()
 
-                fatture_emesse = self._get_fatture_emesse()
-                if fatture_emesse:
-                    dati_fatture = []
-                    # Cedente
-                    comunicazione.partner_cedente_id = \
-                        fatture_emesse[0].company_id.partner_id.id
-                    comunicazione.onchange_partner_cedente_id()
+    @api.one
+    def compute_fatture_emesse(self):
+        fatture_emesse = self._get_fatture_emesse()
+        if fatture_emesse:
+            dati_fatture = []
+            # Cedente
+            self.partner_cedente_id = \
+                fatture_emesse[0].company_id.partner_id.id
+            self.onchange_partner_cedente_id()
 
-                    # Cessionari
-                    cessionari = fatture_emesse.mapped('partner_id')
-                    for cessionario in cessionari:
-                        # Fatture
-                        fatture = fatture_emesse.filtered(
-                            lambda fatture_emesse:
-                            fatture_emesse.partner_id.id ==
-                                cessionario.id)
-                        vals_fatture = []
-                        for fattura in fatture:
-                            val = {
-                                'invoice_id': fattura.id,
-                                'dati_fattura_TipoDocumento':
-                                    fattura.fiscal_document_type_id.id,
-                                'dati_fattura_Data': fattura.date_invoice,
-                                'dati_fattura_Numero': fattura.number,
-                                'dati_fattura_iva_ids':
-                                    fattura._get_tax_comunicazione_dati_iva()
-                            }
-                            val = self._prepare_fattura_emessa(val, fattura)
-                            vals_fatture.append((0, 0, val))
+            # Cessionari
+            cessionari = fatture_emesse.mapped('partner_id')
+            for cessionario in cessionari:
+                # Fatture
+                fatture = fatture_emesse.filtered(
+                    lambda fatture_emesse:
+                    fatture_emesse.partner_id.id ==
+                        cessionario.id)
+                vals_fatture = []
+                for fattura in fatture:
+                    val = {
+                        'invoice_id': fattura.id,
+                        'dati_fattura_TipoDocumento':
+                            fattura.fiscal_document_type_id.id,
+                        'dati_fattura_Data': fattura.date_invoice,
+                        'dati_fattura_Numero': fattura.number,
+                        'dati_fattura_iva_ids':
+                            fattura._get_tax_comunicazione_dati_iva()
+                    }
+                    val = self._prepare_fattura_emessa(val, fattura)
+                    vals_fatture.append((0, 0, val))
 
-                        val_cessionario = {
-                            'partner_id': cessionario.id,
-                            'fatture_emesse_body_ids': vals_fatture
-                        }
-                        vals = self._prepare_cessionario_partner_id(
-                            cessionario)
-                        val_cessionario.update(vals)
-                        dati_fatture.append((0, 0, val_cessionario))
-                    comunicazione.fatture_emesse_ids = dati_fatture
+                val_cessionario = {
+                    'partner_id': cessionario.id,
+                    'fatture_emesse_body_ids': vals_fatture
+                }
+                vals = self._prepare_cessionario_partner_id(
+                    cessionario)
+                val_cessionario.update(vals)
+                dati_fatture.append((0, 0, val_cessionario))
+            self.fatture_emesse_ids = dati_fatture
 
     def _get_fatture_emesse(self):
         invoices = False
@@ -561,7 +564,7 @@ class ComunicazioneDatiIvaFattureEmesseIva(models.Model):
          (fattura semplificata), si può indicare in alternativa all'elemento \
          2.2.3.2.2.1 <Imposta>. Per tutti gli altri valori dell'elemento \
          2.2.3.1.1 <TipoDocumento> deve essere valorizzata.")
-    Natura_id = fields.Char('Natura DA FARE M2O')
+    Natura_id = fields.Char('Natura')
     Detraibile = fields.Float(string='Detraibile %')
     Deducibile = fields.Char(string='Deducibile', size=2,
                              help="valori ammessi: [SI] = spesa deducibile")
@@ -777,7 +780,7 @@ class ComunicazioneDatiIvaFattureRicevuteIva(models.Model):
          (fattura semplificata), si può indicare in alternativa all'elemento \
          3.2.3.2.2.1 <Imposta>. Per tutti gli altri valori dell'elemento \
          3.2.3.1.1 <TipoDocumento> deve essere valorizzata.")
-    Natura_id = fields.Char('Natura DA FARE M2O')
+    Natura_id = fields.Char('Natura')
     Detraibile = fields.Float(string='Detraibile %')
     Deducibile = fields.Char(string='Deducibile', size=2,
                              help="valori ammessi: [SI] = spesa deducibile")
