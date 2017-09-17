@@ -376,7 +376,7 @@ class ComunicazioneDatiIva(models.Model):
         if fatture_ricevute:
             dati_fatture = []
             # Cedente
-            self.partner_cedente_id = \
+            self.partner_cessionario_id = \
                 fatture_ricevute[0].company_id.partner_id.id
             self.onchange_partner_cessionario_id()
 
