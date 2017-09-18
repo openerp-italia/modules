@@ -2,8 +2,34 @@
 
 
 from openerp import api, fields, models, _
-from datetime import datetime
 from openerp.exceptions import ValidationError
+from lxml import etree
+
+
+NS_2 = 'http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v2.0'
+VERSION = 'DAT20'
+NS_MAP = {
+    'ns2': NS_2,
+}
+etree.register_namespace("vi", NS_2)
+
+
+def format_decimal(value=0.0):
+    return "{:.2f}".format(value).replace('.', ',')
+
+
+def clear_xml_element(element):
+    if element.text:
+        return False
+    return all((clear_xml_element(e) for e in element.iterchildren()))
+
+
+def clear_xml(xml_root):
+    xml_root = etree.iterwalk(xml_root)
+    for dummy, xml_element in xml_root:
+        parent = xml_element.getparent()
+        if clear_xml_element(xml_element):
+            parent.remove(xml_element)
 
 
 class ComunicazioneDatiIva(models.Model):
@@ -48,6 +74,8 @@ class ComunicazioneDatiIva(models.Model):
     fatture_ricevute_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.ricevute', 'comunicazione_id',
         string='Fatture Ricevute')
+    fatture_emesse = fields.Boolean(string="Fatture Emesse")
+    fatture_ricevute = fields.Boolean(string="Fatture Ricevute")
     dati_trasmissione = fields.Selection(
         [('DTE', 'Fatture Emesse'), ('DTR', 'Fatture Ricevute'),
          ('ANN', 'Annullamento dai inviati in precedenza')],
@@ -437,6 +465,950 @@ class ComunicazioneDatiIva(models.Model):
             comunicazione.fatture_ricevute_ids = False
 
         return True
+
+    def _validate(self):
+        """
+        Controllo congruità dati della comunicazione
+        """
+        return True
+
+    def _export_xml_get_dati_fattura(self):
+        # ----- 0 - Dati Fattura
+        attrs = {
+            'versione': VERSION
+            }
+        x_0_dati_fattura = etree.Element(
+            etree.QName(NS_2, "DatiFattura"), attrib=attrs, nsmap=NS_MAP)
+        return x_0_dati_fattura
+
+    def _export_xml_get_dati_fattura_header(self):
+        # ----- 1 - Dati Fattura
+        x_1_dati_fattura_header = etree.Element(
+            etree.QName("DatiFatturaHeader"))
+        # ----- 1.1 - Progressivo Invio
+        x_1_1_progressivo_invio = etree.SubElement(
+            x_1_dati_fattura_header,
+            etree.QName("ProgressivoInvio"))
+        x_1_1_progressivo_invio.text = str(self.identificativo)
+
+        '''
+        Nota del file excel: 
+        Questo blocco va valorizzato solo se il soggetto obbligato 
+        alla comunicazione dei dati fattura non coincide con 
+        il soggetto passivo IVA al quale i dati si riferiscono. 
+        NON deve essere valorizzato se per il soggetto trasmittente 
+        è vera una delle seguenti affermazioni:
+        - coincide  con il soggetto IVA al quale i dati si riferiscono;
+        - è legato da vincolo di incarico con il soggetto IVA al quale i dati 
+            si riferiscono;
+        - è un intermediario.
+        In tutti gli altri casi questo blocco DEVE essere valorizzato.
+        
+        # ----- 1.2 - Dichiarante
+        x_1_2_dichiarante = etree.SubElement(
+            x_1_dati_fattura_header,
+            etree.QName("Dichiarante"))
+        # ----- 1.2.1 - Codice Fiscale
+        x_1_2_1_codice_fiscale = etree.SubElement(
+            x_1_2_dichiarante,
+            etree.QName("CodiceFiscale"))
+        x_1_2_1_codice_fiscale.text = self.company_id.vat
+        # ----- 1.2.2 - Carica
+        x_1_2_2_carica = etree.SubElement(
+            x_1_2_dichiarante,
+            etree.QName("Carica"))
+        '''
+
+        return x_1_dati_fattura_header
+
+    def _export_xml_get_dte(self):
+        # ----- 2 - DTE
+        x_2_dte = etree.Element(
+            etree.QName("DTE"))
+        # -----     2.1 - Cedente Prestatore DTE
+        x_2_1_cedente_prestatore = etree.SubElement(
+            x_2_dte,
+            etree.QName("CedentePrestatoreDTE"))
+        # -----         2.1.1 - IdentificativiFiscali
+        x_2_1_1_identificativi_fiscali = etree.SubElement(
+            x_2_1_cedente_prestatore,
+            etree.QName("IdentificativiFiscali"))
+        # -----             2.1.1.1 - Id Fiscale IVA
+        x_2_1_1_1_id_fiscale_iva = etree.SubElement(
+            x_2_1_1_identificativi_fiscali,
+            etree.QName("IdFiscaleIVA"))
+        # -----                 2.1.1.1.1 - Id Paese
+        x_2_1_1_1_1_id_paese = etree.SubElement(
+            x_2_1_1_1_id_fiscale_iva,
+            etree.QName("IdPaese"))
+        x_2_1_1_1_1_id_paese.text = self.cedente_IdFiscaleIVA_IdPaese or ''
+        # -----                 2.1.1.1.2 - Id Codice
+        x_2_1_1_1_2_id_codice = etree.SubElement(
+            x_2_1_1_1_id_fiscale_iva,
+            etree.QName("IdCodice"))
+        x_2_1_1_1_2_id_codice.text = self.cedente_IdFiscaleIVA_IdCodice or ''
+        # -----             2.1.1.2 - Codice Fiscale
+        x_2_1_1_2_codice_fiscale = etree.SubElement(
+            x_2_1_1_identificativi_fiscali,
+            etree.QName("CodiceFiscale"))
+        x_2_1_1_2_codice_fiscale.text = self.cedente_CodiceFiscale or ''
+        # -----         2.1.2 - AltriDatiIdentificativi
+        x_2_1_2_altri_identificativi = etree.SubElement(
+            x_2_1_cedente_prestatore,
+            etree.QName("AltriDatiIdentificativi"))
+        # -----             2.1.2.1 - Denominazione
+        x_2_1_2_1_denominazione = etree.SubElement(
+            x_2_1_2_altri_identificativi,
+            etree.QName("Denominazione"))
+        x_2_1_2_1_denominazione.text = self.cedente_Denominazione or ''
+        # -----             2.1.2.2 - Nome
+        x_2_1_2_2_nome = etree.SubElement(
+            x_2_1_2_altri_identificativi,
+            etree.QName("Nome"))
+        x_2_1_2_2_nome.text = self.cedente_Nome or ''
+        # -----             2.1.2.3 - Cognome
+        x_2_1_2_3_cognome = etree.SubElement(
+            x_2_1_2_altri_identificativi,
+            etree.QName("Cognome"))
+        x_2_1_2_3_cognome.text = self.cedente_Cognome or ''
+        # -----             2.1.2.4 - Sede
+        x_2_1_2_4_sede = etree.SubElement(
+            x_2_1_2_altri_identificativi,
+            etree.QName("Sede"))
+        # -----                 2.1.2.4.1 - Indirizzo
+        x_2_1_2_4_1_indirizzo = etree.SubElement(
+            x_2_1_2_4_sede,
+            etree.QName("Indirizzo"))
+        x_2_1_2_4_1_indirizzo.text = self.cedente_sede_Indirizzo or ''
+        # -----                 2.1.2.4.2 - Numero Civico
+        x_2_1_2_4_2_numero_civico = etree.SubElement(
+            x_2_1_2_4_sede,
+            etree.QName("NumeroCivico"))
+        x_2_1_2_4_2_numero_civico.text = self.cedente_sede_NumeroCivico or ''
+        # -----                 2.1.2.4.3 - CAP
+        x_2_1_2_4_3_cap = etree.SubElement(
+            x_2_1_2_4_sede,
+            etree.QName("CAP"))
+        x_2_1_2_4_3_cap.text = self.cedente_sede_Cap or ''
+        # -----                 2.1.2.4.4 - Comune
+        x_2_1_2_4_4_comune = etree.SubElement(
+            x_2_1_2_4_sede,
+            etree.QName("Comune"))
+        x_2_1_2_4_4_comune.text = self.cedente_sede_Comune or ''
+        # -----                 2.1.2.4.5 - Provincia
+        x_2_1_2_4_5_provincia = etree.SubElement(
+            x_2_1_2_4_sede,
+            etree.QName("Provincia"))
+        x_2_1_2_4_5_provincia.text = self.cedente_sede_Provincia or ''
+        # -----                 2.1.2.4.6 - Nazione
+        x_2_1_2_4_6_nazione = etree.SubElement(
+            x_2_1_2_4_sede,
+            etree.QName("Nazione"))
+        x_2_1_2_4_6_nazione.text = self.cedente_sede_Nazione or ''
+        # -----             2.1.2.5 - Stabile Organizzazione
+        x_2_1_2_5_stabile_organizzazione = etree.SubElement(
+            x_2_1_2_altri_identificativi,
+            etree.QName("StabileOrganizzazione"))
+        # -----                 2.1.2.5.1 - Indirizzo
+        x_2_1_2_5_1_indirizzo = etree.SubElement(
+            x_2_1_2_5_stabile_organizzazione,
+            etree.QName("Indirizzo"))
+        x_2_1_2_5_1_indirizzo.text = self.cedente_so_Indirizzo or ''
+        # -----                 2.1.2.5.2 - Numero Civico
+        x_2_1_2_5_2_numero_civico = etree.SubElement(
+            x_2_1_2_5_stabile_organizzazione,
+            etree.QName("Numerocivico"))
+        x_2_1_2_5_2_numero_civico.text = self.cedente_so_NumeroCivico or ''
+        # -----                 2.1.2.5.3 - CAP
+        x_2_1_2_5_3_cap = etree.SubElement(
+            x_2_1_2_5_stabile_organizzazione,
+            etree.QName("CAP"))
+        x_2_1_2_5_3_cap.text = self.cedente_so_Cap or ''
+        # -----                 2.1.2.5.4 - Comune
+        x_2_1_2_5_4_comune = etree.SubElement(
+            x_2_1_2_5_stabile_organizzazione,
+            etree.QName("Comune"))
+        x_2_1_2_5_4_comune.text = self.cedente_so_Comune or ''
+        # -----                 2.1.2.5.5 - Provincia
+        x_2_1_2_5_5_provincia = etree.SubElement(
+            x_2_1_2_5_stabile_organizzazione,
+            etree.QName("Provincia"))
+        x_2_1_2_5_5_provincia.text = self.cedente_so_Provincia or ''
+        # -----                 2.1.2.5.6 - Nazione
+        x_2_1_2_5_6_nazione = etree.SubElement(
+            x_2_1_2_5_stabile_organizzazione,
+            etree.QName("Nazione"))
+        x_2_1_2_5_6_nazione.text = self.cedente_so_Nazione or ''
+        # -----             2.1.2.6 - Rappresentante Fiscale
+        x_2_1_2_6_rappresentante_fiscale = etree.SubElement(
+            x_2_1_2_altri_identificativi,
+            etree.QName("RappresentanteFiscale"))
+        # -----                 2.1.2.6.1 - Id Fiscale IVA
+        x_2_1_2_6_1_id_fiscale_iva = etree.SubElement(
+            x_2_1_2_6_rappresentante_fiscale,
+            etree.QName("IdFiscaleIVA"))
+        # -----                     2.1.2.6.1.1 - Id Paese
+        x_2_1_2_6_1_1_id_paese = etree.SubElement(
+            x_2_1_2_6_1_id_fiscale_iva,
+            etree.QName("IdPaese"))
+        x_2_1_2_6_1_1_id_paese.text = self.cedente_rf_IdFiscaleIVA_IdPaese or ''
+        # -----                     2.1.2.6.1.2 - Id Codice
+        x_2_1_2_6_1_2_id_codice = etree.SubElement(
+            x_2_1_2_6_1_id_fiscale_iva,
+            etree.QName("IdCodice"))
+        x_2_1_2_6_1_2_id_codice.text = \
+            self.cedente_rf_IdFiscaleIVA_IdCodice or ''
+        # -----                 2.1.2.6.2 - Denominazione
+        x_2_1_2_6_2_denominazione = etree.SubElement(
+            x_2_1_2_6_rappresentante_fiscale,
+            etree.QName("Denominazione"))
+        x_2_1_2_6_2_denominazione.text = \
+            self.cedente_rf_Denominazione or ''
+        # -----                 2.1.2.6.3 - Nome
+        x_2_1_2_6_3_nome = etree.SubElement(
+            x_2_1_2_6_rappresentante_fiscale,
+            etree.QName("Nome"))
+        x_2_1_2_6_3_nome.text = self.cedente_rf_Nome or ''
+        # -----                 2.1.2.6.4 - Cognome
+        x_2_1_2_6_4_cognome = etree.SubElement(
+            x_2_1_2_6_rappresentante_fiscale,
+            etree.QName("Cognome"))
+        x_2_1_2_6_4_cognome.text = self.cedente_rf_Cognome or ''
+
+        for partner_invoice in self.fatture_emesse_ids:
+            # -----     2.2 - Cessionario Committente DTE
+            x_2_2_cessionario_committente = etree.SubElement(
+                x_2_dte,
+                etree.QName("CessionarioCommittenteDTE"))
+            # -----         2.2.1 - IdentificativiFiscali
+            x_2_2_1_identificativi_fiscali = etree.SubElement(
+                x_2_2_cessionario_committente,
+                etree.QName("IdentificativiFiscali"))
+            # -----             2.2.1.1 - Id Fiscale IVA
+            x_2_2_1_1_id_fiscale_iva = etree.SubElement(
+                x_2_2_1_identificativi_fiscali,
+                etree.QName("IdFiscaleIVA"))
+            # -----                 2.2.1.1.1 - Id Paese
+            x_2_2_1_1_1_id_paese = etree.SubElement(
+                x_2_2_1_1_id_fiscale_iva,
+                etree.QName("IdPaese"))
+            x_2_2_1_1_1_id_paese.text = \
+                partner_invoice.cessionario_IdFiscaleIVA_IdPaese or ''
+            # -----                 2.2.1.1.2 - Id Codice
+            x_2_2_1_1_2_id_codice = etree.SubElement(
+                x_2_2_1_1_id_fiscale_iva,
+                etree.QName("IdCodice"))
+            x_2_2_1_1_2_id_codice.text = \
+                partner_invoice.cessionario_IdFiscaleIVA_IdCodice or ''
+            # -----             2.2.1.2 - Codice Fiscale
+            x_2_2_1_2_codice_fiscale = etree.SubElement(
+                x_2_2_1_identificativi_fiscali,
+                etree.QName("CodiceFiscale"))
+            x_2_2_1_2_codice_fiscale.text = \
+                partner_invoice.cessionario_CodiceFiscale or ''
+            # -----         2.2.2 - AltriDatiIdentificativi
+            x_2_2_2_altri_identificativi = etree.SubElement(
+                x_2_2_cessionario_committente,
+                etree.QName("AltriDatiIdentificativi"))
+            # -----             2.2.2.1 - Denominazione
+            x_2_2_2_1_altri_identificativi_denominazione = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName("Denominazione"))
+            x_2_2_2_1_altri_identificativi_denominazione.text = \
+                partner_invoice.cessionario_Denominazione or ''
+            # -----             2.2.2.2 - Nome
+            x_2_2_2_2_nome = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName("Nome"))
+            x_2_2_2_2_nome.text = \
+                partner_invoice.cessionario_Nome or ''
+            # -----             2.2.2.3 - Cognome
+            x_2_2_2_3_cognome = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName("Cognome"))
+            x_2_2_2_3_cognome.text = \
+                partner_invoice.cessionario_Cognome or ''
+            # -----             2.2.2.4 - Sede
+            x_2_2_2_4_sede = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName("Sede"))
+            # -----                 2.2.2.4.1 - Indirizzo
+            x_2_2_2_4_1_indirizzo = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName("Indirizzo"))
+            x_2_2_2_4_1_indirizzo.text = \
+                partner_invoice.cessionario_sede_Indirizzo or ''
+            # -----                 2.2.2.4.2 - Numero Civico
+            x_2_2_2_4_2_numero_civico = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName("NumeroCivico"))
+            x_2_2_2_4_2_numero_civico.text = \
+                partner_invoice.cessionario_sede_NumeroCivico or ''
+            # -----                 2.2.2.4.3 - CAP
+            x_2_2_2_4_3_cap = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName("CAP"))
+            x_2_2_2_4_3_cap.text = \
+                partner_invoice.cessionario_sede_Cap or ''
+            # -----                 2.2.2.4.4 - Comune
+            x_2_2_2_4_4_comune = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName("Comune"))
+            x_2_2_2_4_4_comune.text = \
+                partner_invoice.cessionario_sede_Comune or ''
+            # -----                 2.2.2.4.5 - Provincia
+            x_2_2_2_4_5_provincia = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName("Provincia"))
+            x_2_2_2_4_5_provincia.text = \
+                partner_invoice.cessionario_sede_Provincia or ''
+            # -----                 2.2.2.4.6 - Nazione
+            x_2_2_2_4_6_nazione = etree.SubElement(
+                x_2_2_2_4_sede,
+                etree.QName("Nazione"))
+            x_2_2_2_4_6_nazione.text = \
+                partner_invoice.cessionario_sede_Nazione or ''
+            # -----             2.2.2.5 - Stabile Organizzazione
+            x_2_2_2_5_stabile_organizzazione = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName("StabileOrganizzazione"))
+            # -----                 2.2.2.5.1 - Indirizzo
+            x_2_2_2_5_1_indirizzo = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName("Indirizzo"))
+            x_2_2_2_5_1_indirizzo.text = \
+                partner_invoice.cessionario_so_Indirizzo or ''
+            # -----                 2.2.2.5.2 - Numero Civico
+            x_2_2_2_5_2_numero_civico = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName("NumeroCivico"))
+            x_2_2_2_5_2_numero_civico.text = \
+                partner_invoice.cessionario_so_NumeroCivico or ''
+            # -----                 2.2.2.5.3 - CAP
+            x_2_2_2_5_3_cap = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName("CAP"))
+            x_2_2_2_5_3_cap.text = \
+                partner_invoice.cessionario_so_Cap or ''
+            # -----                 2.2.2.5.4 - Comune
+            x_2_2_2_5_4_comune = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName("Comune"))
+            x_2_2_2_5_4_comune.text = \
+                partner_invoice.cessionario_so_Comune or ''
+            # -----                 2.2.2.5.5 - Provincia
+            x_2_2_2_5_5_provincia = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName("Provincia"))
+            x_2_2_2_5_5_provincia.text = \
+                partner_invoice.cessionario_so_Provincia or ''
+            # -----                 2.2.2.5.6 - Nazione
+            x_2_2_2_5_6_nazione = etree.SubElement(
+                x_2_2_2_5_stabile_organizzazione,
+                etree.QName("Nazione"))
+            x_2_2_2_5_6_nazione.text = \
+                partner_invoice.cessionario_so_Nazione or ''
+            # -----             2.2.2.6 - Rappresentante Fiscale
+            x_2_2_2_6_rappresentante_fiscale = etree.SubElement(
+                x_2_2_2_altri_identificativi,
+                etree.QName("RappresentanteFiscale"))
+            # -----                 2.2.2.6.1 - Id Fiscale IVA
+            x_2_2_2_6_1_id_fiscale_iva = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName("IdFiscaleIVA"))
+            x_2_2_2_6_rappresentante_fiscale.text = \
+                partner_invoice.cessionario_rf_IdFiscaleIVA_IdPaese or ''
+            # -----                     2.2.2.6.1.1 - Id Paese
+            x_2_2_2_6_1_1_id_paese = etree.SubElement(
+                x_2_2_2_6_1_id_fiscale_iva,
+                etree.QName("IdPaese"))
+            x_2_2_2_6_1_1_id_paese.text = \
+                partner_invoice.cessionario_rf_IdFiscaleIVA_IdPaese or ''
+            # -----                     2.2.2.6.1.2 - Id Codice
+            x_2_2_2_6_1_2_id_codice = etree.SubElement(
+                x_2_2_2_6_1_id_fiscale_iva,
+                etree.QName("IdCodice"))
+            x_2_2_2_6_1_2_id_codice.text = \
+                partner_invoice.cessionario_rf_IdFiscaleIVA_IdCodice or ''
+            # -----                 2.2.2.6.2 - Denominazione
+            x_2_2_2_6_2_denominazione = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName("Denominazione"))
+            x_2_2_2_6_2_denominazione.text = \
+                partner_invoice.cessionario_rf_Denominazione or ''
+            # -----                 2.2.2.6.3 - Nome
+            x_2_2_2_6_3_nome = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName("Nome"))
+            x_2_2_2_6_3_nome.text = \
+                partner_invoice.cessionario_rf_Nome or ''
+            # -----                 2.2.2.6.4 - Cognome
+            x_2_2_2_6_4_cognome = etree.SubElement(
+                x_2_2_2_6_rappresentante_fiscale,
+                etree.QName("Cognome"))
+            x_2_2_2_6_4_cognome.text = \
+                partner_invoice.cessionario_rf_Cognome or ''
+
+            for invoice in partner_invoice.fatture_emesse_body_ids:
+                # -----         2.2.3 - Dati Fattura Body DTE
+                x_2_2_3_dati_fattura_body_dte = etree.SubElement(
+                    x_2_2_cessionario_committente,
+                    etree.QName("DatiFatturaBodyDTE"))
+                # -----             2.2.3.1 - Dati Generali
+                x_2_2_3_1_dati_generali = etree.SubElement(
+                    x_2_2_3_dati_fattura_body_dte,
+                    etree.QName("DatiGenerali"))
+                # -----                 2.2.3.1.1 - Tipo Documento
+                x_2_2_3_1_1_tipo_documento = etree.SubElement(
+                    x_2_2_3_1_dati_generali,
+                    etree.QName("TipoDocumento"))
+                x_2_2_3_1_1_tipo_documento.text = \
+                    invoice.dati_fattura_TipoDocumento.code or ''
+                # -----                 2.2.3.1.2 - Data
+                x_2_2_3_1_2_data = etree.SubElement(
+                    x_2_2_3_1_dati_generali,
+                    etree.QName("Data"))
+                x_2_2_3_1_2_data.text = invoice.dati_fattura_Data or ''
+                # -----                 2.2.3.1.3 - Numero
+                x_2_2_3_1_2_numero = etree.SubElement(
+                    x_2_2_3_1_dati_generali,
+                    etree.QName("Numero"))
+                x_2_2_3_1_2_numero.text = invoice.dati_fattura_Numero or ''
+
+                for tax in invoice.dati_fattura_iva_ids:
+                    # -----             2.2.3.2 - Dati Riepilogo
+                    x_2_2_3_2_riepilogo = etree.SubElement(
+                        x_2_2_3_dati_fattura_body_dte,
+                        etree.QName("DatiRiepilogo"))
+                    # -----                 2.2.3.2.1 - Imponibile Importo
+                    x_2_2_3_2_1_imponibile_importo = etree.SubElement(
+                        x_2_2_3_2_riepilogo,
+                        etree.QName("ImponibileImporto"))
+                    x_2_2_3_2_1_imponibile_importo.text = \
+                        format_decimal(tax.ImponibileImporto)
+                    # -----                 2.2.3.2.2 - Dati IVA
+                    x_2_2_3_2_2_dati_iva = etree.SubElement(
+                        x_2_2_3_2_riepilogo,
+                        etree.QName("DatiIVA"))
+                    # -----                     2.2.3.2.2.1 - Imposta
+                    x_2_2_3_2_2_1_imposta = etree.SubElement(
+                        x_2_2_3_2_2_dati_iva,
+                        etree.QName("Imposta"))
+                    x_2_2_3_2_2_1_imposta.text = format_decimal(tax.Imposta)
+                    # -----                     2.2.3.2.2.2 - Aliquota
+                    x_2_2_3_2_2_2_aliquota = etree.SubElement(
+                        x_2_2_3_2_2_dati_iva,
+                        etree.QName("Aliquota"))
+                    x_2_2_3_2_2_2_aliquota.text = format_decimal(tax.Aliquota)
+                    # -----                 2.2.3.2.3 - Natura
+                    x_2_2_3_2_3_natura = etree.SubElement(
+                        x_2_2_3_2_riepilogo,
+                        etree.QName("Natura"))
+                    x_2_2_3_2_3_natura.text = \
+                        tax.Natura_id.code if tax.Natura_id else ''
+                    # -----                 2.2.3.2.4 - Detraibile
+                    x_2_2_3_2_4_detraibile = etree.SubElement(
+                        x_2_2_3_2_riepilogo,
+                        etree.QName("Detraibile"))
+                    x_2_2_3_2_4_detraibile.text = format_decimal(tax.Detraibile)
+                    # -----                 2.2.3.2.5 - Deducibile
+                    x_2_2_3_2_5_deducibile = etree.SubElement(
+                        x_2_2_3_2_riepilogo,
+                        etree.QName("Deducibile"))
+                    x_2_2_3_2_5_deducibile.text = tax.Deducibile or ''
+                    # -----                 2.2.3.2.6 - Esigibilita IVA
+                    x_2_2_3_2_6_esagibilita_iva = etree.SubElement(
+                        x_2_2_3_2_riepilogo,
+                        etree.QName("EsigibilitaIVA"))
+                    x_2_2_3_2_6_esagibilita_iva.text = tax.EsigibilitaIVA or ''
+
+        '''
+        TODO: Not implemented yet
+        # -----     2.3 - Rettifica
+        x_2_3_rettifica = etree.SubElement(
+            x_2_dte,
+            etree.QName("Rettifica"))
+        # -----         2.3.1 - Id File
+        x_2_3_1_id_file = etree.SubElement(
+            x_2_3_rettifica,
+            etree.QName("IdFile"))
+        # x_2_3_1_id_file.text = self.rettifica_IdFIle \
+        #     if self.rettifica_IdFIle else ''
+        # -----         2.3.2 - Posizione
+        x_2_3_2_posizione = etree.SubElement(
+            x_2_3_rettifica,
+            etree.QName("Posizione"))
+        # x_2_3_2_posizione.text = self.rettifica_Posizione \
+        #     if self.rettifica_Posizione else ''
+        '''
+
+        return x_2_dte
+
+    def _export_xml_get_dtr(self):
+        # ----- 3 - DTR
+        x_3_dtr = etree.Element(
+            etree.QName("DTR"))
+        # -----     2.1 - Cessionario Committente DTR
+        x_3_1_cessionario_committente = etree.SubElement(
+            x_3_dtr,
+            etree.QName("CessionarioCommittenteDTR"))
+        # -----         2.1.1 - IdentificativiFiscali
+        x_3_1_1_identificativi_fiscali = etree.SubElement(
+            x_3_1_cessionario_committente,
+            etree.QName("IdentificativiFiscali"))
+        # -----             2.1.1.1 - Id Fiscale IVA
+        x_3_1_1_1_id_fiscale_iva = etree.SubElement(
+            x_3_1_1_identificativi_fiscali,
+            etree.QName("IdFiscaleIVA"))
+        # -----                 2.1.1.1.1 - Id Paese
+        x_3_1_1_1_1_id_paese = etree.SubElement(
+            x_3_1_1_1_id_fiscale_iva,
+            etree.QName("IdPaese"))
+        x_3_1_1_1_1_id_paese.text = self.cessionario_IdFiscaleIVA_IdPaese or ''
+        # -----                 2.1.1.1.2 - Id Codice
+        x_3_1_1_1_2_id_codice = etree.SubElement(
+            x_3_1_1_1_id_fiscale_iva,
+            etree.QName("IdCodice"))
+        x_3_1_1_1_2_id_codice.text = self.cessionario_IdFiscaleIVA_IdCodice or ''
+        # -----             2.1.1.2 - Codice Fiscale
+        x_3_1_1_2_codice_fiscale = etree.SubElement(
+            x_3_1_1_identificativi_fiscali,
+            etree.QName("CodiceFiscale"))
+        x_3_1_1_2_codice_fiscale.text = self.cessionario_CodiceFiscale or ''
+        # -----         2.1.2 - AltriDatiIdentificativi
+        x_3_1_2_altri_identificativi = etree.SubElement(
+            x_3_1_cessionario_committente,
+            etree.QName("AltriDatiIdentificativi"))
+        # -----             2.1.2.1 - Denominazione
+        x_3_1_2_1_denominazione = etree.SubElement(
+            x_3_1_2_altri_identificativi,
+            etree.QName("Denominazione"))
+        x_3_1_2_1_denominazione.text = self.cessionario_Denominazione or ''
+        # -----             2.1.2.2 - Nome
+        x_3_1_2_2_nome = etree.SubElement(
+            x_3_1_2_altri_identificativi,
+            etree.QName("Nome"))
+        x_3_1_2_2_nome.text = self.cessionario_Nome or ''
+        # -----             2.1.2.3 - Cognome
+        x_3_1_2_3_cognome = etree.SubElement(
+            x_3_1_2_altri_identificativi,
+            etree.QName("Cognome"))
+        x_3_1_2_3_cognome.text = self.cessionario_Cognome or ''
+        # -----             2.1.2.4 - Sede
+        x_3_1_2_4_sede = etree.SubElement(
+            x_3_1_2_altri_identificativi,
+            etree.QName("Sede"))
+        # -----                 2.1.2.4.1 - Indirizzo
+        x_3_1_2_4_1_indirizzo = etree.SubElement(
+            x_3_1_2_4_sede,
+            etree.QName("Indirizzo"))
+        x_3_1_2_4_1_indirizzo.text = self.cessionario_sede_Indirizzo or ''
+        # -----                 2.1.2.4.2 - Numero Civico
+        x_3_1_2_4_2_numero_civico = etree.SubElement(
+            x_3_1_2_4_sede,
+            etree.QName("NumeroCivico"))
+        x_3_1_2_4_2_numero_civico.text = self.cessionario_sede_NumeroCivico or ''
+        # -----                 2.1.2.4.3 - CAP
+        x_3_1_2_4_3_cap = etree.SubElement(
+            x_3_1_2_4_sede,
+            etree.QName("CAP"))
+        x_3_1_2_4_3_cap.text = self.cessionario_sede_Cap or ''
+        # -----                 2.1.2.4.4 - Comune
+        x_3_1_2_4_4_comune = etree.SubElement(
+            x_3_1_2_4_sede,
+            etree.QName("Comune"))
+        x_3_1_2_4_4_comune.text = self.cessionario_sede_Comune or ''
+        # -----                 2.1.2.4.5 - Provincia
+        x_3_1_2_4_5_provincia = etree.SubElement(
+            x_3_1_2_4_sede,
+            etree.QName("Provincia"))
+        x_3_1_2_4_5_provincia.text = self.cessionario_sede_Provincia or ''
+        # -----                 2.1.2.4.6 - Nazione
+        x_3_1_2_4_6_nazione = etree.SubElement(
+            x_3_1_2_4_sede,
+            etree.QName("Nazione"))
+        x_3_1_2_4_6_nazione.text = self.cessionario_sede_Nazione or ''
+        # -----             2.1.2.5 - Stabile Organizzazione
+        x_3_1_2_5_stabile_organizzazione = etree.SubElement(
+            x_3_1_2_altri_identificativi,
+            etree.QName("StabileOrganizzazione"))
+        # -----                 2.1.2.5.1 - Indirizzo
+        x_3_1_2_5_1_indirizzo = etree.SubElement(
+            x_3_1_2_5_stabile_organizzazione,
+            etree.QName("Indirizzo"))
+        x_3_1_2_5_1_indirizzo.text = self.cessionario_so_Indirizzo or ''
+        # -----                 2.1.2.5.2 - Numero Civico
+        x_3_1_2_5_2_numero_civico = etree.SubElement(
+            x_3_1_2_5_stabile_organizzazione,
+            etree.QName("Numerocivico"))
+        x_3_1_2_5_2_numero_civico.text = self.cessionario_so_NumeroCivico or ''
+        # -----                 2.1.2.5.3 - CAP
+        x_3_1_2_5_3_cap = etree.SubElement(
+            x_3_1_2_5_stabile_organizzazione,
+            etree.QName("CAP"))
+        x_3_1_2_5_3_cap.text = self.cessionario_so_Cap or ''
+        # -----                 2.1.2.5.4 - Comune
+        x_3_1_2_5_4_comune = etree.SubElement(
+            x_3_1_2_5_stabile_organizzazione,
+            etree.QName("Comune"))
+        x_3_1_2_5_4_comune.text = self.cessionario_so_Comune or ''
+        # -----                 2.1.2.5.5 - Provincia
+        x_3_1_2_5_5_provincia = etree.SubElement(
+            x_3_1_2_5_stabile_organizzazione,
+            etree.QName("Provincia"))
+        x_3_1_2_5_5_provincia.text = self.cessionario_so_Provincia or ''
+        # -----                 2.1.2.5.6 - Nazione
+        x_3_1_2_5_6_nazione = etree.SubElement(
+            x_3_1_2_5_stabile_organizzazione,
+            etree.QName("Nazione"))
+        x_3_1_2_5_6_nazione.text = self.cessionario_so_Nazione or ''
+        # -----             2.1.2.6 - Rappresentante Fiscale
+        x_3_1_2_6_rappresentante_fiscale = etree.SubElement(
+            x_3_1_2_altri_identificativi,
+            etree.QName("RappresentanteFiscale"))
+        # -----                 2.1.2.6.1 - Id Fiscale IVA
+        x_3_1_2_6_1_id_fiscale_iva = etree.SubElement(
+            x_3_1_2_6_rappresentante_fiscale,
+            etree.QName("IdFiscaleIVA"))
+        # -----                     2.1.2.6.1.1 - Id Paese
+        x_3_1_2_6_1_1_id_paese = etree.SubElement(
+            x_3_1_2_6_1_id_fiscale_iva,
+            etree.QName("IdPaese"))
+        x_3_1_2_6_1_1_id_paese.text = self.cessionario_rf_IdFiscaleIVA_IdPaese or ''
+        # -----                     2.1.2.6.1.2 - Id Codice
+        x_3_1_2_6_1_2_id_codice = etree.SubElement(
+            x_3_1_2_6_1_id_fiscale_iva,
+            etree.QName("IdCodice"))
+        x_3_1_2_6_1_2_id_codice.text = \
+            self.cessionario_rf_IdFiscaleIVA_IdCodice or ''
+        # -----                 2.1.2.6.2 - Denominazione
+        x_3_1_2_6_2_denominazione = etree.SubElement(
+            x_3_1_2_6_rappresentante_fiscale,
+            etree.QName("Denominazione"))
+        x_3_1_2_6_2_denominazione.text = \
+            self.cessionario_rf_Denominazione or ''
+        # -----                 2.1.2.6.3 - Nome
+        x_3_1_2_6_3_nome = etree.SubElement(
+            x_3_1_2_6_rappresentante_fiscale,
+            etree.QName("Nome"))
+        x_3_1_2_6_3_nome.text = self.cessionario_rf_Nome or ''
+        # -----                 2.1.2.6.4 - Cognome
+        x_3_1_2_6_4_cognome = etree.SubElement(
+            x_3_1_2_6_rappresentante_fiscale,
+            etree.QName("Cognome"))
+        x_3_1_2_6_4_cognome.text = self.cessionario_rf_Cognome or ''
+
+        for partner_invoice in self.fatture_ricevute_ids:
+            # -----     2.2 - Cessionario Committente DTE
+            x_3_2_cedente_prestatore = etree.SubElement(
+                x_3_dtr,
+                etree.QName("CedentePrestatoreDTR"))
+            # -----         2.2.1 - IdentificativiFiscali
+            x_3_2_1_identificativi_fiscali = etree.SubElement(
+                x_3_2_cedente_prestatore,
+                etree.QName("IdentificativiFiscali"))
+            # -----             2.2.1.1 - Id Fiscale IVA
+            x_3_2_1_1_id_fiscale_iva = etree.SubElement(
+                x_3_2_1_identificativi_fiscali,
+                etree.QName("IdFiscaleIVA"))
+            # -----                 2.2.1.1.1 - Id Paese
+            x_3_2_1_1_1_id_paese = etree.SubElement(
+                x_3_2_1_1_id_fiscale_iva,
+                etree.QName("IdPaese"))
+            x_3_2_1_1_1_id_paese.text = \
+                partner_invoice.cedente_IdFiscaleIVA_IdPaese or ''
+            # -----                 2.2.1.1.2 - Id Codice
+            x_3_2_1_1_2_id_codice = etree.SubElement(
+                x_3_2_1_1_id_fiscale_iva,
+                etree.QName("IdCodice"))
+            x_3_2_1_1_2_id_codice.text = \
+                partner_invoice.cedente_IdFiscaleIVA_IdCodice or ''
+            # -----             2.2.1.2 - Codice Fiscale
+            x_3_2_1_2_codice_fiscale = etree.SubElement(
+                x_3_2_1_identificativi_fiscali,
+                etree.QName("CodiceFiscale"))
+            x_3_2_1_2_codice_fiscale.text = \
+                partner_invoice.cedente_CodiceFiscale or ''
+            # -----         2.2.2 - AltriDatiIdentificativi
+            x_3_2_2_altri_identificativi = etree.SubElement(
+                x_3_2_cedente_prestatore,
+                etree.QName("AltriDatiIdentificativi"))
+            # -----             2.2.2.1 - Denominazione
+            x_3_2_2_1_altri_identificativi_denominazione = etree.SubElement(
+                x_3_2_2_altri_identificativi,
+                etree.QName("Denominazione"))
+            x_3_2_2_1_altri_identificativi_denominazione.text = \
+                partner_invoice.cedente_Denominazione or ''
+            # -----             2.2.2.2 - Nome
+            x_3_2_2_2_nome = etree.SubElement(
+                x_3_2_2_altri_identificativi,
+                etree.QName("Nome"))
+            x_3_2_2_2_nome.text = \
+                partner_invoice.cedente_Nome or ''
+            # -----             2.2.2.3 - Cognome
+            x_3_2_2_3_cognome = etree.SubElement(
+                x_3_2_2_altri_identificativi,
+                etree.QName("Cognome"))
+            x_3_2_2_3_cognome.text = \
+                partner_invoice.cedente_Cognome or ''
+            # -----             2.2.2.4 - Sede
+            x_3_2_2_4_sede = etree.SubElement(
+                x_3_2_2_altri_identificativi,
+                etree.QName("Sede"))
+            # -----                 2.2.2.4.1 - Indirizzo
+            x_3_2_2_4_1_indirizzo = etree.SubElement(
+                x_3_2_2_4_sede,
+                etree.QName("Indirizzo"))
+            x_3_2_2_4_1_indirizzo.text = \
+                partner_invoice.cedente_sede_Indirizzo or ''
+            # -----                 2.2.2.4.2 - Numero Civico
+            x_3_2_2_4_2_numero_civico = etree.SubElement(
+                x_3_2_2_4_sede,
+                etree.QName("NumeroCivico"))
+            x_3_2_2_4_2_numero_civico.text = \
+                partner_invoice.cedente_sede_NumeroCivico or ''
+            # -----                 2.2.2.4.3 - CAP
+            x_3_2_2_4_3_cap = etree.SubElement(
+                x_3_2_2_4_sede,
+                etree.QName("CAP"))
+            x_3_2_2_4_3_cap.text = \
+                partner_invoice.cedente_sede_Cap or ''
+            # -----                 2.2.2.4.4 - Comune
+            x_3_2_2_4_4_comune = etree.SubElement(
+                x_3_2_2_4_sede,
+                etree.QName("Comune"))
+            x_3_2_2_4_4_comune.text = \
+                partner_invoice.cedente_sede_Comune or ''
+            # -----                 2.2.2.4.5 - Provincia
+            x_3_2_2_4_5_provincia = etree.SubElement(
+                x_3_2_2_4_sede,
+                etree.QName("Provincia"))
+            x_3_2_2_4_5_provincia.text = \
+                partner_invoice.cedente_sede_Provincia or ''
+            # -----                 2.2.2.4.6 - Nazione
+            x_3_2_2_4_6_nazione = etree.SubElement(
+                x_3_2_2_4_sede,
+                etree.QName("Nazione"))
+            x_3_2_2_4_6_nazione.text = \
+                partner_invoice.cedente_sede_Nazione or ''
+            # -----             2.2.2.5 - Stabile Organizzazione
+            x_3_2_2_5_stabile_organizzazione = etree.SubElement(
+                x_3_2_2_altri_identificativi,
+                etree.QName("StabileOrganizzazione"))
+            # -----                 2.2.2.5.1 - Indirizzo
+            x_3_2_2_5_1_indirizzo = etree.SubElement(
+                x_3_2_2_5_stabile_organizzazione,
+                etree.QName("Indirizzo"))
+            x_3_2_2_5_1_indirizzo.text = \
+                partner_invoice.cedente_so_Indirizzo or ''
+            # -----                 2.2.2.5.2 - Numero Civico
+            x_3_2_2_5_2_numero_civico = etree.SubElement(
+                x_3_2_2_5_stabile_organizzazione,
+                etree.QName("NumeroCivico"))
+            x_3_2_2_5_2_numero_civico.text = \
+                partner_invoice.cedente_so_NumeroCivico or ''
+            # -----                 2.2.2.5.3 - CAP
+            x_3_2_2_5_3_cap = etree.SubElement(
+                x_3_2_2_5_stabile_organizzazione,
+                etree.QName("CAP"))
+            x_3_2_2_5_3_cap.text = \
+                partner_invoice.cedente_so_Cap or ''
+            # -----                 2.2.2.5.4 - Comune
+            x_3_2_2_5_4_comune = etree.SubElement(
+                x_3_2_2_5_stabile_organizzazione,
+                etree.QName("Comune"))
+            x_3_2_2_5_4_comune.text = \
+                partner_invoice.cedente_so_Comune or ''
+            # -----                 2.2.2.5.5 - Provincia
+            x_3_2_2_5_5_provincia = etree.SubElement(
+                x_3_2_2_5_stabile_organizzazione,
+                etree.QName("Provincia"))
+            x_3_2_2_5_5_provincia.text = \
+                partner_invoice.cedente_so_Provincia or ''
+            # -----                 2.2.2.5.6 - Nazione
+            x_3_2_2_5_6_nazione = etree.SubElement(
+                x_3_2_2_5_stabile_organizzazione,
+                etree.QName("Nazione"))
+            x_3_2_2_5_6_nazione.text = \
+                partner_invoice.cedente_so_Nazione or ''
+            # -----             2.2.2.6 - Rappresentante Fiscale
+            x_3_2_2_6_rappresentante_fiscale = etree.SubElement(
+                x_3_2_2_altri_identificativi,
+                etree.QName("RappresentanteFiscale"))
+            # -----                 2.2.2.6.1 - Id Fiscale IVA
+            x_3_2_2_6_1_id_fiscale_iva = etree.SubElement(
+                x_3_2_2_6_rappresentante_fiscale,
+                etree.QName("IdFiscaleIVA"))
+            x_3_2_2_6_rappresentante_fiscale.text = \
+                partner_invoice.cedente_rf_IdFiscaleIVA_IdPaese or ''
+            # -----                     2.2.2.6.1.1 - Id Paese
+            x_3_2_2_6_1_1_id_paese = etree.SubElement(
+                x_3_2_2_6_1_id_fiscale_iva,
+                etree.QName("IdPaese"))
+            x_3_2_2_6_1_1_id_paese.text = \
+                partner_invoice.cedente_rf_IdFiscaleIVA_IdPaese or ''
+            # -----                     2.2.2.6.1.2 - Id Codice
+            x_3_2_2_6_1_2_id_codice = etree.SubElement(
+                x_3_2_2_6_1_id_fiscale_iva,
+                etree.QName("IdCodice"))
+            x_3_2_2_6_1_2_id_codice.text = \
+                partner_invoice.cedente_rf_IdFiscaleIVA_IdCodice or ''
+            # -----                 2.2.2.6.2 - Denominazione
+            x_3_2_2_6_2_denominazione = etree.SubElement(
+                x_3_2_2_6_rappresentante_fiscale,
+                etree.QName("Denominazione"))
+            x_3_2_2_6_2_denominazione.text = \
+                partner_invoice.cedente_rf_Denominazione or ''
+            # -----                 2.2.2.6.3 - Nome
+            x_3_2_2_6_3_nome = etree.SubElement(
+                x_3_2_2_6_rappresentante_fiscale,
+                etree.QName("Nome"))
+            x_3_2_2_6_3_nome.text = \
+                partner_invoice.cedente_rf_Nome or ''
+            # -----                 2.2.2.6.4 - Cognome
+            x_3_2_2_6_4_cognome = etree.SubElement(
+                x_3_2_2_6_rappresentante_fiscale,
+                etree.QName("Cognome"))
+            x_3_2_2_6_4_cognome.text = \
+                partner_invoice.cedente_rf_Cognome or ''
+
+            for invoice in partner_invoice.fatture_ricevute_body_ids:
+                # -----         2.2.3 - Dati Fattura Body DTE
+                x_3_2_3_dati_fattura_body_dte = etree.SubElement(
+                    x_3_2_cedente_prestatore,
+                    etree.QName("DatiFatturaBodyDTE"))
+                # -----             2.2.3.1 - Dati Generali
+                x_3_2_3_1_dati_generali = etree.SubElement(
+                    x_3_2_3_dati_fattura_body_dte,
+                    etree.QName("DatiGenerali"))
+                # -----                 2.2.3.1.1 - Tipo Documento
+                x_3_2_3_1_1_tipo_documento = etree.SubElement(
+                    x_3_2_3_1_dati_generali,
+                    etree.QName("TipoDocumento"))
+                x_3_2_3_1_1_tipo_documento.text = \
+                    invoice.dati_fattura_TipoDocumento.code or ''
+                # -----                 2.2.3.1.2 - Data
+                x_3_2_3_1_2_data = etree.SubElement(
+                    x_3_2_3_1_dati_generali,
+                    etree.QName("Data"))
+                x_3_2_3_1_2_data.text = invoice.dati_fattura_Data or ''
+                # -----                 2.2.3.1.3 - Numero
+                x_3_2_3_1_2_numero = etree.SubElement(
+                    x_3_2_3_1_dati_generali,
+                    etree.QName("Numero"))
+                x_3_2_3_1_2_numero.text = invoice.dati_fattura_Numero or ''
+
+                for tax in invoice.dati_fattura_iva_ids:
+                    # -----             2.2.3.2 - Dati Riepilogo
+                    x_3_2_3_2_riepilogo = etree.SubElement(
+                        x_3_2_3_dati_fattura_body_dte,
+                        etree.QName("DatiRiepilogo"))
+                    # -----                 2.2.3.2.1 - Imponibile Importo
+                    x_3_2_3_2_1_imponibile_importo = etree.SubElement(
+                        x_3_2_3_2_riepilogo,
+                        etree.QName("ImponibileImporto"))
+                    x_3_2_3_2_1_imponibile_importo.text = \
+                        format_decimal(tax.ImponibileImporto)
+                    # -----                 2.2.3.2.2 - Dati IVA
+                    x_3_2_3_2_2_dati_iva = etree.SubElement(
+                        x_3_2_3_2_riepilogo,
+                        etree.QName("DatiIVA"))
+                    # -----                     2.2.3.2.2.1 - Imposta
+                    x_3_2_3_2_2_1_imposta = etree.SubElement(
+                        x_3_2_3_2_2_dati_iva,
+                        etree.QName("Imposta"))
+                    x_3_2_3_2_2_1_imposta.text = format_decimal(tax.Imposta)
+                    # -----                     2.2.3.2.2.2 - Aliquota
+                    x_3_2_3_2_2_2_aliquota = etree.SubElement(
+                        x_3_2_3_2_2_dati_iva,
+                        etree.QName("Aliquota"))
+                    x_3_2_3_2_2_2_aliquota.text = format_decimal(tax.Aliquota)
+                    # -----                 2.2.3.2.3 - Natura
+                    x_3_2_3_2_3_natura = etree.SubElement(
+                        x_3_2_3_2_riepilogo,
+                        etree.QName("Natura"))
+                    x_3_2_3_2_3_natura.text = \
+                        tax.Natura_id.code if tax.Natura_id else ''
+                    # -----                 2.2.3.2.4 - Detraibile
+                    x_3_2_3_2_4_detraibile = etree.SubElement(
+                        x_3_2_3_2_riepilogo,
+                        etree.QName("Detraibile"))
+                    x_3_2_3_2_4_detraibile.text = format_decimal(tax.Detraibile)
+                    # -----                 2.2.3.2.5 - Deducibile
+                    x_3_2_3_2_5_deducibile = etree.SubElement(
+                        x_3_2_3_2_riepilogo,
+                        etree.QName("Deducibile"))
+                    x_3_2_3_2_5_deducibile.text = tax.Deducibile or ''
+                    # -----                 2.2.3.2.6 - Esigibilita IVA
+                    x_3_2_3_2_6_esagibilita_iva = etree.SubElement(
+                        x_3_2_3_2_riepilogo,
+                        etree.QName("EsigibilitaIVA"))
+                    x_3_2_3_2_6_esagibilita_iva.text = tax.EsigibilitaIVA or ''
+
+        '''
+        TODO: Not implemented yet
+        # -----     2.3 - Rettifica
+        x_3_3_rettifica = etree.SubElement(
+            x_3_dtr,
+            etree.QName("Rettifica"))
+        # -----         2.3.1 - Id File
+        x_3_3_1_id_file = etree.SubElement(
+            x_3_3_rettifica,
+            etree.QName("IdFile"))
+        # x_3_3_1_id_file.text = self.rettifica_IdFIle \
+        #     if self.rettifica_IdFIle else ''
+        # -----         2.3.2 - Posizione
+        x_3_3_2_posizione = etree.SubElement(
+            x_3_3_rettifica,
+            etree.QName("Posizione"))
+        # x_3_3_2_posizione.text = self.rettifica_Posizione \
+        #     if self.rettifica_Posizione else ''
+        '''
+
+        return x_3_dtr
+
+    def _export_xml_get_ann(self):
+        # ----- 4 - ANN
+        x_4_ann = etree.Element(
+            etree.QName("ANN"))
+        # ----- 4.1 - Id File
+        x_4_1_id_file = etree.SubElement(
+            x_4_ann,
+            etree.QName("IdFile"))
+        x_4_1_id_file.text = str(self.identificativo)
+        # ----- 4.2 - Posizione
+        x_4_2_posizione = etree.SubElement(
+            x_4_ann,
+            etree.QName("Posizione"))
+        return x_4_ann
+
+    @api.multi
+    def get_export_xml(self):
+        self.ensure_one()
+        self._validate()
+        # ----- 0 - Dati Fattura
+        x_0_dati_fattura = self._export_xml_get_dati_fattura()
+        # ----- 1 - Dati Fattura header
+        x_1_dati_fattura_header = self._export_xml_get_dati_fattura_header()
+        x_0_dati_fattura.append(x_1_dati_fattura_header)
+        if self.dati_trasmissione == 'DTE':
+            # ----- 2 - DTE
+            x_2_dte = self._export_xml_get_dte()
+            x_0_dati_fattura.append(x_2_dte)
+        elif self.dati_trasmissione == 'DTR':
+            # ----- 3 - DTR
+            x_3_dtr = self._export_xml_get_dtr()
+            x_0_dati_fattura.append(x_3_dtr)
+        elif self.dati_trasmissione == 'ANN':
+            # ----- 4 - ANN
+            x_4_ann = self._export_xml_get_ann()
+            x_0_dati_fattura.append(x_4_ann)
+        # ----- Remove empty nodes
+        clear_xml(x_0_dati_fattura)
+        # ----- Create XML
+        xml_string = etree.tostring(
+            x_0_dati_fattura, encoding='utf8', method='xml', pretty_print=True)
+        return xml_string
 
 
 class ComunicazioneDatiIvaFattureEmesse(models.Model):
