@@ -1,3 +1,3 @@
 # -*- coding: utf-8 -*-
 
-import comunicazione
+from . import comunicazione, account_invoice
