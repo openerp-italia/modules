@@ -524,6 +524,23 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
     rettifica_Posizione = fields.Integer(
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
+    # totali
+    totale_imponibile = fields.Float('Totale Imponibile',
+                                     compute="_compute_total", store=True)
+    totale_iva = fields.Float('Totale IVA',
+                              compute="_compute_total", store=True)
+
+    @api.depends('fatture_emesse_body_ids.totale_imponibile',
+                 'fatture_emesse_body_ids.totale_iva')
+    def _compute_total(self):
+        for line in self:
+            totale_imponibile = 0
+            totale_iva = 0
+            for fattura in line.fatture_emesse_body_ids:
+                totale_imponibile += fattura.totale_imponibile
+                totale_iva += fattura.totale_iva
+            line.totale_imponibile = totale_imponibile
+            line.totale_iva = totale_iva
 
     @api.multi
     @api.onchange('partner_id')
@@ -725,6 +742,23 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
     rettifica_Posizione = fields.Integer(
         string='Posizione', help="Posizione della fattura all'interno del \
         file trasmesso")
+    # totali
+    totale_imponibile = fields.Float('Totale Imponibile',
+                                     compute="_compute_total", store=True)
+    totale_iva = fields.Float('Totale IVA',
+                              compute="_compute_total", store=True)
+
+    @api.depends('fatture_ricevute_body_ids.totale_imponibile',
+                 'fatture_ricevute_body_ids.totale_iva')
+    def _compute_total(self):
+        for line in self:
+            totale_imponibile = 0
+            totale_iva = 0
+            for fattura in line.fatture_ricevute_body_ids:
+                totale_imponibile += fattura.totale_imponibile
+                totale_iva += fattura.totale_iva
+            line.totale_imponibile = totale_imponibile
+            line.totale_iva = totale_iva
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):

@@ -168,6 +168,8 @@
                 <tree string="Fatture emesse">
                     <field name="partner_id" />
                     <field name="cessionario_Denominazione" />
+                    <field name="totale_imponibile"/>
+                    <field name="totale_iva"/>
                 </tree>
             </field>
         </record>
@@ -241,6 +243,8 @@
                 <tree string="Fatture ricevute">
                     <field name="partner_id" />
                     <field name="cedente_Denominazione" />
+                    <field name="totale_imponibile"/>
+                    <field name="totale_iva"/>
                 </tree>
             </field>
         </record>
