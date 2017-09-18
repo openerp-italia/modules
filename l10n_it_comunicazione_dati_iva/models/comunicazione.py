@@ -367,6 +367,7 @@ class ComunicazioneDatiIva(models.Model):
         for comunicazione in self:
             domain = [('fiscal_document_type_id.type', 'in',
                        ['out_invoice', 'out_refund']),
+                      ('move_id', '!=', False),
                       ('company_id', '>=', comunicazione.company_id.id),
                       ('date_invoice', '>=', comunicazione.date_start),
                       ('date_invoice', '<=', comunicazione.date_end)]
@@ -423,6 +424,7 @@ class ComunicazioneDatiIva(models.Model):
         for comunicazione in self:
             domain = [('fiscal_document_type_id.type', 'in',
                        ['in_invoice', 'in_refund']),
+                      ('move_id', '!=', False),
                       ('company_id', '>=', comunicazione.company_id.id),
                       ('registration_date', '>=', comunicazione.date_start),
                       ('registration_date', '<=', comunicazione.date_end)]
