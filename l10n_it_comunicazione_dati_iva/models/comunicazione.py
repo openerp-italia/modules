@@ -269,12 +269,14 @@ class ComunicazioneDatiIva(models.Model):
         vals['cedente_IdFiscaleIVA_IdCodice'] = \
             partner.vat[2:] if partner.vat else ''
         vals['cedente_CodiceFiscale'] = partner.fiscalcode or ''
-        vals['cedente_Denominazione'] = partner.name or ''
+        vals['cedente_Denominazione'] = partner.name.encode('utf8') or ''
         # Sede
         vals['cedente_sede_Indirizzo'] = '{} {}'.format(
-            partner.street or '', partner.street2 or '')
+            partner.street and partner.street.encode('utf8') or '',
+            partner.street2 and partner.street2.encode('utf8') or '')
         vals['cedente_sede_Cap'] = partner.zip or ''
-        vals['cedente_sede_Comune'] = partner.city or ''
+        vals['cedente_sede_Comune'] = partner.city and \
+            partner.city.encode('utf8') or ''
         vals['cedente_sede_Provincia'] = partner.state_id and \
             partner.state_id.code or ''
         vals['cedente_sede_Nazione'] = partner.country_id and \
@@ -315,12 +317,14 @@ class ComunicazioneDatiIva(models.Model):
         vals['cessionario_IdFiscaleIVA_IdCodice'] = \
             partner.vat[2:] if partner.vat else ''
         vals['cessionario_CodiceFiscale'] = partner.fiscalcode or ''
-        vals['cessionario_Denominazione'] = partner.name or ''
+        vals['cessionario_Denominazione'] = partner.name.encode('utf8') or ''
         # Sede
         vals['cessionario_sede_Indirizzo'] = '{} {}'.format(
-            partner.street or '', partner.street2 or '')
+            partner.street and partner.street.encode('utf8') or '',
+            partner.street2 and partner.street2.encode('utf8') or '')
         vals['cessionario_sede_Cap'] = partner.zip or ''
-        vals['cessionario_sede_Comune'] = partner.city or ''
+        vals['cessionario_sede_Comune'] = partner.city and \
+            partner.city.encode('utf8') or ''
         vals['cessionario_sede_Provincia'] = partner.state_id and \
             partner.state_id.code or ''
         vals['cessionario_sede_Nazione'] = partner.country_id and \
