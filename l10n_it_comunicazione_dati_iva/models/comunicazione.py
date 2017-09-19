@@ -476,7 +476,7 @@ class ComunicazioneDatiIva(models.Model):
         # ----- 0 - Dati Fattura
         attrs = {
             'versione': VERSION
-            }
+        }
         x_0_dati_fattura = etree.Element(
             etree.QName(NS_2, "DatiFattura"), attrib=attrs, nsmap=NS_MAP)
         return x_0_dati_fattura
@@ -910,7 +910,8 @@ class ComunicazioneDatiIva(models.Model):
                     x_2_2_3_2_4_detraibile = etree.SubElement(
                         x_2_2_3_2_riepilogo,
                         etree.QName("Detraibile"))
-                    x_2_2_3_2_4_detraibile.text = format_decimal(tax.Detraibile)
+                    x_2_2_3_2_4_detraibile.text = format_decimal(
+                        tax.Detraibile)
                     # -----                 2.2.3.2.5 - Deducibile
                     x_2_2_3_2_5_deducibile = etree.SubElement(
                         x_2_2_3_2_riepilogo,
@@ -1333,7 +1334,8 @@ class ComunicazioneDatiIva(models.Model):
                     x_3_2_3_2_4_detraibile = etree.SubElement(
                         x_3_2_3_2_riepilogo,
                         etree.QName("Detraibile"))
-                    x_3_2_3_2_4_detraibile.text = format_decimal(tax.Detraibile)
+                    x_3_2_3_2_4_detraibile.text = format_decimal(
+                        tax.Detraibile)
                     # -----                 2.2.3.2.5 - Deducibile
                     x_3_2_3_2_5_deducibile = etree.SubElement(
                         x_3_2_3_2_riepilogo,

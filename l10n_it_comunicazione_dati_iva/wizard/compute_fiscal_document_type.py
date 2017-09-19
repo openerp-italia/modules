@@ -14,9 +14,12 @@ class ComunicazioneDatiIvaRicalcoloTipoDocumentoFiscale(models.TransientModel):
         for wizard in self:
             for comunicazione in self.env['comunicazione.dati.iva'].\
                     browse(comunicazione_ids):
-                fatture_emesse = comunicazione._get_fatture_emesse()
-                fatture_ricevute = comunicazione._get_fatture_ricevute()
-                fatture = fatture_emesse + fatture_ricevute
+                domain = [
+                    ('move_id', '!=', False),
+                    ('company_id', '>=', comunicazione.company_id.id),
+                    ('date_invoice', '>=', comunicazione.date_start),
+                    ('date_invoice', '<=', comunicazione.date_end)]
+                fatture = self.env['account.invoice'].search(domain)
                 for fattura in fatture:
                     fattura.fiscal_document_type_id =\
                         fattura._get_document_fiscal_type(
