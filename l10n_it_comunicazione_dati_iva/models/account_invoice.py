@@ -44,6 +44,16 @@ class account_invoice(models.Model):
                     'Natura_id': kind_id,
                     'EsigibilitaIVA': payability
                 }
+                # Detraibilità
+                detraibilita = False
+                if tax_origin.parent_id and tax_origin.type in ['percent']:
+                    if tax_origin.account_collected_id:
+                        detraibilita = tax_origin.amount * 100
+                    else:
+                        detraibilita = 100 - (tax_origin.amount * 100)
+                if detraibilita:
+                    val['Detraibile'] = detraibilita
+
                 tot_imponibile += val['ImponibileImporto']
                 tot_imposta += val['Imposta']
                 if not tax.id in tax_grouped:
@@ -87,6 +97,7 @@ class account_invoice(models.Model):
     def _check_tax_comunicazione_dati_iva_fattura(self, args=None):
         if not args:
             args = {}
+
         if 'tot_imponibile' in args:
             if not self.amount_untaxed == args['tot_imponibile']:
                 raise ValidationError(
