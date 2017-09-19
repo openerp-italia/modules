@@ -22,7 +22,9 @@
             <field name="arch" type="xml">
                 <form string="Comunicazione dati IVA">
                     <header>
-                        <button name="compute_values" string="Compute Values" type="object"/>
+                        <button name="compute_values" string="Calcola Valori" type="object"/>
+                        <button type="action" name="%(action_compute_fiscal_document_type)d"
+                        string="Assegna tipo documento fiscale"/>
                     </header>
                     <sheet>
                         <group name="company">

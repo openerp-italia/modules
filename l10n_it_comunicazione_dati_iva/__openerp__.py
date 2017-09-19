@@ -18,6 +18,7 @@
     ],
     'data': [
         'security/ir.model.access.csv',
+        'wizard/compute_fiscal_document_type_view.xml',
         'views/comunicazione.xml',
         'wizard/export_file_view.xml',
     ],
