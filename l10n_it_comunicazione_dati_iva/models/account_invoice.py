@@ -101,7 +101,8 @@ class account_invoice(models.Model):
             args = {}
 
         if 'tot_imponibile' in args:
-            if not self.amount_untaxed == args['tot_imponibile']:
+            if not round(self.amount_untaxed, 2) ==\
+                    round(args['tot_imponibile'], 2):
                 raise ValidationError(
                     _("Imponibile ft {} del partner {} non congruente. \
                     Verificare dettaglio sezione imposte della fattura (\
