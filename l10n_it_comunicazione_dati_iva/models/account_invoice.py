@@ -103,6 +103,9 @@ class account_invoice(models.Model):
         if 'tot_imponibile' in args:
             if not self.amount_untaxed == args['tot_imponibile']:
                 raise ValidationError(
-                    _("Imponibile ft {} del partner {} non congruente. Verificare \
-                dettaglio sezione imposte della fattura"
-                      ).format(self.number, self.partner_id.name))
+                    _("Imponibile ft {} del partner {} non congruente. \
+                    Verificare dettaglio sezione imposte della fattura (\
+                    imponible doc:{} - imponibile dati iva:{})"
+                      ).format(self.number, self.partner_id.name,
+                               str(self.amount_untaxed),
+                               str(args['tot_imponibile'])))
