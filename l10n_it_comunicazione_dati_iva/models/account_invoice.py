@@ -53,6 +53,10 @@ class account_invoice(models.Model):
                         detraibilita = 100 - (tax_origin.amount * 100)
                 if detraibilita:
                     val['Detraibile'] = detraibilita
+                # Solo imponibile legato alla parte indetraibile
+                if tax_origin.parent_id:
+                    if tax_origin.account_collected_id:
+                        val['ImponibileImporto'] = 0
 
                 tot_imponibile += val['ImponibileImporto']
                 tot_imposta += val['Imposta']
@@ -86,12 +90,14 @@ class account_invoice(models.Model):
             val = {}
         if val['Aliquota'] == 0 and not val['Natura_id']:
             raise ValidationError(
-                _("Specificare la natura dell'esenzione per l'imposta: {}"
-                  ).format(tax.name))
+                _("Specificare la natura dell'esenzione per l'imposta: {}\
+                - Fattura {}"
+                  ).format(tax.name, self.number or False))
         if not val['EsigibilitaIVA']:
             raise ValidationError(
-                _("Specificare l'esigibilità IVA per l'imposta: {}"
-                  ).format(tax.name))
+                _("Specificare l'esigibilità IVA per l'imposta: {}\
+                - Fattura {}"
+                  ).format(tax.name, self.number or False))
         return val
 
     def _check_tax_comunicazione_dati_iva_fattura(self, args=None):
@@ -99,8 +105,12 @@ class account_invoice(models.Model):
             args = {}
 
         if 'tot_imponibile' in args:
-            if not self.amount_untaxed == args['tot_imponibile']:
+            if not round(self.amount_untaxed, 2) ==\
+                    round(args['tot_imponibile'], 2):
                 raise ValidationError(
-                    _("Imponibile ft {} del partner {} non congruente. Verificare \
-                dettaglio sezione imposte della fattura"
-                      ).format(self.number, self.partner_id.name))
+                    _("Imponibile ft {} del partner {} non congruente. \
+                    Verificare dettaglio sezione imposte della fattura (\
+                    imponible doc:{} - imponibile dati iva:{})"
+                      ).format(self.number, self.partner_id.name,
+                               str(self.amount_untaxed),
+                               str(args['tot_imponibile'])))

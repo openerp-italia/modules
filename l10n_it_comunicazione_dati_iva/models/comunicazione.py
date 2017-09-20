@@ -15,7 +15,7 @@ etree.register_namespace("vi", NS_2)
 
 
 def format_decimal(value=0.0):
-    return "{:.2f}".format(value).replace('.', ',')
+    return "{:.2f}".format(value)
 
 
 def clear_xml_element(element):
@@ -104,7 +104,7 @@ class ComunicazioneDatiIva(models.Model):
     cedente_sede_NumeroCivico = fields.Char(
         string='Numero civico', size=8)
     cedente_sede_Cap = fields.Char(
-        string='Numero civico', size=5)
+        string='CAP', size=5)
     cedente_sede_Comune = fields.Char(
         string='Comune', size=60)
     cedente_sede_Provincia = fields.Char(
@@ -117,7 +117,7 @@ class ComunicazioneDatiIva(models.Model):
     cedente_so_NumeroCivico = fields.Char(
         string='Numero civico', size=8)
     cedente_so_Cap = fields.Char(
-        string='Numero civico', size=5)
+        string='CAP', size=5)
     cedente_so_Comune = fields.Char(
         string='Comune', size=60)
     cedente_so_Provincia = fields.Char(
@@ -253,7 +253,7 @@ class ComunicazioneDatiIva(models.Model):
                 # Sede
                 comunicazione.cedente_sede_Indirizzo =\
                     vals['cedente_sede_Indirizzo']
-                comunicazione.cessionario_sede_Cap = \
+                comunicazione.cedente_sede_Cap = \
                     vals['cedente_sede_Cap']
                 comunicazione.cedente_sede_Comune = \
                     vals['cedente_sede_Comune']
@@ -396,10 +396,14 @@ class ComunicazioneDatiIva(models.Model):
 
     def _get_fatture_emesse(self):
         invoices = False
+        domain = [('comunicazione_dati_iva_escludi', '=', True)]
+        no_journal_ids = self.env['account.journal'].search(domain).ids
         for comunicazione in self:
             domain = [('fiscal_document_type_id.type', 'in',
                        ['out_invoice', 'out_refund']),
+                      ('type', 'in', ['out_invoice', 'out_refund']),
                       ('move_id', '!=', False),
+                      ('move_id.journal_id', 'not in', no_journal_ids),
                       ('company_id', '>=', comunicazione.company_id.id),
                       ('date_invoice', '>=', comunicazione.date_start),
                       ('date_invoice', '<=', comunicazione.date_end)]
@@ -454,9 +458,13 @@ class ComunicazioneDatiIva(models.Model):
     def _get_fatture_ricevute(self):
         invoices = False
         for comunicazione in self:
+            domain = [('comunicazione_dati_iva_escludi', '=', True)]
+            no_journal_ids = self.env['account.journal'].search(domain).ids
             domain = [('fiscal_document_type_id.type', 'in',
                        ['in_invoice', 'in_refund']),
+                      ('type', 'in', ['in_invoice', 'in_refund']),
                       ('move_id', '!=', False),
+                      ('move_id.journal_id', 'not in', no_journal_ids),
                       ('company_id', '>=', comunicazione.company_id.id),
                       ('registration_date', '>=', comunicazione.date_start),
                       ('registration_date', '<=', comunicazione.date_end)]
@@ -1389,6 +1397,17 @@ class ComunicazioneDatiIva(models.Model):
         return x_4_ann
 
     @api.multi
+    def get_export_xml_filename(self):
+        self.ensure_one()
+        filename = '{id}_{type}_{number}.{ext}'.format(
+            id=self.company_id.vat or '',
+            type='DF',
+            number=str(self.identificativo or 0).rjust(5, '0'),
+            ext='xml',
+        )
+        return filename
+
+    @api.multi
     def get_export_xml(self):
         self.ensure_one()
         self._validate()
@@ -1859,7 +1878,7 @@ class ComunicazioneDatiIvaFattureRicevuteIva(models.Model):
          (fattura semplificata), si può indicare in alternativa all'elemento \
          3.2.3.2.2.1 <Imposta>. Per tutti gli altri valori dell'elemento \
          3.2.3.1.1 <TipoDocumento> deve essere valorizzata.")
-    Natura_id = fields.Char('Natura')
+    Natura_id = fields.Many2one('account.tax.kind', string='Natura')
     Detraibile = fields.Float(string='Detraibile %')
     Deducibile = fields.Char(string='Deducibile', size=2,
                              help="valori ammessi: [SI] = spesa deducibile")
