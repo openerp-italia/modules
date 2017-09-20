@@ -253,7 +253,7 @@ class ComunicazioneDatiIva(models.Model):
                 # Sede
                 comunicazione.cedente_sede_Indirizzo =\
                     vals['cedente_sede_Indirizzo']
-                comunicazione.cessionario_sede_Cap = \
+                comunicazione.cedente_sede_Cap = \
                     vals['cedente_sede_Cap']
                 comunicazione.cedente_sede_Comune = \
                     vals['cedente_sede_Comune']
