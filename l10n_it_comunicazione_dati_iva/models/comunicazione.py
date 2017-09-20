@@ -15,7 +15,7 @@ etree.register_namespace("vi", NS_2)
 
 
 def format_decimal(value=0.0):
-    return "{:.2f}".format(value).replace('.', ',')
+    return "{:.2f}".format(value)
 
 
 def clear_xml_element(element):
