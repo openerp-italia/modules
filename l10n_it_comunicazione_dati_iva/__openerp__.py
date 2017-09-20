@@ -20,6 +20,7 @@
         'security/ir.model.access.csv',
         'wizard/compute_fiscal_document_type_view.xml',
         'views/comunicazione.xml',
+        'views/account.xml',
         'wizard/export_file_view.xml',
     ],
     'installable': True,

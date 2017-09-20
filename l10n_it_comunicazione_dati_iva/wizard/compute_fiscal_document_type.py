@@ -14,8 +14,11 @@ class ComunicazioneDatiIvaRicalcoloTipoDocumentoFiscale(models.TransientModel):
         for wizard in self:
             for comunicazione in self.env['comunicazione.dati.iva'].\
                     browse(comunicazione_ids):
+                domain = [('comunicazione_dati_iva_escludi', '=', True)]
+                no_journal_ids = self.env['account.journal'].search(domain).ids
                 domain = [
                     ('move_id', '!=', False),
+                    ('move_id.journal_id', 'not in', no_journal_ids),
                     ('company_id', '>=', comunicazione.company_id.id),
                     ('date_invoice', '>=', comunicazione.date_start),
                     ('date_invoice', '<=', comunicazione.date_end)]
