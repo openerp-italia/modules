@@ -86,12 +86,14 @@ class account_invoice(models.Model):
             val = {}
         if val['Aliquota'] == 0 and not val['Natura_id']:
             raise ValidationError(
-                _("Specificare la natura dell'esenzione per l'imposta: {}"
-                  ).format(tax.name))
+                _("Specificare la natura dell'esenzione per l'imposta: {}\
+                - Fattura {}"
+                  ).format(tax.name, self.number or False))
         if not val['EsigibilitaIVA']:
             raise ValidationError(
-                _("Specificare l'esigibilità IVA per l'imposta: {}"
-                  ).format(tax.name))
+                _("Specificare l'esigibilità IVA per l'imposta: {}\
+                - Fattura {}"
+                  ).format(tax.name, self.number or False))
         return val
 
     def _check_tax_comunicazione_dati_iva_fattura(self, args=None):
