@@ -15,7 +15,7 @@ etree.register_namespace("vi", NS_2)
 
 
 def format_decimal(value=0.0):
-    return "{:.2f}".format(value).replace('.', ',')
+    return "{:.2f}".format(value)
 
 
 def clear_xml_element(element):
@@ -1395,6 +1395,17 @@ class ComunicazioneDatiIva(models.Model):
             x_4_ann,
             etree.QName("Posizione"))
         return x_4_ann
+
+    @api.multi
+    def get_export_xml_filename(self):
+        self.ensure_one()
+        filename = '{id}_{type}_{number}.{ext}'.format(
+            id=self.company_id.vat or '',
+            type='DF',
+            number=str(self.identificativo or 0).rjust(5, '0'),
+            ext='xml',
+            )
+        return filename
 
     @api.multi
     def get_export_xml(self):

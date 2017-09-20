@@ -9,6 +9,7 @@ class ComunicazioneDatiIvaExportFile(models.TransientModel):
     _description = "Export file xml della comunicazione dei dati IVA"
 
     file_export = fields.Binary('File', readonly=True)
+    filename = fields.Char()
     name = fields.Char('File Name', readonly=True, default='dati_iva.xml')
 
     @api.multi
@@ -29,7 +30,9 @@ class ComunicazioneDatiIvaExportFile(models.TransientModel):
             for comunicazione in self.env['comunicazione.dati.iva'].\
                     browse(comunicazione_ids):
                 out = base64.encodestring(comunicazione.get_export_xml())
+                filename = comunicazione.get_export_xml_filename()
                 wizard.file_export = out
+                wizard.filename = filename
             model_data_obj = self.env['ir.model.data']
             view_rec = model_data_obj.get_object_reference(
                 'l10n_it_comunicazione_dati_iva',
