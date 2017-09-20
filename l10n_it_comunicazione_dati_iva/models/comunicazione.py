@@ -1389,6 +1389,17 @@ class ComunicazioneDatiIva(models.Model):
         return x_4_ann
 
     @api.multi
+    def get_export_xml_filename(self):
+        self.ensure_one()
+        filename = '{id}_{type}_{number}.{ext}'.format(
+            id=self.company_id.vat or '',
+            type='DF',
+            number=str(self.identificativo or 0).rjust(5, '0'),
+            ext='xml',
+            )
+        return filename
+
+    @api.multi
     def get_export_xml(self):
         self.ensure_one()
         self._validate()
