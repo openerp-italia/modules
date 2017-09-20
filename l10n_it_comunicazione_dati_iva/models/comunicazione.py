@@ -104,7 +104,7 @@ class ComunicazioneDatiIva(models.Model):
     cedente_sede_NumeroCivico = fields.Char(
         string='Numero civico', size=8)
     cedente_sede_Cap = fields.Char(
-        string='Numero civico', size=5)
+        string='CAP', size=5)
     cedente_sede_Comune = fields.Char(
         string='Comune', size=60)
     cedente_sede_Provincia = fields.Char(
@@ -117,7 +117,7 @@ class ComunicazioneDatiIva(models.Model):
     cedente_so_NumeroCivico = fields.Char(
         string='Numero civico', size=8)
     cedente_so_Cap = fields.Char(
-        string='Numero civico', size=5)
+        string='CAP', size=5)
     cedente_so_Comune = fields.Char(
         string='Comune', size=60)
     cedente_so_Provincia = fields.Char(
