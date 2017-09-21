@@ -1289,7 +1289,7 @@ class ComunicazioneDatiIva(models.Model):
                 # -----         2.2.3 - Dati Fattura Body DTE
                 x_3_2_3_dati_fattura_body_dte = etree.SubElement(
                     x_3_2_cedente_prestatore,
-                    etree.QName("DatiFatturaBodyDTE"))
+                    etree.QName("DatiFatturaBodyDTR"))
                 # -----             2.2.3.1 - Dati Generali
                 x_3_2_3_1_dati_generali = etree.SubElement(
                     x_3_2_3_dati_fattura_body_dte,
