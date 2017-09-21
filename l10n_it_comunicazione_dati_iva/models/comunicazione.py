@@ -438,6 +438,8 @@ class ComunicazioneDatiIva(models.Model):
                         'dati_fattura_TipoDocumento':
                             fattura.fiscal_document_type_id.id,
                         'dati_fattura_Data': fattura.date_invoice,
+                        'dati_fattura_DataRegistrazione':
+                            fattura.registration_date,
                         'dati_fattura_Numero': fattura.number,
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
@@ -1815,6 +1817,8 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
         'fiscal.document.type', string='Tipo Documento', required=True)
     dati_fattura_Data = fields.Date(string='Data Documento', required=True)
     dati_fattura_Numero = fields.Char(string='Numero Documento', required=True)
+    dati_fattura_DataRegistrazione = fields.Date(string='Data Registrazione',
+                                                 required=True)
     dati_fattura_iva_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.ricevute.iva',
         'fattura_ricevuta_body_id',
@@ -1833,6 +1837,8 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
                     fattura.invoice_id.fiscal_document_type_id.id or False
                 fattura.dati_fattura_Numero = fattura.invoice_id.number
                 fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
+                fattura.dati_fattura_DataRegistrazione = \
+                    fattura.invoice_id.registration_date
                 # tax
                 tax_lines = []
                 for tax_line in fattura.invoice_id.tax_line:

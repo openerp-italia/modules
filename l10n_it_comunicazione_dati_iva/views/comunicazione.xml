@@ -368,6 +368,7 @@
                     <field name="invoice_id" />
                     <field name="dati_fattura_Numero" />
                     <field name="dati_fattura_Data" />
+                    <field name="dati_fattura_DataRegistrazione"/>
                     <field name="totale_imponibile" sum="Tot Imponibile"/>
                     <field name="totale_iva" sum="Tot Imposta"/>
                 </tree>
@@ -385,6 +386,7 @@
                         <field name="dati_fattura_TipoDocumento"/>
                         <field name="dati_fattura_Numero"/>
                         <field name="dati_fattura_Data"/>
+                        <field name="dati_fattura_DataRegistrazione"/>
                     </group>
                     <group string="Riepilogo IVA" name="riepilogo_iva">
                         <field name="dati_fattura_iva_ids" nolabel="1">
