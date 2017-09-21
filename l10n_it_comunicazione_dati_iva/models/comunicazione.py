@@ -473,8 +473,8 @@ class ComunicazioneDatiIva(models.Model):
 
     def _unlink_sections(self):
         for comunicazione in self:
-            comunicazione.fatture_emesse_ids = False
-            comunicazione.fatture_ricevute_ids = False
+            comunicazione.fatture_emesse_ids.unlink()
+            comunicazione.fatture_ricevute_ids.unlink()
 
         return True
 
@@ -1441,7 +1441,8 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
     _description = 'Comunicazione Dati IVA - Fatture Emesse'
 
     comunicazione_id = fields.Many2one(
-        'comunicazione.dati.iva', string='Comunicazione', readonly=True)
+        'comunicazione.dati.iva', string='Comunicazione', readonly=True,
+        ondelete="cascade")
     # Cedente
     partner_id = fields.Many2one('res.partner', string='Partner')
     cessionario_IdFiscaleIVA_IdPaese = fields.Char(
@@ -1584,7 +1585,8 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
             ft.totale_iva = totale_iva
 
     fattura_emessa_id = fields.Many2one(
-        'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
+        'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa",
+        ondelete="cascade")
     posizione = fields.Integer(
         "Posizione", help="della fattura all'interno del file trasmesso",
         required=True)
@@ -1620,7 +1622,7 @@ class ComunicazioneDatiIvaFattureEmesseIva(models.Model):
 
     fattura_emessa_body_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.emesse.body',
-        string='Body Fattura Emessa', readonly=True)
+        string='Body Fattura Emessa', readonly=True, ondelete="cascade")
     ImponibileImporto = fields.Float(
         string='Base imponibile', help="Ammontare (base) imponibile ( per le\
          operazioni soggette ad IVA )  o importo non imponibile (per le \
@@ -1658,7 +1660,8 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
     _description = 'Comunicazione Dati IVA - Fatture Ricevute'
 
     comunicazione_id = fields.Many2one(
-        'comunicazione.dati.iva', string='Comunicazione', readonly=True)
+        'comunicazione.dati.iva', string='Comunicazione', readonly=True,
+        ondelete="cascade")
     # Cessionario
     partner_id = fields.Many2one('res.partner', string='Partner')
     cedente_IdFiscaleIVA_IdPaese = fields.Char(
@@ -1802,7 +1805,8 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
             ft.totale_iva = totale_iva
 
     fattura_ricevuta_id = fields.Many2one(
-        'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta")
+        'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta",
+        ondelete="cascade")
     posizione = fields.Integer(
         "Posizione", help="della fattura all'interno del file trasmesso",
         required=True)
@@ -1854,7 +1858,7 @@ class ComunicazioneDatiIvaFattureRicevuteIva(models.Model):
 
     fattura_ricevuta_body_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.ricevute.body',
-        string='Body Fattura Ricevuta', readonly=True)
+        string='Body Fattura Ricevuta', readonly=True, ondelete="cascade")
     ImponibileImporto = fields.Float(
         string='Base imponibile', help="Ammontare (base) imponibile ( per le\
          operazioni soggette ad IVA )  o importo non imponibile (per le \
