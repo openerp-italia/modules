@@ -64,8 +64,11 @@ class ComunicazioneDatiIva(models.Model):
     identificativo = fields.Integer(string='Identificativo',
                                     default=_get_identificativo)
     name = fields.Char(string='Name', compute="_compute_name")
-    declarant_fiscalcode = fields.Char(string='Fiscalcode')
-    codice_carica_id = fields.Many2one('codice.carica', string='Codice carica')
+    declarant_fiscalcode = fields.Char(
+        string='Codice Fiscale Dichiarante', required=True,
+        help="Codice fiscale del soggetto che comunica i dati fattura")
+    codice_carica_id = fields.Many2one(
+        'codice.carica', string='Codice carica', required=True)
     date_start = fields.Date(string='Date start', required=True)
     date_end = fields.Date(string='Date end', required=True)
     fatture_emesse_ids = fields.One2many(
@@ -438,6 +441,8 @@ class ComunicazioneDatiIva(models.Model):
                         'dati_fattura_TipoDocumento':
                             fattura.fiscal_document_type_id.id,
                         'dati_fattura_Data': fattura.date_invoice,
+                        'dati_fattura_DataRegistrazione':
+                            fattura.registration_date,
                         'dati_fattura_Numero': fattura.number,
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
@@ -473,8 +478,8 @@ class ComunicazioneDatiIva(models.Model):
 
     def _unlink_sections(self):
         for comunicazione in self:
-            comunicazione.fatture_emesse_ids = False
-            comunicazione.fatture_ricevute_ids = False
+            comunicazione.fatture_emesse_ids.unlink()
+            comunicazione.fatture_ricevute_ids.unlink()
 
         return True
 
@@ -515,7 +520,8 @@ class ComunicazioneDatiIva(models.Model):
             si riferiscono;
         - è un intermediario.
         In tutti gli altri casi questo blocco DEVE essere valorizzato.
-        
+        '''
+
         # ----- 1.2 - Dichiarante
         x_1_2_dichiarante = etree.SubElement(
             x_1_dati_fattura_header,
@@ -524,13 +530,13 @@ class ComunicazioneDatiIva(models.Model):
         x_1_2_1_codice_fiscale = etree.SubElement(
             x_1_2_dichiarante,
             etree.QName("CodiceFiscale"))
-        x_1_2_1_codice_fiscale.text = self.company_id.vat
+        x_1_2_1_codice_fiscale.text = self.declarant_fiscalcode
         # ----- 1.2.2 - Carica
         x_1_2_2_carica = etree.SubElement(
             x_1_2_dichiarante,
             etree.QName("Carica"))
-        '''
-
+        x_1_2_2_carica.text = self.codice_carica_id.code if \
+        self.codice_carica_id else ''
         return x_1_dati_fattura_header
 
     def _export_xml_get_dte(self):
@@ -1289,7 +1295,7 @@ class ComunicazioneDatiIva(models.Model):
                 # -----         2.2.3 - Dati Fattura Body DTE
                 x_3_2_3_dati_fattura_body_dte = etree.SubElement(
                     x_3_2_cedente_prestatore,
-                    etree.QName("DatiFatturaBodyDTE"))
+                    etree.QName("DatiFatturaBodyDTR"))
                 # -----             2.2.3.1 - Dati Generali
                 x_3_2_3_1_dati_generali = etree.SubElement(
                     x_3_2_3_dati_fattura_body_dte,
@@ -1306,10 +1312,16 @@ class ComunicazioneDatiIva(models.Model):
                     etree.QName("Data"))
                 x_3_2_3_1_2_data.text = invoice.dati_fattura_Data or ''
                 # -----                 2.2.3.1.3 - Numero
-                x_3_2_3_1_2_numero = etree.SubElement(
+                x_3_2_3_1_3_numero = etree.SubElement(
                     x_3_2_3_1_dati_generali,
                     etree.QName("Numero"))
-                x_3_2_3_1_2_numero.text = invoice.dati_fattura_Numero or ''
+                x_3_2_3_1_3_numero.text = invoice.dati_fattura_Numero or ''
+                # -----                 2.2.3.1.4 - Data Registrazione
+                x_3_2_3_1_4_data_registrazione = etree.SubElement(
+                    x_3_2_3_1_dati_generali,
+                    etree.QName("DataRegistrazione"))
+                x_3_2_3_1_4_data_registrazione.text = \
+                    invoice.dati_fattura_DataRegistrazione or ''
 
                 for tax in invoice.dati_fattura_iva_ids:
                     # -----             2.2.3.2 - Dati Riepilogo
@@ -1441,7 +1453,8 @@ class ComunicazioneDatiIvaFattureEmesse(models.Model):
     _description = 'Comunicazione Dati IVA - Fatture Emesse'
 
     comunicazione_id = fields.Many2one(
-        'comunicazione.dati.iva', string='Comunicazione', readonly=True)
+        'comunicazione.dati.iva', string='Comunicazione', readonly=True,
+        ondelete="cascade")
     # Cedente
     partner_id = fields.Many2one('res.partner', string='Partner')
     cessionario_IdFiscaleIVA_IdPaese = fields.Char(
@@ -1584,7 +1597,8 @@ class ComunicazioneDatiIvaFattureEmesseBody(models.Model):
             ft.totale_iva = totale_iva
 
     fattura_emessa_id = fields.Many2one(
-        'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa")
+        'comunicazione.dati.iva.fatture.emesse', string="Fattura Emessa",
+        ondelete="cascade")
     posizione = fields.Integer(
         "Posizione", help="della fattura all'interno del file trasmesso",
         required=True)
@@ -1620,7 +1634,7 @@ class ComunicazioneDatiIvaFattureEmesseIva(models.Model):
 
     fattura_emessa_body_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.emesse.body',
-        string='Body Fattura Emessa', readonly=True)
+        string='Body Fattura Emessa', readonly=True, ondelete="cascade")
     ImponibileImporto = fields.Float(
         string='Base imponibile', help="Ammontare (base) imponibile ( per le\
          operazioni soggette ad IVA )  o importo non imponibile (per le \
@@ -1658,7 +1672,8 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
     _description = 'Comunicazione Dati IVA - Fatture Ricevute'
 
     comunicazione_id = fields.Many2one(
-        'comunicazione.dati.iva', string='Comunicazione', readonly=True)
+        'comunicazione.dati.iva', string='Comunicazione', readonly=True,
+        ondelete="cascade")
     # Cessionario
     partner_id = fields.Many2one('res.partner', string='Partner')
     cedente_IdFiscaleIVA_IdPaese = fields.Char(
@@ -1802,7 +1817,8 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
             ft.totale_iva = totale_iva
 
     fattura_ricevuta_id = fields.Many2one(
-        'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta")
+        'comunicazione.dati.iva.fatture.ricevute', string="Fattura Ricevuta",
+        ondelete="cascade")
     posizione = fields.Integer(
         "Posizione", help="della fattura all'interno del file trasmesso",
         required=True)
@@ -1811,6 +1827,8 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
         'fiscal.document.type', string='Tipo Documento', required=True)
     dati_fattura_Data = fields.Date(string='Data Documento', required=True)
     dati_fattura_Numero = fields.Char(string='Numero Documento', required=True)
+    dati_fattura_DataRegistrazione = fields.Date(string='Data Registrazione',
+                                                 required=True)
     dati_fattura_iva_ids = fields.One2many(
         'comunicazione.dati.iva.fatture.ricevute.iva',
         'fattura_ricevuta_body_id',
@@ -1829,6 +1847,8 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
                     fattura.invoice_id.fiscal_document_type_id.id or False
                 fattura.dati_fattura_Numero = fattura.invoice_id.number
                 fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
+                fattura.dati_fattura_DataRegistrazione = \
+                    fattura.invoice_id.registration_date
                 # tax
                 tax_lines = []
                 for tax_line in fattura.invoice_id.tax_line:
@@ -1854,7 +1874,7 @@ class ComunicazioneDatiIvaFattureRicevuteIva(models.Model):
 
     fattura_ricevuta_body_id = fields.Many2one(
         'comunicazione.dati.iva.fatture.ricevute.body',
-        string='Body Fattura Ricevuta', readonly=True)
+        string='Body Fattura Ricevuta', readonly=True, ondelete="cascade")
     ImponibileImporto = fields.Float(
         string='Base imponibile', help="Ammontare (base) imponibile ( per le\
          operazioni soggette ad IVA )  o importo non imponibile (per le \
