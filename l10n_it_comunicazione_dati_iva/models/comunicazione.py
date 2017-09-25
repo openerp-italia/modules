@@ -520,7 +520,8 @@ class ComunicazioneDatiIva(models.Model):
             si riferiscono;
         - è un intermediario.
         In tutti gli altri casi questo blocco DEVE essere valorizzato.
-        
+        '''
+
         # ----- 1.2 - Dichiarante
         x_1_2_dichiarante = etree.SubElement(
             x_1_dati_fattura_header,
@@ -529,13 +530,13 @@ class ComunicazioneDatiIva(models.Model):
         x_1_2_1_codice_fiscale = etree.SubElement(
             x_1_2_dichiarante,
             etree.QName("CodiceFiscale"))
-        x_1_2_1_codice_fiscale.text = self.company_id.vat
+        x_1_2_1_codice_fiscale.text = self.declarant_fiscalcode
         # ----- 1.2.2 - Carica
         x_1_2_2_carica = etree.SubElement(
             x_1_2_dichiarante,
             etree.QName("Carica"))
-        '''
-
+        x_1_2_2_carica.text = self.codice_carica_id.code if \
+        self.codice_carica_id else ''
         return x_1_dati_fattura_header
 
     def _export_xml_get_dte(self):
