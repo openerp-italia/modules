@@ -1311,10 +1311,16 @@ class ComunicazioneDatiIva(models.Model):
                     etree.QName("Data"))
                 x_3_2_3_1_2_data.text = invoice.dati_fattura_Data or ''
                 # -----                 2.2.3.1.3 - Numero
-                x_3_2_3_1_2_numero = etree.SubElement(
+                x_3_2_3_1_3_numero = etree.SubElement(
                     x_3_2_3_1_dati_generali,
                     etree.QName("Numero"))
-                x_3_2_3_1_2_numero.text = invoice.dati_fattura_Numero or ''
+                x_3_2_3_1_3_numero.text = invoice.dati_fattura_Numero or ''
+                # -----                 2.2.3.1.4 - Data Registrazione
+                x_3_2_3_1_4_data_registrazione = etree.SubElement(
+                    x_3_2_3_1_dati_generali,
+                    etree.QName("DataRegistrazione"))
+                x_3_2_3_1_4_data_registrazione.text = \
+                    invoice.dati_fattura_DataRegistrazione or ''
 
                 for tax in invoice.dati_fattura_iva_ids:
                     # -----             2.2.3.2 - Dati Riepilogo
