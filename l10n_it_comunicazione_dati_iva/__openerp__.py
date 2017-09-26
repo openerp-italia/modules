@@ -21,6 +21,7 @@
         'wizard/compute_fiscal_document_type_view.xml',
         'views/comunicazione.xml',
         'views/account.xml',
+        'views/account_invoice_view.xml',
         'wizard/export_file_view.xml',
     ],
     'installable': True,

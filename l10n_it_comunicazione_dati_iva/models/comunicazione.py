@@ -405,6 +405,7 @@ class ComunicazioneDatiIva(models.Model):
             domain = [('fiscal_document_type_id.type', 'in',
                        ['out_invoice', 'out_refund']),
                       ('type', 'in', ['out_invoice', 'out_refund']),
+                      ('comunicazione_dati_iva_escludi', '!=', True),
                       ('move_id', '!=', False),
                       ('move_id.journal_id', 'not in', no_journal_ids),
                       ('company_id', '>=', comunicazione.company_id.id),
@@ -468,6 +469,7 @@ class ComunicazioneDatiIva(models.Model):
             domain = [('fiscal_document_type_id.type', 'in',
                        ['in_invoice', 'in_refund']),
                       ('type', 'in', ['in_invoice', 'in_refund']),
+                      ('comunicazione_dati_iva_escludi', '!=', True),
                       ('move_id', '!=', False),
                       ('move_id.journal_id', 'not in', no_journal_ids),
                       ('company_id', '>=', comunicazione.company_id.id),
@@ -536,7 +538,7 @@ class ComunicazioneDatiIva(models.Model):
             x_1_2_dichiarante,
             etree.QName("Carica"))
         x_1_2_2_carica.text = self.codice_carica_id.code if \
-        self.codice_carica_id else ''
+            self.codice_carica_id else ''
         return x_1_dati_fattura_header
 
     def _export_xml_get_dte(self):
