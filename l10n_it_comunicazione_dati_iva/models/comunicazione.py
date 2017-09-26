@@ -65,10 +65,10 @@ class ComunicazioneDatiIva(models.Model):
                                     default=_get_identificativo)
     name = fields.Char(string='Name', compute="_compute_name")
     declarant_fiscalcode = fields.Char(
-        string='Codice Fiscale Dichiarante', required=True,
+        string='Codice Fiscale Dichiarante',
         help="Codice fiscale del soggetto che comunica i dati fattura")
     codice_carica_id = fields.Many2one(
-        'codice.carica', string='Codice carica', required=True)
+        'codice.carica', string='Codice carica')
     date_start = fields.Date(string='Date start', required=True)
     date_end = fields.Date(string='Date end', required=True)
     fatture_emesse_ids = fields.One2many(
