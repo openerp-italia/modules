@@ -26,12 +26,11 @@
     'category': 'account',
     'author': 'Apulia Software S.r.l.',
     'website': 'www.apuliasoftware.it',
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'depends': [
         'l10n_it_intrastat_statement',
         ],
     'data': [],
-    'active': False,
-    'installable': False
+    'installable': True
 }
 

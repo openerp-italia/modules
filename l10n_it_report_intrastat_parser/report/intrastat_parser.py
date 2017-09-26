@@ -28,9 +28,9 @@ from openerp.http import request
 class ReportIntrastatQweb(models.AbstractModel):
 
     _name = 'report.l10n_it_report_intrastat.report_intrastat_mod1'
-                                             
+
     @api.multi
-    def render_html(self, data=None):
+    def render_html(self, docids, data=None):
         report_obj = self.env['report']
         report = report_obj._get_report_from_name(
             'l10n_it_report_intrastat.report_intrastat_mod1')

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    Author: Alessandro Camilli (a.camilli@openforce.it)
 #    Copyright (C) 2015
 #    Apulia Software srl - info@apuliasoftware.it - www.apuliasoftware.it
@@ -26,15 +26,10 @@ from openerp import models, fields, api
 
 class res_company(models.Model):
     _inherit = 'res.company'
-    
+
     intrastat_uom_kg_id = fields.Many2one(
         'product.uom', string="Unit of measure for Kg",
         )
-    intrastat_weight_from_product = fields.Selection([
-        ('none', 'None'),
-        ('gross', 'Gross weight'),
-        ('net', 'Net weight'),
-        ], 'Weight from Product', default='net', required=True)
     intrastat_additional_unit_from = fields.Selection(
         [('quantity', 'Quantity'),('weight', 'Weight'),('none', 'None')],
         string='Additional Unit of Measure FROM', default='weight')

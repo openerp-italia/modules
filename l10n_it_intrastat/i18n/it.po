@@ -406,11 +406,6 @@ msgstr "Force Statistic Amount Euro"
 msgid "Good"
 msgstr "Merce"
 
-#: selection:res.company,intrastat_weight_from_product:0
-#. module: l10n_it_intrastat
-msgid "Gross weight"
-msgstr "Peso Lordo"
-
 #: view:account.invoice.intrastat:l10n_it_intrastat.view_invoice_intrastat_search
 #. module: l10n_it_intrastat
 msgid "Group By..."
@@ -615,17 +610,6 @@ msgstr "Mese di riferimento del riepilogo da rettificare"
 #. module: l10n_it_intrastat
 msgid "Name"
 msgstr "Nome"
-
-#: selection:res.company,intrastat_weight_from_product:0
-#. module: l10n_it_intrastat
-msgid "Net weight"
-msgstr "Peso Netto"
-
-#: selection:res.company,intrastat_additional_unit_from:0
-#: selection:res.company,intrastat_weight_from_product:0
-#. module: l10n_it_intrastat
-msgid "None"
-msgstr "Nessuno"
 
 #: selection:account.intrastat.statement,special_cases:0
 #. module: l10n_it_intrastat
@@ -1065,11 +1049,6 @@ msgstr "P.IVA contribuente"
 msgid "Weight"
 msgstr "Peso"
 
-#: field:res.company,intrastat_weight_from_product:0
-#. module: l10n_it_intrastat
-msgid "Weight from Product"
-msgstr "Peso dal Prodotto"
-
 #: field:account.intrastat.statement.purchase.section1,weight_kg:0
 #: field:account.intrastat.statement.sale.section1,weight_kg:0
 #: field:account.invoice.intrastat,weight_kg:0
@@ -1077,7 +1056,7 @@ msgstr "Peso dal Prodotto"
 msgid "Weight kg"
 msgstr "Peso kg"
 
-#: field:account.intrastat.statement,fiscalyear_id:0
+#: field:account.intrastat.statement,fiscalyear:0
 #. module: l10n_it_intrastat
 msgid "Year"
 msgstr "Anno"

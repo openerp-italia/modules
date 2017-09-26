@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
-#    
+#
 #    Author: Alessandro Camilli (a.camilli@openforce.it)
 #    Copyright (C) 2015
 #    Apulia Software srl - info@apuliasoftware.it - www.apuliasoftware.it
 #    Openforce di Camilli Alessandro - www.openforce.it
+#    LinkIt Srl (<http://http://www.linkgroup.it>)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as published
@@ -23,14 +24,15 @@
 
 {
     'name': 'Account - Intrastat Declaration',
-    'version': '0.1',
+    'version': '10.0',
     'category': 'Account',
     'description': """
     Intrastat Declaration and export file.
     """,
-    'author': 'Openforce di Alessandro Camilli per Apulia Software srl',
+    'author': 'Openforce di Alessandro Camilli per Apulia Software srl'
+        ', Lara Baggio per Link IT srl',
     'website': 'http://apuliasoftware.it/',
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     "depends": [
         'l10n_it_intrastat',
         ],
@@ -43,7 +45,6 @@
         'views/intrastat.xml',
         ],
     "demo": [],
-    "active": False,
-    "installable": False
+    "installable": True
 }
 
