@@ -403,10 +403,10 @@ class ComunicazioneDatiIva(models.Model):
         no_journal_ids = self.env['account.journal'].search(domain).ids
         for comunicazione in self:
             domain = [('type', 'in', ['out_invoice', 'out_refund']),
-                      ('comunicazione_dati_iva_escludi', '!=', True),
+                      ('comunicazione_dati_iva_escludi', '=', False),
                       ('move_id', '!=', False),
                       ('move_id.journal_id', 'not in', no_journal_ids),
-                      ('company_id', '>=', comunicazione.company_id.id),
+                      ('company_id', '=', comunicazione.company_id.id),
                       ('date_invoice', '>=', comunicazione.date_start),
                       ('date_invoice', '<=', comunicazione.date_end),
                       '|',
@@ -415,7 +415,6 @@ class ComunicazioneDatiIva(models.Model):
                       ]
             invoices = self.env['account.invoice'].search(domain)
         return invoices
-
 
     @api.one
     def compute_fatture_ricevute(self):
@@ -470,15 +469,15 @@ class ComunicazioneDatiIva(models.Model):
             domain = [('comunicazione_dati_iva_escludi', '=', True)]
             no_journal_ids = self.env['account.journal'].search(domain).ids
             domain = [('type', 'in', ['in_invoice', 'in_refund']),
-                      ('comunicazione_dati_iva_escludi', '!=', True),
+                      ('comunicazione_dati_iva_escludi', '=', False),
                       ('move_id', '!=', False),
                       ('move_id.journal_id', 'not in', no_journal_ids),
-                      ('company_id', '>=', comunicazione.company_id.id),
+                      ('company_id', '=', comunicazione.company_id.id),
                       ('registration_date', '>=', comunicazione.date_start),
                       ('registration_date', '<=', comunicazione.date_end),
                       '|',
                       ('fiscal_document_type_id.in_invoice', '=', True),
-                      ('fiscal_document_type_id.in_refund', '=', True),]
+                      ('fiscal_document_type_id.in_refund', '=', True), ]
             invoices = self.env['account.invoice'].search(domain)
         return invoices
 
