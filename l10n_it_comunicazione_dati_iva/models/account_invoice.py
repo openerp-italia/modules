@@ -32,11 +32,6 @@ class account_invoice(models.Model):
                     aliquota = tax.amount * 100
                     kind_id = tax.kind_id.id
                     payability = tax.payability
-                # Correzioni x iva indetraibile
-                base = tax_line.base
-                amount = tax_line.amount
-                if not tax_origin.account_collected_id:
-                    amount = 0
                 vals_tax_line = \
                     self._get_tax_comunicazione_dati_iva_tax_line_amount(
                         tax_line)
@@ -83,8 +78,8 @@ class account_invoice(models.Model):
 
     def _get_tax_comunicazione_dati_iva_tax_line_amount(self, tax_line):
         vals = {
-            'base': tax_line.base,
-            'amount': tax_line.amount
+            'base': tax_line.base_amount,
+            'amount': tax_line.tax_amount
         }
         return vals
 
@@ -104,6 +99,13 @@ class account_invoice(models.Model):
         return val
 
     def _check_tax_comunicazione_dati_iva_fattura(self, args=None):
+        if (
+            self.currency_id and
+            self.currency_id.id != self.company_id.currency_id.id
+        ):
+            # in caso di fatture in valuta estera, non controllo amount_untaxed
+            # perchè sarebbe comunque diverso dall'importo in valuta base
+            return
         if not args:
             args = {}
 
