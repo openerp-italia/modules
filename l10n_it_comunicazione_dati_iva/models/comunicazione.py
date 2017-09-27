@@ -4,6 +4,7 @@
 from openerp import api, fields, models, _
 from openerp.exceptions import ValidationError
 from lxml import etree
+import re
 
 
 NS_2 = 'http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v2.0'
@@ -30,6 +31,15 @@ def clear_xml(xml_root):
         parent = xml_element.getparent()
         if clear_xml_element(xml_element):
             parent.remove(xml_element)
+
+
+def check_normalized_string(value):
+    normalized = True
+    if not value:
+        return normalized
+    if value != value.strip():
+        normalized = False
+    return normalized
 
 
 class ComunicazioneDatiIva(models.Model):
@@ -213,6 +223,7 @@ class ComunicazioneDatiIva(models.Model):
         rappresentante fiscale persona fisica. Obbligatorio ma da valorizzare\
          insieme all'elemento 3.1.2.6.3 <Nome>  ed in alternativa \
          all'elemento 3.1.2.6.2 <Denominazione>")
+    errors = fields.Text()
 
     @api.multi
     def _compute_name(self):
@@ -488,6 +499,418 @@ class ComunicazioneDatiIva(models.Model):
 
         return True
 
+    @api.multi
+    def _check_errors_dte(self):
+        self.ensure_one()
+        comunicazione = self
+        errors = []
+        # ----- Conta il limite di partner e fatture
+        invoices_limit = 0
+        partner_limit = 0
+        for partner in comunicazione.fatture_emesse_ids:
+            partner_limit += 1
+            invoices_limit += len(partner.fatture_emesse_body_ids)
+        if invoices_limit > 1000:
+            errors += [
+                'Superato il limite di 1000 fatture per comunicazione']
+        if partner_limit > 1000:
+            errors += [
+                'Superato il limite di 1000 cessionari per comunicazione']
+        # ----- Cedente
+        # -----     Normalizzazione delle stringhe
+        if not check_normalized_string(comunicazione.cedente_Denominazione):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Denominazione del cedente')
+        if not check_normalized_string(comunicazione.cedente_Nome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Nome del cedente')
+        if not check_normalized_string(comunicazione.cedente_Cognome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Cognome del cedente')
+        if not check_normalized_string(comunicazione.cedente_sede_Indirizzo):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Indirizzo della Sede del cedente')
+        if not check_normalized_string(comunicazione.cedente_sede_NumeroCivico):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico della Sede del cedente')
+        if not check_normalized_string(comunicazione.cedente_sede_Comune):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico della Sede del cedente')
+        if not check_normalized_string(comunicazione.cedente_so_Indirizzo):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Indirizzo dello Stabile Organizzazione del cedente')
+        if not check_normalized_string(comunicazione.cedente_so_NumeroCivico):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico dello Stabile Organizzazione del cedente')
+        if not check_normalized_string(comunicazione.cedente_so_Comune):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico dello Stabile Organizzazione del cedente')
+        if not check_normalized_string(comunicazione.cedente_rf_Denominazione):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Denominazione del Rappresentante Fiscale del cedente')
+        if not check_normalized_string(comunicazione.cedente_rf_Nome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Nome del Rappresentante Fiscale del cedente')
+        if not check_normalized_string(comunicazione.cedente_rf_Cognome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Cognome del Rappresentante Fiscale del cedente')
+        # ----- Cessionario
+        for partner in comunicazione.fatture_emesse_ids:
+            # -----     Normalizzazione delle stringhe
+            if not check_normalized_string(partner.cessionario_Denominazione):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Denominazione del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_Nome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Nome del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_Cognome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Cognome del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_sede_Indirizzo):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Indirizzo della Sede del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_sede_NumeroCivico):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico della Sede del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_sede_Comune):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico della Sede del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_so_Indirizzo):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Indirizzo dello Stabile Organizzazione del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_so_NumeroCivico):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico dello Stabile Organizzazione del'
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_so_Comune):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico dello Stabile Organizzazione del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(
+                    partner.cessionario_rf_Denominazione):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Denominazione del Rappresentante Fiscale del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_rf_Nome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Nome del Rappresentante Fiscale del '
+                    u'cessionario %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cessionario_rf_Cognome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Cognome del Rappresentante Fiscale del '
+                    u'cessionario %s' % partner.partner_id.name)
+            # ----- Dati fiscali
+            if partner.cessionario_IdFiscaleIVA_IdPaese and not \
+                    partner.cessionario_IdFiscaleIVA_IdCodice:
+                errors.append(
+                    u'Definire un codice identificativo fiscale '
+                    u'per il cessionario %s' % partner.partner_id.name)
+            if not partner.cessionario_IdFiscaleIVA_IdPaese and \
+                    partner.cessionario_IdFiscaleIVA_IdCodice:
+                errors.append(
+                    u'Definire un id paese '
+                    u'per il cessionario %s' % partner.partner_id.name)
+            # ----- Dati Sede
+            if not all([partner.cessionario_sede_Indirizzo,
+                        partner.cessionario_sede_Comune,
+                        partner.cessionario_sede_Nazione, ]):
+                errors.append(
+                    u'I valori Indirizzo, Comune e Nazione della Sede del '
+                    u'Cessionario %s sono '
+                    u'obbligatori' % partner.partner_id.name)
+            # ----- Dati Stabile Organizzazione
+            if any([partner.cessionario_so_Indirizzo,
+                    partner.cessionario_so_NumeroCivico,
+                    partner.cessionario_so_Cap,
+                    partner.cessionario_so_Comune,
+                    partner.cessionario_so_Provincia,
+                    partner.cessionario_so_Nazione,
+                    ]) and not all([partner.cessionario_so_Indirizzo,
+                                    partner.cessionario_so_Comune,
+                                    partner.cessionario_so_Cap,
+                                    partner.cessionario_so_Nazione, ]):
+                errors.append(
+                    u'I valori Indirizzo, Comune, CAP e Nazione dello Stabile '
+                    u'Organizzazione %s sono obbligatori se almeno '
+                    u'uno dei dati è definito' % partner.partner_id.name)
+            # ----- Rappresentante Fiscale
+            if any([partner.cessionario_rf_IdFiscaleIVA_IdPaese,
+                    partner.cessionario_rf_IdFiscaleIVA_IdCodice,
+                    partner.cessionario_rf_Denominazione,
+                    partner.cessionario_rf_Nome,
+                    partner.cessionario_rf_Cognome,
+                    ]) and not all([
+                        partner.cessionario_rf_IdFiscaleIVA_IdPaese,
+                        partner.cessionario_rf_IdFiscaleIVA_IdCodice, ]):
+                errors.append(
+                    u'I valori Id Paese e Codice identificativo fiscale '
+                    u' del Rappresentante Fiscale %s sono obbligatori '
+                    u'se almeno uno dei dati è '
+                    u'definito' % partner.partner_id.name)
+            # ----- CAP
+            if partner.cessionario_sede_Cap and \
+                    not re.match('[0-9]{5}', partner.cessionario_sede_Cap):
+                errors.append(
+                    u'Il CAP %s del cessionario %s non rispetta '
+                    u'il formato desiderato' % (
+                        partner.cessionario_sede_Cap,
+                        partner.partner_id.name))
+            # ----- Dettagli IVA
+            for invoice in partner.fatture_emesse_body_ids:
+                if not invoice.dati_fattura_iva_ids:
+                    errors.append(
+                        u'Nessun dato IVA definito per la fattura %s del '
+                        u'partner %s' % (invoice.invoice_id.number,
+                                         partner.partner_id.name))
+        return errors
+
+    @api.multi
+    def _check_errors_dtr(self):
+        self.ensure_one()
+        comunicazione = self
+        errors = []
+        # ----- Conta il limite di partner e fatture
+        invoices_limit = 0
+        partner_limit = 0
+        for partner in comunicazione.fatture_ricevute_ids:
+            partner_limit += 1
+            invoices_limit += len(partner.fatture_ricevute_body_ids)
+        if invoices_limit > 1000:
+            errors += [
+                'Superato il limite di 1000 fatture per comunicazione']
+        if partner_limit > 1000:
+            errors += [
+                'Superato il limite di 1000 cessionari per comunicazione']
+        # ----- Cessionario
+        # -----     Normalizzazione delle stringhe
+        if not check_normalized_string(
+                comunicazione.cessionario_Denominazione):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Denominazione del cessionario')
+        if not check_normalized_string(comunicazione.cessionario_Nome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Nome del cessionario')
+        if not check_normalized_string(comunicazione.cessionario_Cognome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Cognome del cessionario')
+        if not check_normalized_string(
+                comunicazione.cessionario_sede_Indirizzo):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Indirizzo della Sede del cessionario')
+        if not check_normalized_string(
+                comunicazione.cessionario_sede_NumeroCivico):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico della Sede del cessionario')
+        if not check_normalized_string(comunicazione.cessionario_sede_Comune):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico della Sede del cessionario')
+        if not check_normalized_string(comunicazione.cessionario_so_Indirizzo):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Indirizzo dello Stabile Organizzazione del cessionario')
+        if not check_normalized_string(
+                comunicazione.cessionario_so_NumeroCivico):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico dello Stabile Organizzazione del cessionario')
+        if not check_normalized_string(comunicazione.cessionario_so_Comune):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Numero Civico dello Stabile Organizzazione del cessionario')
+        if not check_normalized_string(
+                comunicazione.cessionario_rf_Denominazione):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Denominazione del Rappresentante Fiscale del cessionario')
+        if not check_normalized_string(comunicazione.cessionario_rf_Nome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Nome del Rappresentante Fiscale del cessionario')
+        if not check_normalized_string(comunicazione.cessionario_rf_Cognome):
+            errors.append(
+                'Eliminare i caratteri vuoti ai limiti del valore '
+                'Cognome del Rappresentante Fiscale del cessionario')
+        # ----- Cedente
+        for partner in comunicazione.fatture_ricevute_ids:
+            # -----     Normalizzazione delle stringhe
+            if not check_normalized_string(partner.cedente_Denominazione):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Denominazione del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_Nome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Nome del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_Cognome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Cognome del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_sede_Indirizzo):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Indirizzo della Sede del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_sede_NumeroCivico):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico della Sede del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_sede_Comune):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico della Sede del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_so_Indirizzo):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Indirizzo dello Stabile Organizzazione del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_so_NumeroCivico):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico dello Stabile Organizzazione del'
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_so_Comune):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Numero Civico dello Stabile Organizzazione del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(
+                    partner.cedente_rf_Denominazione):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Denominazione del Rappresentante Fiscale del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_rf_Nome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Nome del Rappresentante Fiscale del '
+                    u'cedente %s' % partner.partner_id.name)
+            if not check_normalized_string(partner.cedente_rf_Cognome):
+                errors.append(
+                    u'Eliminare i caratteri vuoti ai limiti del valore '
+                    u'Cognome del Rappresentante Fiscale del '
+                    u'cedente %s' % partner.partner_id.name)
+            # ----- Dati fiscali
+            if partner.cedente_IdFiscaleIVA_IdPaese and not \
+                    partner.cedente_IdFiscaleIVA_IdCodice:
+                errors.append(
+                    u'Definire un codice identificativo fiscale '
+                    u'per il cedente %s' % partner.partner_id.name)
+            if not partner.cedente_IdFiscaleIVA_IdPaese and \
+                    partner.cedente_IdFiscaleIVA_IdCodice:
+                errors.append(
+                    u'Definire un id paese '
+                    u'per il cedente %s' % partner.partner_id.name)
+            # ----- Dati Sede
+            if not all([partner.cedente_sede_Indirizzo,
+                        partner.cedente_sede_Comune,
+                        partner.cedente_sede_Nazione, ]):
+                errors.append(
+                    u'I valori Indirizzo, Comune e Nazione della Sede del '
+                    u'cedente %s sono '
+                    u'obbligatori' % partner.partner_id.name)
+            # ----- Dati Stabile Organizzazione
+            if any([partner.cedente_so_Indirizzo,
+                    partner.cedente_so_NumeroCivico,
+                    partner.cedente_so_Cap,
+                    partner.cedente_so_Comune,
+                    partner.cedente_so_Provincia,
+                    partner.cedente_so_Nazione,
+                    ]) and not all([partner.cedente_so_Indirizzo,
+                                    partner.cedente_so_Comune,
+                                    partner.cedente_so_Cap,
+                                    partner.cedente_so_Nazione, ]):
+                errors.append(
+                    u'I valori Indirizzo, Comune, CAP e Nazione dello Stabile '
+                    u'Organizzazione %s sono obbligatori se almeno '
+                    u'uno dei dati è definito' % partner.partner_id.name)
+            # ----- Rappresentante Fiscale
+            if any([partner.cedente_rf_IdFiscaleIVA_IdPaese,
+                    partner.cedente_rf_IdFiscaleIVA_IdCodice,
+                    partner.cedente_rf_Denominazione,
+                    partner.cedente_rf_Nome,
+                    partner.cedente_rf_Cognome,
+                    ]) and not all([
+                        partner.cedente_rf_IdFiscaleIVA_IdPaese,
+                        partner.cedente_rf_IdFiscaleIVA_IdCodice, ]):
+                errors.append(
+                    u'I valori Id Paese e Codice identificativo fiscale '
+                    u' del Rappresentante Fiscale %s sono obbligatori '
+                    u'se almeno uno dei dati è '
+                    u'definito' % partner.partner_id.name)
+            # ----- CAP
+            if partner.cedente_sede_Cap and \
+                    not re.match('[0-9]{5}', partner.cedente_sede_Cap):
+                errors.append(
+                    u'Il CAP %s del cedente %s non rispetta '
+                    u'il formato desiderato' % (
+                        partner.cedente_sede_Cap,
+                        partner.partner_id.name))
+            # ----- Dettagli IVA
+            for invoice in partner.fatture_ricevute_body_ids:
+                if not invoice.dati_fattura_iva_ids:
+                    errors.append(
+                        u'Nessun dato IVA definito per la fattura %s del '
+                        u'partner %s' % (invoice.invoice_id.number,
+                                         partner.partner_id.name))
+        return errors
+
+    @api.multi
+    def check_errors(self):
+        for comunicazione in self:
+            errors = []
+            if comunicazione.dati_trasmissione == 'DTE':
+                errors += comunicazione._check_errors_dte()
+            elif comunicazione.dati_trasmissione == 'DTR':
+                errors += comunicazione._check_errors_dtr()
+            if not errors:
+                errors = [u'Tutti i Dati risultano essere corretti!\n'
+                          u'È possibile esportare il file XML']
+            else:
+                errors = ['Errori:'] + errors
+            comunicazione.errors = u'\n - '.join(errors)
+
     def _validate(self):
         """
         Controllo congruità dati della comunicazione
@@ -535,7 +958,7 @@ class ComunicazioneDatiIva(models.Model):
         x_1_2_1_codice_fiscale = etree.SubElement(
             x_1_2_dichiarante,
             etree.QName("CodiceFiscale"))
-        x_1_2_1_codice_fiscale.text = self.declarant_fiscalcode
+        x_1_2_1_codice_fiscale.text = self.declarant_fiscalcode or ''
         # ----- 1.2.2 - Carica
         x_1_2_2_carica = etree.SubElement(
             x_1_2_dichiarante,
