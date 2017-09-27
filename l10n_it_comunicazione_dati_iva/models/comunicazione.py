@@ -535,7 +535,8 @@ class ComunicazioneDatiIva(models.Model):
         x_1_2_1_codice_fiscale = etree.SubElement(
             x_1_2_dichiarante,
             etree.QName("CodiceFiscale"))
-        x_1_2_1_codice_fiscale.text = self.declarant_fiscalcode
+        x_1_2_1_codice_fiscale.text = self.declarant_fiscalcode if \
+            self.declarant_fiscalcode else ''
         # ----- 1.2.2 - Carica
         x_1_2_2_carica = etree.SubElement(
             x_1_2_dichiarante,
