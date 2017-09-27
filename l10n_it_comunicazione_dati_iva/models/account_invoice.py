@@ -8,6 +8,9 @@ from openerp.exceptions import ValidationError
 class account_invoice(models.Model):
     _inherit = "account.invoice"
 
+    comunicazione_dati_iva_escludi = fields.Boolean(
+        string='Escludi dalla dichiarazione IVA', default=False)
+
     def _get_tax_comunicazione_dati_iva(self):
         for fattura in self:
             tax_lines = []

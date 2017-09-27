@@ -65,10 +65,10 @@ class ComunicazioneDatiIva(models.Model):
                                     default=_get_identificativo)
     name = fields.Char(string='Name', compute="_compute_name")
     declarant_fiscalcode = fields.Char(
-        string='Codice Fiscale Dichiarante', required=True,
+        string='Codice Fiscale Dichiarante',
         help="Codice fiscale del soggetto che comunica i dati fattura")
     codice_carica_id = fields.Many2one(
-        'codice.carica', string='Codice carica', required=True)
+        'codice.carica', string='Codice carica')
     date_start = fields.Date(string='Date start', required=True)
     date_end = fields.Date(string='Date end', required=True)
     fatture_emesse_ids = fields.One2many(
@@ -402,14 +402,17 @@ class ComunicazioneDatiIva(models.Model):
         domain = [('comunicazione_dati_iva_escludi', '=', True)]
         no_journal_ids = self.env['account.journal'].search(domain).ids
         for comunicazione in self:
-            domain = [('fiscal_document_type_id.type', 'in',
-                       ['out_invoice', 'out_refund']),
-                      ('type', 'in', ['out_invoice', 'out_refund']),
+            domain = [('type', 'in', ['out_invoice', 'out_refund']),
+                      ('comunicazione_dati_iva_escludi', '=', False),
                       ('move_id', '!=', False),
                       ('move_id.journal_id', 'not in', no_journal_ids),
-                      ('company_id', '>=', comunicazione.company_id.id),
+                      ('company_id', '=', comunicazione.company_id.id),
                       ('date_invoice', '>=', comunicazione.date_start),
-                      ('date_invoice', '<=', comunicazione.date_end)]
+                      ('date_invoice', '<=', comunicazione.date_end),
+                      '|',
+                      ('fiscal_document_type_id.out_invoice', '=', True),
+                      ('fiscal_document_type_id.out_refund', '=', True),
+                      ]
             invoices = self.env['account.invoice'].search(domain)
         return invoices
 
@@ -465,14 +468,16 @@ class ComunicazioneDatiIva(models.Model):
         for comunicazione in self:
             domain = [('comunicazione_dati_iva_escludi', '=', True)]
             no_journal_ids = self.env['account.journal'].search(domain).ids
-            domain = [('fiscal_document_type_id.type', 'in',
-                       ['in_invoice', 'in_refund']),
-                      ('type', 'in', ['in_invoice', 'in_refund']),
+            domain = [('type', 'in', ['in_invoice', 'in_refund']),
+                      ('comunicazione_dati_iva_escludi', '=', False),
                       ('move_id', '!=', False),
                       ('move_id.journal_id', 'not in', no_journal_ids),
-                      ('company_id', '>=', comunicazione.company_id.id),
+                      ('company_id', '=', comunicazione.company_id.id),
                       ('registration_date', '>=', comunicazione.date_start),
-                      ('registration_date', '<=', comunicazione.date_end)]
+                      ('registration_date', '<=', comunicazione.date_end),
+                      '|',
+                      ('fiscal_document_type_id.in_invoice', '=', True),
+                      ('fiscal_document_type_id.in_refund', '=', True), ]
             invoices = self.env['account.invoice'].search(domain)
         return invoices
 
@@ -536,7 +541,7 @@ class ComunicazioneDatiIva(models.Model):
             x_1_2_dichiarante,
             etree.QName("Carica"))
         x_1_2_2_carica.text = self.codice_carica_id.code if \
-        self.codice_carica_id else ''
+            self.codice_carica_id else ''
         return x_1_dati_fattura_header
 
     def _export_xml_get_dte(self):

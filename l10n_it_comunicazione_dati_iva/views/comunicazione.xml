@@ -31,7 +31,7 @@
                             <group>
                             <field name="company_id" widget="selection"/>
                             <field name="declarant_fiscalcode"/>
-                            <field name="codice_carica_id"/>
+                            <field name="codice_carica_id" attrs="{'required':[('declarant_fiscalcode', '!=', False)]}"/>
                             </group>
                             <group>
                             <field name="identificativo"/>
