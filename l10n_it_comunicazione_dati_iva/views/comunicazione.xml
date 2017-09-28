@@ -168,7 +168,7 @@
 
         <menuitem id="menu_comunicazione_dati_iva" name="Comunicazione dati IVA"
             action="action_comunicazione_dati_iva"
-            parent="account.menu_account_end_year_treatments" sequence="50"/>
+            parent="account.menu_finance_entries" sequence="50"/>
 
         <record id="view_comunicazione_dati_iva_fatture_emesse_tree" model="ir.ui.view">
             <field name="name">comunicazione.dati_iva.fatture.emesse.tree</field>

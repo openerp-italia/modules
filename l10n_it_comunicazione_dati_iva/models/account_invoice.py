@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from openerp import api, fields, models, _
-from openerp.exceptions import ValidationError
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class account_invoice(models.Model):
@@ -11,77 +11,64 @@ class account_invoice(models.Model):
     comunicazione_dati_iva_escludi = fields.Boolean(
         string='Escludi dalla dichiarazione IVA', default=False)
 
+    def _compute_taxes_in_company_currency(self, vals):
+        exchange_rate = (
+            self.amount_total_signed /
+            self.amount_total_company_signed)
+        vals['ImponibileImporto'] = vals['ImponibileImporto'] / exchange_rate
+        vals['Imposta'] = vals['Imposta'] / exchange_rate
+
     def _get_tax_comunicazione_dati_iva(self):
-        for fattura in self:
-            tax_lines = []
-            tax_grouped = {}
-            tot_imponibile = 0
-            tot_imposta = 0
-            for tax_line in fattura.tax_line:
-                # aliquota, natura, esigibilità
-                aliquota = 0
-                kind_id = False
-                payability = False
-                domain = [('tax_code_id', '=', tax_line.tax_code_id.id)]
-                tax = self.env['account.tax'].search(
-                    domain, order='id', limit=1)
-                tax_origin = tax
-                if tax.parent_id:
-                    tax = tax.parent_id
-                if tax:
-                    aliquota = tax.amount * 100
-                    kind_id = tax.kind_id.id
-                    payability = tax.payability
-                vals_tax_line = \
-                    self._get_tax_comunicazione_dati_iva_tax_line_amount(
-                        tax_line)
-                val = {
-                    'ImponibileImporto': vals_tax_line['base'],
-                    'Imposta': vals_tax_line['amount'],
+        self.ensure_one()
+        fattura = self
+        tax_model = self.env['account.tax']
+
+        tax_lines = []
+        tax_grouped = {}
+        for tax_line in fattura.tax_line_ids:
+            tax = tax_line.tax_id
+            aliquota = tax.amount
+            parent = tax_model.search([('children_tax_ids', 'in', [tax.id])])
+            if parent:
+                tax = parent
+                aliquota = parent.amount
+            kind_id = tax.kind_id.id
+            payability = tax.payability
+            imposta = tax_line.amount
+            if tax.id not in tax_grouped:
+                tax_grouped[tax.id] = {
+                    'ImponibileImporto': 0.0,
+                    'Imposta': imposta,
                     'Aliquota': aliquota,
                     'Natura_id': kind_id,
-                    'EsigibilitaIVA': payability
+                    'EsigibilitaIVA': payability,
+                    'Detraibile': 0.0,
                 }
-                # Detraibilità
-                detraibilita = False
-                if tax_origin.parent_id and tax_origin.type in ['percent']:
-                    if tax_origin.account_collected_id:
-                        detraibilita = tax_origin.amount * 100
-                    else:
-                        detraibilita = 100 - (tax_origin.amount * 100)
-                if detraibilita:
-                    val['Detraibile'] = detraibilita
-                # Solo imponibile legato alla parte indetraibile
-                if tax_origin.parent_id:
-                    if tax_origin.account_collected_id:
-                        val['ImponibileImporto'] = 0
+            else:
+                tax_grouped[tax.id]['Imposta'] += imposta
 
-                tot_imponibile += val['ImponibileImporto']
-                tot_imposta += val['Imposta']
-                if not tax.id in tax_grouped:
-                    tax_grouped[tax.id] = val
-                else:
-                    tax_grouped[tax.id]['ImponibileImporto'] += \
-                        val['ImponibileImporto']
-                    tax_grouped[tax.id]['Imposta'] += val['Imposta']
-            if tax_grouped:
-                for key in tax_grouped:
-                    val = tax_grouped[key]
-                    val = self._check_tax_comunicazione_dati_iva(tax, val)
-                    tax_lines.append((0, 0, val))
-            tot_vals = {
-                'tot_imponibile': tot_imponibile,
-                'tot_imposta': tot_imposta
-            }
-            fattura._check_tax_comunicazione_dati_iva_fattura(tot_vals)
+        for tax_id in tax_grouped:
+            tax = tax_model.browse(tax_id)
+            vals = tax_grouped[tax_id]
+            vals['ImponibileImporto'] = (
+                vals['Imposta'] * (
+                    1 / (vals['Aliquota'] / 100.0)
+                )
+            )
+            if tax.children_tax_ids:
+                parte_detraibile = 0.0
+                for child_tax in tax.children_tax_ids:
+                    if child_tax.account_id:
+                        parte_detraibile = child_tax.amount
+                        break
+                vals['Detraibile'] = (
+                    100 / (vals['Aliquota'] / parte_detraibile)
+                )
+            vals = self._check_tax_comunicazione_dati_iva(tax, vals)
+            fattura._compute_taxes_in_company_currency(vals)
+            tax_lines.append((0, 0, vals))
+
         return tax_lines
-
-    def _get_tax_comunicazione_dati_iva_tax_line_amount(self, tax_line):
-        vals = {
-            'base': tax_line.base_amount,
-            'amount': tax_line.tax_amount
-        }
-        return vals
 
     def _check_tax_comunicazione_dati_iva(self, tax, val=None):
         if not val:
@@ -97,25 +84,3 @@ class account_invoice(models.Model):
                 - Fattura {}"
                   ).format(tax.name, self.number or False))
         return val
-
-    def _check_tax_comunicazione_dati_iva_fattura(self, args=None):
-        if (
-            self.currency_id and
-            self.currency_id.id != self.company_id.currency_id.id
-        ):
-            # in caso di fatture in valuta estera, non controllo amount_untaxed
-            # perchè sarebbe comunque diverso dall'importo in valuta base
-            return
-        if not args:
-            args = {}
-
-        if 'tot_imponibile' in args:
-            if not round(self.amount_untaxed, 2) ==\
-                    round(args['tot_imponibile'], 2):
-                raise ValidationError(
-                    _("Imponibile ft {} del partner {} non congruente. \
-                    Verificare dettaglio sezione imposte della fattura (\
-                    imponible doc:{} - imponibile dati iva:{})"
-                      ).format(self.number, self.partner_id.name,
-                               str(self.amount_untaxed),
-                               str(args['tot_imponibile'])))

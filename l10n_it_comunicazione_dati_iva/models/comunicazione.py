@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
-from openerp import api, fields, models, _
-from openerp.exceptions import ValidationError
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 from lxml import etree
 import re
 
@@ -456,7 +456,7 @@ class ComunicazioneDatiIva(models.Model):
                             fattura.fiscal_document_type_id.id,
                         'dati_fattura_Data': fattura.date_invoice,
                         'dati_fattura_DataRegistrazione':
-                            fattura.registration_date,
+                            fattura.date,
                         'dati_fattura_Numero': fattura.number,
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
@@ -484,8 +484,8 @@ class ComunicazioneDatiIva(models.Model):
                       ('move_id', '!=', False),
                       ('move_id.journal_id', 'not in', no_journal_ids),
                       ('company_id', '=', comunicazione.company_id.id),
-                      ('registration_date', '>=', comunicazione.date_start),
-                      ('registration_date', '<=', comunicazione.date_end),
+                      ('date', '>=', comunicazione.date_start),
+                      ('date', '<=', comunicazione.date_end),
                       '|',
                       ('fiscal_document_type_id.in_invoice', '=', True),
                       ('fiscal_document_type_id.in_refund', '=', True), ]
@@ -2276,7 +2276,7 @@ class ComunicazioneDatiIvaFattureRicevuteBody(models.Model):
                 fattura.dati_fattura_Numero = fattura.invoice_id.number
                 fattura.dati_fattura_Data = fattura.invoice_id.date_invoice
                 fattura.dati_fattura_DataRegistrazione = \
-                    fattura.invoice_id.registration_date
+                    fattura.invoice_id.date
                 # tax
                 tax_lines = []
                 for tax_line in fattura.invoice_id.tax_line:
