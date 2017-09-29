@@ -78,8 +78,8 @@ class account_invoice(models.Model):
 
     def _get_tax_comunicazione_dati_iva_tax_line_amount(self, tax_line):
         vals = {
-            'base': tax_line.base_amount,
-            'amount': tax_line.tax_amount
+            'base': abs(tax_line.base_amount),
+            'amount': abs(tax_line.tax_amount)
         }
         return vals
 
