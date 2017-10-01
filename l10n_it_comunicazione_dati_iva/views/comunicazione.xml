@@ -338,6 +338,7 @@
             <field name="arch" type="xml">
                 <form string="Body Fatture emesse">
                     <group string="Riferimenti" name="riferimenti">
+                        <field name="posizione"/>
                         <field name="invoice_id"/>
                         <field name="dati_fattura_TipoDocumento"/>
                         <field name="dati_fattura_Numero"/>
@@ -384,6 +385,7 @@
             <field name="arch" type="xml">
                 <form string="Body fatture ricevute">
                     <group string="Riferimenti" name="riferimenti">
+                        <field name="posizione"/>
                         <field name="invoice_id"/>
                         <field name="dati_fattura_TipoDocumento"/>
                         <field name="dati_fattura_Numero"/>
