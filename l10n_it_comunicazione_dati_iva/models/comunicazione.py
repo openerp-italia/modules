@@ -631,11 +631,6 @@ class ComunicazioneDatiIva(models.Model):
                     u'Cognome del Rappresentante Fiscale del '
                     u'cessionario %s' % partner.partner_id.name)
             # ----- Dati fiscali
-            if partner.cessionario_IdFiscaleIVA_IdPaese and not \
-                    partner.cessionario_IdFiscaleIVA_IdCodice:
-                errors.append(
-                    u'Definire un codice identificativo fiscale '
-                    u'per il cessionario %s' % partner.partner_id.name)
             if not partner.cessionario_IdFiscaleIVA_IdPaese and \
                     partner.cessionario_IdFiscaleIVA_IdCodice:
                 errors.append(
@@ -832,11 +827,6 @@ class ComunicazioneDatiIva(models.Model):
                     u'Cognome del Rappresentante Fiscale del '
                     u'cedente %s' % partner.partner_id.name)
             # ----- Dati fiscali
-            if partner.cedente_IdFiscaleIVA_IdPaese and not \
-                    partner.cedente_IdFiscaleIVA_IdCodice:
-                errors.append(
-                    u'Definire un codice identificativo fiscale '
-                    u'per il cedente %s' % partner.partner_id.name)
             if not partner.cedente_IdFiscaleIVA_IdPaese and \
                     partner.cedente_IdFiscaleIVA_IdCodice:
                 errors.append(
@@ -1130,22 +1120,24 @@ class ComunicazioneDatiIva(models.Model):
             x_2_2_1_identificativi_fiscali = etree.SubElement(
                 x_2_2_cessionario_committente,
                 etree.QName("IdentificativiFiscali"))
-            # -----             2.2.1.1 - Id Fiscale IVA
-            x_2_2_1_1_id_fiscale_iva = etree.SubElement(
-                x_2_2_1_identificativi_fiscali,
-                etree.QName("IdFiscaleIVA"))
-            # -----                 2.2.1.1.1 - Id Paese
-            x_2_2_1_1_1_id_paese = etree.SubElement(
-                x_2_2_1_1_id_fiscale_iva,
-                etree.QName("IdPaese"))
-            x_2_2_1_1_1_id_paese.text = \
-                partner_invoice.cessionario_IdFiscaleIVA_IdPaese or ''
-            # -----                 2.2.1.1.2 - Id Codice
-            x_2_2_1_1_2_id_codice = etree.SubElement(
-                x_2_2_1_1_id_fiscale_iva,
-                etree.QName("IdCodice"))
-            x_2_2_1_1_2_id_codice.text = \
-                partner_invoice.cessionario_IdFiscaleIVA_IdCodice or ''
+            if partner_invoice.cessionario_IdFiscaleIVA_IdPaese and \
+                    partner_invoice.cessionario_IdFiscaleIVA_IdCodice:
+                # -----             2.2.1.1 - Id Fiscale IVA
+                x_2_2_1_1_id_fiscale_iva = etree.SubElement(
+                    x_2_2_1_identificativi_fiscali,
+                    etree.QName("IdFiscaleIVA"))
+                # -----                 2.2.1.1.1 - Id Paese
+                x_2_2_1_1_1_id_paese = etree.SubElement(
+                    x_2_2_1_1_id_fiscale_iva,
+                    etree.QName("IdPaese"))
+                x_2_2_1_1_1_id_paese.text = \
+                    partner_invoice.cessionario_IdFiscaleIVA_IdPaese or ''
+                # -----                 2.2.1.1.2 - Id Codice
+                x_2_2_1_1_2_id_codice = etree.SubElement(
+                    x_2_2_1_1_id_fiscale_iva,
+                    etree.QName("IdCodice"))
+                x_2_2_1_1_2_id_codice.text = \
+                    partner_invoice.cessionario_IdFiscaleIVA_IdCodice or ''
             # -----             2.2.1.2 - Codice Fiscale
             x_2_2_1_2_codice_fiscale = etree.SubElement(
                 x_2_2_1_identificativi_fiscali,
@@ -1554,22 +1546,24 @@ class ComunicazioneDatiIva(models.Model):
             x_3_2_1_identificativi_fiscali = etree.SubElement(
                 x_3_2_cedente_prestatore,
                 etree.QName("IdentificativiFiscali"))
-            # -----             2.2.1.1 - Id Fiscale IVA
-            x_3_2_1_1_id_fiscale_iva = etree.SubElement(
-                x_3_2_1_identificativi_fiscali,
-                etree.QName("IdFiscaleIVA"))
-            # -----                 2.2.1.1.1 - Id Paese
-            x_3_2_1_1_1_id_paese = etree.SubElement(
-                x_3_2_1_1_id_fiscale_iva,
-                etree.QName("IdPaese"))
-            x_3_2_1_1_1_id_paese.text = \
-                partner_invoice.cedente_IdFiscaleIVA_IdPaese or ''
-            # -----                 2.2.1.1.2 - Id Codice
-            x_3_2_1_1_2_id_codice = etree.SubElement(
-                x_3_2_1_1_id_fiscale_iva,
-                etree.QName("IdCodice"))
-            x_3_2_1_1_2_id_codice.text = \
-                partner_invoice.cedente_IdFiscaleIVA_IdCodice or ''
+            if partner_invoice.cedente_IdFiscaleIVA_IdPaese and \
+                    partner_invoice.cedente_IdFiscaleIVA_IdCodice:
+                # -----             2.2.1.1 - Id Fiscale IVA
+                x_3_2_1_1_id_fiscale_iva = etree.SubElement(
+                    x_3_2_1_identificativi_fiscali,
+                    etree.QName("IdFiscaleIVA"))
+                # -----                 2.2.1.1.1 - Id Paese
+                x_3_2_1_1_1_id_paese = etree.SubElement(
+                    x_3_2_1_1_id_fiscale_iva,
+                    etree.QName("IdPaese"))
+                x_3_2_1_1_1_id_paese.text = \
+                    partner_invoice.cedente_IdFiscaleIVA_IdPaese or ''
+                # -----                 2.2.1.1.2 - Id Codice
+                x_3_2_1_1_2_id_codice = etree.SubElement(
+                    x_3_2_1_1_id_fiscale_iva,
+                    etree.QName("IdCodice"))
+                x_3_2_1_1_2_id_codice.text = \
+                    partner_invoice.cedente_IdFiscaleIVA_IdCodice or ''
             # -----             2.2.1.2 - Codice Fiscale
             x_3_2_1_2_codice_fiscale = etree.SubElement(
                 x_3_2_1_identificativi_fiscali,
