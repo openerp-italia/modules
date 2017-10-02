@@ -287,7 +287,7 @@ class ComunicazioneDatiIva(models.Model):
         # Sede
         vals['cedente_sede_Indirizzo'] = '{} {}'.format(
             partner.street and partner.street.encode('utf8') or '',
-            partner.street2 and partner.street2.encode('utf8') or '')
+            partner.street2 and partner.street2.encode('utf8') or '').strip()
         vals['cedente_sede_Cap'] = partner.zip or ''
         vals['cedente_sede_Comune'] = partner.city and \
             partner.city.encode('utf8') or ''
@@ -335,7 +335,7 @@ class ComunicazioneDatiIva(models.Model):
         # Sede
         vals['cessionario_sede_Indirizzo'] = '{} {}'.format(
             partner.street and partner.street.encode('utf8') or '',
-            partner.street2 and partner.street2.encode('utf8') or '')
+            partner.street2 and partner.street2.encode('utf8') or '').strip()
         vals['cessionario_sede_Cap'] = partner.zip or ''
         vals['cessionario_sede_Comune'] = partner.city and \
             partner.city.encode('utf8') or ''
@@ -2215,7 +2215,8 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
                     fattura.partner_id.name or ''
                 # Sede
                 fattura.cedente_sede_Indirizzo = '{} {}'.format(
-                    fattura.partner_id.street, fattura.partner_id.street2)
+                    fattura.partner_id.street, fattura.partner_id.street2
+                    ).strip()
                 fattura.cedente_sede_Cap = \
                     fattura.partner_id.zip or ''
                 fattura.cedente_sede_Comune = \
