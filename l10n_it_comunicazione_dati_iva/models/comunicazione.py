@@ -456,8 +456,9 @@ class ComunicazioneDatiIva(models.Model):
                             fattura.fiscal_document_type_id.id,
                         'dati_fattura_Data': fattura.date_invoice,
                         'dati_fattura_DataRegistrazione':
-                            fattura.registration_date,
-                        'dati_fattura_Numero': fattura.number,
+                            fattura.registration_date or '',
+                        'dati_fattura_Numero':
+                            fattura.supplier_invoice_number or '',
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
                     }
@@ -884,6 +885,14 @@ class ComunicazioneDatiIva(models.Model):
                         u'Nessun dato IVA definito per la fattura %s del '
                         u'partner %s' % (invoice.invoice_id.number,
                                          partner.partner_id.name))
+                if not invoice.dati_fattura_Numero:
+                    errors.append(
+                        u'Nessun numero fornitore per la fattura %s' % (
+                            invoice.invoice_id.number))
+                if not invoice.dati_fattura_DataRegistrazione:
+                    errors.append(
+                        u'Nessuna data di registrazione per la fattura %s' % (
+                            invoice.invoice_id.number))
         return errors
 
     @api.multi
