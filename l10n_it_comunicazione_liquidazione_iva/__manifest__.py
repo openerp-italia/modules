@@ -46,6 +46,7 @@
         'security/ir.model.access.csv',
         'views/comunicazione_liquidazione.xml',
         'wizard/export_file_view.xml',
+        'security/security.xml',
     ],
     'installable': True,
 }
