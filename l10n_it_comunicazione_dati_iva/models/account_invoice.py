@@ -81,6 +81,10 @@ class account_invoice(models.Model):
             'base': abs(tax_line.base_amount),
             'amount': abs(tax_line.tax_amount)
         }
+        # Gestione righe negative
+        if tax_line.base < 0:
+            vals['base'] = vals['base'] * -1
+            vals['amount'] = vals['amount'] * -1
         return vals
 
     def _check_tax_comunicazione_dati_iva(self, tax_id, val=None):
