@@ -49,6 +49,7 @@
         'views/account.xml',
         'views/account_invoice_view.xml',
         'wizard/export_file_view.xml',
+        'security/security.xml',
     ],
     'installable': True,
 }

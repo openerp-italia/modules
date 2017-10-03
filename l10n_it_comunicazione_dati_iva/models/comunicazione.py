@@ -679,7 +679,7 @@ class ComunicazioneDatiIva(models.Model):
                     not re.match('[0-9]{5}', partner.cessionario_sede_Cap):
                 errors.append(
                     u'Il CAP %s del cessionario %s non rispetta '
-                    u'il formato desiderato' % (
+                    u'il formato desiderato (numerico lunghezza 5)' % (
                         partner.cessionario_sede_Cap,
                         partner.partner_id.name))
             # ----- Dettagli IVA
@@ -875,7 +875,7 @@ class ComunicazioneDatiIva(models.Model):
                     not re.match('[0-9]{5}', partner.cedente_sede_Cap):
                 errors.append(
                     u'Il CAP %s del cedente %s non rispetta '
-                    u'il formato desiderato' % (
+                    u'il formato desiderato (numerico lunghezza 5)' % (
                         partner.cedente_sede_Cap,
                         partner.partner_id.name))
             # ----- Dettagli IVA
