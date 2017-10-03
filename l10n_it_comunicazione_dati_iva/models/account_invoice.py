@@ -53,7 +53,7 @@ class account_invoice(models.Model):
                     val['Detraibile'] = detraibilita
                 # Solo imponibile legato alla parte indetraibile
                 if tax_origin.parent_id:
-                    if tax_origin.account_collected_id:
+                    if not tax_line.base_code_id:
                         val['ImponibileImporto'] = 0
 
                 tot_imponibile += val['ImponibileImporto']
