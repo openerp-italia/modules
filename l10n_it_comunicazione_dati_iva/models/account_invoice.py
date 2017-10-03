@@ -67,7 +67,7 @@ class account_invoice(models.Model):
             if tax_grouped:
                 for key in tax_grouped:
                     val = tax_grouped[key]
-                    val = self._check_tax_comunicazione_dati_iva(tax, val)
+                    val = self._check_tax_comunicazione_dati_iva(key, val)
                     tax_lines.append((0, 0, val))
             tot_vals = {
                 'tot_imponibile': tot_imponibile,
@@ -83,9 +83,10 @@ class account_invoice(models.Model):
         }
         return vals
 
-    def _check_tax_comunicazione_dati_iva(self, tax, val=None):
+    def _check_tax_comunicazione_dati_iva(self, tax_id, val=None):
         if not val:
             val = {}
+        tax = self.env['account.tax'].browse(tax_id)
         if val['Aliquota'] == 0 and not val['Natura_id']:
             raise ValidationError(
                 _("Specificare la natura dell'esenzione per l'imposta: {}\
