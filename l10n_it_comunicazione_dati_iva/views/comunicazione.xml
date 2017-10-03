@@ -25,6 +25,7 @@
                         <button name="compute_values" string="Calcola Valori" type="object" class="oe_highlight"/>
                         <button type="action" name="%(action_compute_fiscal_document_type)d"
                         string="Assegna tipo documento fiscale"/>
+                        <button name="check_errors" string="Controllo Errori" type="object"/>
                     </header>
                     <sheet>
                         <group name="company">
@@ -146,6 +147,11 @@
                                 <group>
                                     <field name="fatture_ricevute_ids" nolabel="1">
                                     </field>
+                                </group>
+                            </page>
+                            <page string="Errori">
+                                <group>
+                                    <field name="errors" nolabel="1"/>
                                 </group>
                             </page>
                         </notebook>
