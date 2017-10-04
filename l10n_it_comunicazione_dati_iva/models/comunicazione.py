@@ -280,9 +280,13 @@ class ComunicazioneDatiIva(models.Model):
         vals = {}
         vals['cedente_IdFiscaleIVA_IdPaese'] = \
             partner.country_id.code or ''
+        # ----- Get vat
+        partner_vat = partner.commercial_partner_id.vat or ''
         vals['cedente_IdFiscaleIVA_IdCodice'] = \
-            partner.vat[2:] if partner.vat else ''
-        vals['cedente_CodiceFiscale'] = partner.fiscalcode or ''
+            partner_vat[2:] if partner_vat else ''
+        # ----- Get fiscalcode
+        vals['cedente_CodiceFiscale'] = \
+            partner.commercial_partner_id.fiscalcode or ''
         vals['cedente_Denominazione'] = partner.name.encode('utf8') or ''
         # Sede
         vals['cedente_sede_Indirizzo'] = '{} {}'.format(
@@ -328,9 +332,13 @@ class ComunicazioneDatiIva(models.Model):
         vals = {}
         vals['cessionario_IdFiscaleIVA_IdPaese'] = \
             partner.country_id.code or ''
+        # ----- Get vat
+        partner_vat = partner.commercial_partner_id.vat or ''
         vals['cessionario_IdFiscaleIVA_IdCodice'] = \
-            partner.vat[2:] if partner.vat else ''
-        vals['cessionario_CodiceFiscale'] = partner.fiscalcode or ''
+            partner_vat[2:] if partner_vat else ''
+        # ----- Get fiscalcode
+        vals['cessionario_CodiceFiscale'] = \
+            partner.commercial_partner_id.fiscalcode or ''
         vals['cessionario_Denominazione'] = partner.name.encode('utf8') or ''
         # Sede
         vals['cessionario_sede_Indirizzo'] = '{} {}'.format(
