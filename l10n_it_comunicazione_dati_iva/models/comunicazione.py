@@ -278,8 +278,12 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_cedente_partner_id(self, partner, vals=None):
         vals = {}
-        vals['cedente_IdFiscaleIVA_IdPaese'] = \
-            partner.country_id.code or ''
+        if partner.vat and partner.country_id:
+            vals['cedente_IdFiscaleIVA_IdPaese'] = partner.country_id.code
+        elif partner.vat:
+            vals['cedente_IdFiscaleIVA_IdPaese'] = partner.vat[:2]
+        else:
+            vals['cedente_IdFiscaleIVA_IdPaese'] = ''
         vals['cedente_IdFiscaleIVA_IdCodice'] = \
             partner.vat[2:] if partner.vat else ''
         vals['cedente_CodiceFiscale'] = partner.fiscalcode or ''
@@ -326,8 +330,12 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_cessionario_partner_id(self, partner, vals=None):
         vals = {}
-        vals['cessionario_IdFiscaleIVA_IdPaese'] = \
-            partner.country_id.code or ''
+        if partner.vat and partner.country_id:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.country_id.code
+        elif partner.vat:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.vat[:2]
+        else:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = ''
         vals['cessionario_IdFiscaleIVA_IdCodice'] = \
             partner.vat[2:] if partner.vat else ''
         vals['cessionario_CodiceFiscale'] = partner.fiscalcode or ''
