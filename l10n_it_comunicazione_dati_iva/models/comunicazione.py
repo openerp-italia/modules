@@ -2219,7 +2219,7 @@ class ComunicazioneDatiIvaFattureRicevute(models.Model):
                 # Sede
                 fattura.cedente_sede_Indirizzo = '{} {}'.format(
                     fattura.partner_id.street, fattura.partner_id.street2
-                    ).strip()
+                ).strip()
                 fattura.cedente_sede_Cap = \
                     fattura.partner_id.zip or ''
                 fattura.cedente_sede_Comune = \
