@@ -334,19 +334,14 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_cessionario_partner_id(self, partner, vals=None):
         vals = {}
-<<<<<<< HEAD
-        if partner.vat and partner.country_id:
-            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.country_id.code
-        elif partner.vat:
-            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.vat[:2]
-        else:
-            vals['cessionario_IdFiscaleIVA_IdPaese'] = ''
-=======
-        vals['cessionario_IdFiscaleIVA_IdPaese'] = \
-            partner.country_id.code or ''
         # ----- Get vat
         partner_vat = partner.commercial_partner_id.vat or ''
->>>>>>> f6015d1b1c1840cad81726fdae36e99112099da3
+        if partner_vat and partner.country_id:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.country_id.code
+        elif partner_vat:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner_vat[:2]
+        else:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = ''
         vals['cessionario_IdFiscaleIVA_IdCodice'] = \
             partner_vat[2:] if partner_vat else ''
         # ----- Get fiscalcode
