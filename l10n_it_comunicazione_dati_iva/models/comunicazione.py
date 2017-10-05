@@ -278,15 +278,19 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_cedente_partner_id(self, partner, vals=None):
         vals = {}
-        if partner.vat and partner.country_id:
+        # ----- Get vat
+        partner_vat = partner.commercial_partner_id.vat or ''
+        if partner_vat and partner.country_id:
             vals['cedente_IdFiscaleIVA_IdPaese'] = partner.country_id.code
-        elif partner.vat:
-            vals['cedente_IdFiscaleIVA_IdPaese'] = partner.vat[:2]
+        elif partner_vat:
+            vals['cedente_IdFiscaleIVA_IdPaese'] = partner_vat[:2]
         else:
             vals['cedente_IdFiscaleIVA_IdPaese'] = ''
         vals['cedente_IdFiscaleIVA_IdCodice'] = \
-            partner.vat[2:] if partner.vat else ''
-        vals['cedente_CodiceFiscale'] = partner.fiscalcode or ''
+            partner_vat[2:] if partner_vat else ''
+        # ----- Get fiscalcode
+        vals['cedente_CodiceFiscale'] = \
+            partner.commercial_partner_id.fiscalcode or ''
         vals['cedente_Denominazione'] = partner.name.encode('utf8') or ''
         # Sede
         vals['cedente_sede_Indirizzo'] = '{} {}'.format(
@@ -330,15 +334,24 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_cessionario_partner_id(self, partner, vals=None):
         vals = {}
+<<<<<<< HEAD
         if partner.vat and partner.country_id:
             vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.country_id.code
         elif partner.vat:
             vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.vat[:2]
         else:
             vals['cessionario_IdFiscaleIVA_IdPaese'] = ''
+=======
+        vals['cessionario_IdFiscaleIVA_IdPaese'] = \
+            partner.country_id.code or ''
+        # ----- Get vat
+        partner_vat = partner.commercial_partner_id.vat or ''
+>>>>>>> f6015d1b1c1840cad81726fdae36e99112099da3
         vals['cessionario_IdFiscaleIVA_IdCodice'] = \
-            partner.vat[2:] if partner.vat else ''
-        vals['cessionario_CodiceFiscale'] = partner.fiscalcode or ''
+            partner_vat[2:] if partner_vat else ''
+        # ----- Get fiscalcode
+        vals['cessionario_CodiceFiscale'] = \
+            partner.commercial_partner_id.fiscalcode or ''
         vals['cessionario_Denominazione'] = partner.name.encode('utf8') or ''
         # Sede
         vals['cessionario_sede_Indirizzo'] = '{} {}'.format(
