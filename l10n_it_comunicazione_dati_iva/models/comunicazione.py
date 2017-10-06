@@ -301,8 +301,12 @@ class ComunicazioneDatiIva(models.Model):
             partner.city.encode('utf8') or ''
         vals['cedente_sede_Provincia'] = partner.state_id and \
             partner.state_id.code or ''
-        vals['cedente_sede_Nazione'] = partner.country_id and \
-            partner.country_id.code or ''
+        if partner.country_id:
+            vals['cedente_sede_Nazione'] = partner.country_id.code
+        elif partner_vat:
+            vals['cedente_sede_Nazione'] = partner_vat[:2]
+        else:
+            vals['cedente_sede_Nazione'] = ''
         return vals
 
     @api.multi
@@ -357,8 +361,12 @@ class ComunicazioneDatiIva(models.Model):
             partner.city.encode('utf8') or ''
         vals['cessionario_sede_Provincia'] = partner.state_id and \
             partner.state_id.code or ''
-        vals['cessionario_sede_Nazione'] = partner.country_id and \
-            partner.country_id.code or ''
+        if partner.country_id:
+            vals['cessionario_sede_Nazione'] = partner.country_id.code
+        elif partner_vat:
+            vals['cessionario_sede_Nazione'] = partner_vat[:2]
+        else:
+            vals['cessionario_sede_Nazione'] = ''
         return vals
 
     def _prepare_fattura_emessa(self, vals, fattura):
