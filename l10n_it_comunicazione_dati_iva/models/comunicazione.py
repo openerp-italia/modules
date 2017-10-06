@@ -376,7 +376,6 @@ class ComunicazioneDatiIva(models.Model):
         return vals
 
     def _parse_fattura_numero(self, fattura_numero):
-        fattura_numero.replace('-', '')
         try:
             fattura_numero = fattura_numero[20:]
         except:
