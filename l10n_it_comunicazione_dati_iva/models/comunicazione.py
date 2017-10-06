@@ -375,6 +375,14 @@ class ComunicazioneDatiIva(models.Model):
     def _prepare_fattura_ricevuta(self, vals, fattura):
         return vals
 
+    def _parse_fattura_numero(self, fattura_numero):
+        fattura_numero.replace('-', '')
+        try:
+            fattura_numero = fattura_numero[20:]
+        except:
+            pass
+        return fattura_numero
+
     @api.multi
     def compute_values(self):
         # Unlink existing lines
@@ -415,7 +423,8 @@ class ComunicazioneDatiIva(models.Model):
                         'dati_fattura_TipoDocumento':
                             fattura.fiscal_document_type_id.id,
                         'dati_fattura_Data': fattura.date_invoice,
-                        'dati_fattura_Numero': fattura.number,
+                        'dati_fattura_Numero': self._parse_fattura_numero(
+                            fattura.number),
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
                     }
@@ -481,8 +490,8 @@ class ComunicazioneDatiIva(models.Model):
                         'dati_fattura_Data': fattura.date_invoice,
                         'dati_fattura_DataRegistrazione':
                             fattura.registration_date or '',
-                        'dati_fattura_Numero':
-                            fattura.supplier_invoice_number or '',
+                        'dati_fattura_Numero': self._parse_fattura_numero(
+                            fattura.supplier_invoice_number) or '',
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
                     }
