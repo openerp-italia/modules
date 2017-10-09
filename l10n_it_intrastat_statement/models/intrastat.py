@@ -761,7 +761,6 @@ class account_intrastat_statement(models.Model):
         statement_lines_purchase_s4 = []
         
         for inv in self.env['account.invoice'].search(domain):
-            print inv.name
             for inv_intra_line in inv.intrastat_line_ids:
                 # Sale - Section 1
                 if inv_intra_line.statement_section == 'sale_s1':
