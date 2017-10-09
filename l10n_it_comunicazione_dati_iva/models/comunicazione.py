@@ -377,7 +377,7 @@ class ComunicazioneDatiIva(models.Model):
 
     def _parse_fattura_numero(self, fattura_numero):
         try:
-            fattura_numero = fattura_numero[20:]
+            fattura_numero = fattura_numero[-20:]
         except:
             pass
         return fattura_numero
