@@ -280,7 +280,7 @@ class ComunicazioneDatiIva(models.Model):
         vals = {}
         # ----- Get vat
         partner_vat = partner.commercial_partner_id.vat or ''
-        if partner_vat and partner.country_id:
+        if partner.country_id:
             vals['cedente_IdFiscaleIVA_IdPaese'] = partner.country_id.code
         elif partner_vat:
             vals['cedente_IdFiscaleIVA_IdPaese'] = partner_vat[:2]
@@ -307,6 +307,21 @@ class ComunicazioneDatiIva(models.Model):
             vals['cedente_sede_Nazione'] = partner_vat[:2]
         else:
             vals['cedente_sede_Nazione'] = ''
+        # Normalizzazione dati in base alla nazione UE o EXTRA UE:
+        vals_norm = {
+            'sede_Nazione': vals['cedente_sede_Nazione'],
+            'IdFiscaleIVA_IdCodice': vals['cedente_IdFiscaleIVA_IdCodice']
+        }
+        vals_norm = self._normalizza_dati_partner(partner, vals_norm)
+        if 'sede_Cap' in vals_norm:
+            vals['cedente_sede_Cap'] = vals_norm['sede_Cap']
+        if 'sede_Provincia' in vals_norm:
+            vals['cedente_sede_Provincia'] = vals_norm['sede_Provincia']
+        if 'CodiceFiscale' in vals_norm:
+            vals['cedente_CodiceFiscale'] = vals_norm['CodiceFiscale']
+        if 'IdFiscaleIVA_IdCodice' in vals_norm:
+            vals['cedente_IdFiscaleIVA_IdCodice'] = \
+                vals_norm['IdFiscaleIVA_IdCodice']
         return vals
 
     @api.multi
@@ -340,7 +355,7 @@ class ComunicazioneDatiIva(models.Model):
         vals = {}
         # ----- Get vat
         partner_vat = partner.commercial_partner_id.vat or ''
-        if partner_vat and partner.country_id:
+        if partner.country_id:
             vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.country_id.code
         elif partner_vat:
             vals['cessionario_IdFiscaleIVA_IdPaese'] = partner_vat[:2]
@@ -367,6 +382,43 @@ class ComunicazioneDatiIva(models.Model):
             vals['cessionario_sede_Nazione'] = partner_vat[:2]
         else:
             vals['cessionario_sede_Nazione'] = ''
+        # Normalizzazione dati in base alla nazione UE o EXTRA UE:
+        vals_norm = {
+            'sede_Nazione': vals['cessionario_sede_Nazione'],
+            'IdFiscaleIVA_IdCodice': vals['cessionario_IdFiscaleIVA_IdCodice']
+        }
+        vals_norm = self._normalizza_dati_partner(partner, vals_norm)
+        if 'sede_Cap' in vals_norm:
+            vals['cessionario_sede_Cap'] = vals_norm['sede_Cap']
+        if 'sede_Provincia' in vals_norm:
+            vals['cessionario_sede_Provincia'] = vals_norm['sede_Provincia']
+        if 'CodiceFiscale' in vals_norm:
+            vals['cessionario_CodiceFiscale'] = vals_norm['CodiceFiscale']
+        if 'IdFiscaleIVA_IdCodice' in vals_norm:
+            vals['cessionario_IdFiscaleIVA_IdCodice'] = \
+                vals_norm['IdFiscaleIVA_IdCodice']
+        return vals
+
+    def _normalizza_dati_partner(self, partner, vals):
+        # Paesi Esteri :
+        # - Rimuovo CAP/provincia che potrebbero dare problemi nella validazione
+        # Paesi UE :
+        # - No codice fiscale se presente partita iva
+        # Paesi EXTRA-UE :
+        # - Non ci sono controlli su id fiscale, ma dato che va messo e può
+        # non esistere, viene messa la ragione sociale(troncata a 28)
+        if vals['sede_Nazione'] not in ['', 'IT']:
+            vals['sede_Cap'] = ''
+            vals['sede_Provincia'] = ''
+            country = self.env['res.country'].search(
+                [('code', '=', vals['sede_Nazione'])])
+            if country.intrastat:
+                if vals['IdFiscaleIVA_IdCodice']:
+                    vals['CodiceFiscale'] = ''
+            if not country.intrastat:
+                if not vals['IdFiscaleIVA_IdCodice']:
+                    vals['IdFiscaleIVA_IdCodice'] = partner.name[:28]
+
         return vals
 
     def _prepare_fattura_emessa(self, vals, fattura):
