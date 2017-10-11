@@ -515,13 +515,13 @@ class ComunicazioneDatiIva(models.Model):
         errors = []
         # ----- Conta il limite di partner e fatture
         partner_limit = 0
-        for partner in comunicazione.fatture_emesse_ids:
+        for line in comunicazione.fatture_emesse_ids:
             partner_limit += 1
-            invoices_limit = len(partner.fatture_emesse_body_ids)
+            invoices_limit = len(line.fatture_emesse_body_ids)
             if invoices_limit > 1000:
                 errors += [
                     'Superato il limite di 1000 fatture per cessionario (%s)'
-                    % partner.name]
+                    % line.partner_id.name]
         if partner_limit > 1000:
             errors += [
                 'Superato il limite di 1000 cessionari per comunicazione']
@@ -706,13 +706,13 @@ class ComunicazioneDatiIva(models.Model):
         errors = []
         # ----- Conta il limite di partner e fatture
         partner_limit = 0
-        for partner in comunicazione.fatture_ricevute_ids:
+        for line in comunicazione.fatture_ricevute_ids:
             partner_limit += 1
-            invoices_limit = len(partner.fatture_ricevute_body_ids)
+            invoices_limit = len(line.fatture_ricevute_body_ids)
             if invoices_limit > 1000:
                 errors += [
                     'Superato il limite di 1000 fatture per cessionario (%s)'
-                    % partner.name]
+                    % line.partner_id.name]
         if partner_limit > 1000:
             errors += [
                 'Superato il limite di 1000 cessionari per comunicazione']
