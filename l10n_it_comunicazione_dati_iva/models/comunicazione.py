@@ -278,10 +278,14 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_cedente_partner_id(self, partner, vals=None):
         vals = {}
-        vals['cedente_IdFiscaleIVA_IdPaese'] = \
-            partner.country_id.code or ''
         # ----- Get vat
         partner_vat = partner.commercial_partner_id.vat or ''
+        if partner.country_id:
+            vals['cedente_IdFiscaleIVA_IdPaese'] = partner.country_id.code
+        elif partner_vat:
+            vals['cedente_IdFiscaleIVA_IdPaese'] = partner_vat[:2]
+        else:
+            vals['cedente_IdFiscaleIVA_IdPaese'] = ''
         vals['cedente_IdFiscaleIVA_IdCodice'] = \
             partner_vat[2:] if partner_vat else ''
         # ----- Get fiscalcode
@@ -297,8 +301,27 @@ class ComunicazioneDatiIva(models.Model):
             partner.city.encode('utf8') or ''
         vals['cedente_sede_Provincia'] = partner.state_id and \
             partner.state_id.code or ''
-        vals['cedente_sede_Nazione'] = partner.country_id and \
-            partner.country_id.code or ''
+        if partner.country_id:
+            vals['cedente_sede_Nazione'] = partner.country_id.code
+        elif partner_vat:
+            vals['cedente_sede_Nazione'] = partner_vat[:2]
+        else:
+            vals['cedente_sede_Nazione'] = ''
+        # Normalizzazione dati in base alla nazione UE o EXTRA UE:
+        vals_norm = {
+            'sede_Nazione': vals['cedente_sede_Nazione'],
+            'IdFiscaleIVA_IdCodice': vals['cedente_IdFiscaleIVA_IdCodice']
+        }
+        vals_norm = self._normalizza_dati_partner(partner, vals_norm)
+        if 'sede_Cap' in vals_norm:
+            vals['cedente_sede_Cap'] = vals_norm['sede_Cap']
+        if 'sede_Provincia' in vals_norm:
+            vals['cedente_sede_Provincia'] = vals_norm['sede_Provincia']
+        if 'CodiceFiscale' in vals_norm:
+            vals['cedente_CodiceFiscale'] = vals_norm['CodiceFiscale']
+        if 'IdFiscaleIVA_IdCodice' in vals_norm:
+            vals['cedente_IdFiscaleIVA_IdCodice'] = \
+                vals_norm['IdFiscaleIVA_IdCodice']
         return vals
 
     @api.multi
@@ -330,10 +353,14 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_cessionario_partner_id(self, partner, vals=None):
         vals = {}
-        vals['cessionario_IdFiscaleIVA_IdPaese'] = \
-            partner.country_id.code or ''
         # ----- Get vat
         partner_vat = partner.commercial_partner_id.vat or ''
+        if partner.country_id:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner.country_id.code
+        elif partner_vat:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = partner_vat[:2]
+        else:
+            vals['cessionario_IdFiscaleIVA_IdPaese'] = ''
         vals['cessionario_IdFiscaleIVA_IdCodice'] = \
             partner_vat[2:] if partner_vat else ''
         # ----- Get fiscalcode
@@ -349,8 +376,49 @@ class ComunicazioneDatiIva(models.Model):
             partner.city.encode('utf8') or ''
         vals['cessionario_sede_Provincia'] = partner.state_id and \
             partner.state_id.code or ''
-        vals['cessionario_sede_Nazione'] = partner.country_id and \
-            partner.country_id.code or ''
+        if partner.country_id:
+            vals['cessionario_sede_Nazione'] = partner.country_id.code
+        elif partner_vat:
+            vals['cessionario_sede_Nazione'] = partner_vat[:2]
+        else:
+            vals['cessionario_sede_Nazione'] = ''
+        # Normalizzazione dati in base alla nazione UE o EXTRA UE:
+        vals_norm = {
+            'sede_Nazione': vals['cessionario_sede_Nazione'],
+            'IdFiscaleIVA_IdCodice': vals['cessionario_IdFiscaleIVA_IdCodice']
+        }
+        vals_norm = self._normalizza_dati_partner(partner, vals_norm)
+        if 'sede_Cap' in vals_norm:
+            vals['cessionario_sede_Cap'] = vals_norm['sede_Cap']
+        if 'sede_Provincia' in vals_norm:
+            vals['cessionario_sede_Provincia'] = vals_norm['sede_Provincia']
+        if 'CodiceFiscale' in vals_norm:
+            vals['cessionario_CodiceFiscale'] = vals_norm['CodiceFiscale']
+        if 'IdFiscaleIVA_IdCodice' in vals_norm:
+            vals['cessionario_IdFiscaleIVA_IdCodice'] = \
+                vals_norm['IdFiscaleIVA_IdCodice']
+        return vals
+
+    def _normalizza_dati_partner(self, partner, vals):
+        # Paesi Esteri :
+        # - Rimuovo CAP/provincia che potrebbero dare problemi nella validazione
+        # Paesi UE :
+        # - No codice fiscale se presente partita iva
+        # Paesi EXTRA-UE :
+        # - Non ci sono controlli su id fiscale, ma dato che va messo e può
+        # non esistere, viene messa la ragione sociale(troncata a 28)
+        if vals['sede_Nazione'] not in ['', 'IT']:
+            vals['sede_Cap'] = ''
+            vals['sede_Provincia'] = ''
+            country = self.env['res.country'].search(
+                [('code', '=', vals['sede_Nazione'])])
+            if country.intrastat:
+                if vals['IdFiscaleIVA_IdCodice']:
+                    vals['CodiceFiscale'] = ''
+            if not country.intrastat:
+                if not vals['IdFiscaleIVA_IdCodice']:
+                    vals['IdFiscaleIVA_IdCodice'] = partner.name[:28]
+
         return vals
 
     def _prepare_fattura_emessa(self, vals, fattura):
@@ -358,6 +426,13 @@ class ComunicazioneDatiIva(models.Model):
 
     def _prepare_fattura_ricevuta(self, vals, fattura):
         return vals
+
+    def _parse_fattura_numero(self, fattura_numero):
+        try:
+            fattura_numero = fattura_numero[-20:]
+        except:
+            pass
+        return fattura_numero
 
     @api.multi
     def compute_values(self):
@@ -399,7 +474,8 @@ class ComunicazioneDatiIva(models.Model):
                         'dati_fattura_TipoDocumento':
                             fattura.fiscal_document_type_id.id,
                         'dati_fattura_Data': fattura.date_invoice,
-                        'dati_fattura_Numero': fattura.number,
+                        'dati_fattura_Numero': self._parse_fattura_numero(
+                            fattura.number),
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
                     }
@@ -465,8 +541,8 @@ class ComunicazioneDatiIva(models.Model):
                         'dati_fattura_Data': fattura.date_invoice,
                         'dati_fattura_DataRegistrazione':
                             fattura.date,
-                        'dati_fattura_Numero':
-                            fattura.supplier_invoice_number or '',
+                        'dati_fattura_Numero': self._parse_fattura_numero(
+                            fattura.reference) or '',
                         'dati_fattura_iva_ids':
                             fattura._get_tax_comunicazione_dati_iva()
                     }
