@@ -14,7 +14,8 @@
     'depends': [
         'account', 'l10n_it_fiscal_document_type', 'l10n_it_codici_carica',
         'l10n_it_fiscalcode', 'l10n_it_esigibilita_iva',
-        'l10n_it_account_tax_kind', 'account_invoice_entry_date'
+        'l10n_it_account_tax_kind', 'account_invoice_entry_date',
+        'report_intrastat'
     ],
     'data': [
         'security/ir.model.access.csv',
