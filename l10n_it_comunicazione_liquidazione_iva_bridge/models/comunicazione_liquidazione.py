@@ -70,6 +70,13 @@ class ComunicazioneLiquidazioneVp(models.Model):
                                 -1 * tax_amounts[tax]['base']
                 # Iva esigibile
                 for vat_amount in liq.debit_vat_account_line_ids:
+                    tax_obj = self.env['account.tax']
+                    tax_of_account = tax_obj.search([
+                        ('tax_code_id', '=', vat_amount.tax_code_id.id)
+                    ])
+                    if tax_of_account:
+                       if tax_of_account.payability == 'S':
+                           continue
                     quadro.iva_esigibile += vat_amount.amount
                 # Iva detratta
                 for vat_amount in liq.credit_vat_account_line_ids:
