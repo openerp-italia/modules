@@ -1,25 +1,10 @@
 # -*- coding: utf-8 -*-
-##############################################################################
 #
 #    Author: Alessandro Camilli (a.camilli@openforce.it)
 #    Copyright (C) 2015
 #    Apulia Software srl - info@apuliasoftware.it - www.apuliasoftware.it
 #    Openforce di Camilli Alessandro - www.openforce.it
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as published
-#    by the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
 
 from openerp import models, fields, api, _
@@ -70,6 +55,14 @@ class account_intrastat_statement(models.Model):
         company_id = self.env.user.company_id
         if company_id:
             return company_id.intrastat_custom_id
+
+    def round_min_amount(self, amount, company=None):
+        if company is None:
+            company = self.company_id
+        if amount < company.intrastat_min_amount:
+            return company.intrastat_min_amount
+        else:
+            return amount
 
     @api.one
     @api.depends('sale_section1_ids.amount_euro')
@@ -786,10 +779,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_sale_s1):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_sale_s1) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_sale_s1.append((0, 0, st_line))
                 # Sale - Section 2
                 elif inv_intra_line.statement_section == 'sale_s2':
@@ -798,10 +791,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_sale_s2):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_sale_s2) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_sale_s2.append((0, 0, st_line))
                 # Sale - Section 3
                 elif inv_intra_line.statement_section == 'sale_s3':
@@ -810,10 +803,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_sale_s3):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_sale_s3) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_sale_s3.append((0, 0, st_line))
                 # Sale - Section 4
                 elif inv_intra_line.statement_section == 'sale_s4':
@@ -822,10 +815,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_sale_s4):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_sale_s4) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_sale_s4.append((0, 0, st_line))
                 # Purchase - Section 1
                 elif inv_intra_line.statement_section == 'purchase_s1':
@@ -835,10 +828,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_purchase_s1):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_purchase_s1) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_purchase_s1.append((0, 0, st_line))
                 # Purchase - Section 2
                 elif inv_intra_line.statement_section == 'purchase_s2':
@@ -848,10 +841,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_purchase_s2):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_purchase_s2) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_purchase_s2.append((0, 0, st_line))
                 # Purchase - Section 3
                 elif inv_intra_line.statement_section == 'purchase_s3':
@@ -861,10 +854,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_purchase_s3):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_purchase_s3) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_purchase_s3.append((0, 0, st_line))
                 # Purchase - Section 4
                 elif inv_intra_line.statement_section == 'purchase_s4':
@@ -874,10 +867,10 @@ class account_intrastat_statement(models.Model):
                         ._prepare_statement_line(inv_intra_line)
                     if st_line:
                         if len(statement_lines_purchase_s4):
-                            st_line['progressive'] = \
+                            st_line['sequence'] = \
                                 len(statement_lines_purchase_s4) +1
                         else:
-                            st_line['progressive'] = 1
+                            st_line['sequence'] = 1
                         statement_lines_purchase_s4.append((0, 0, st_line))
         self.write({
             'sale_section1_ids' : statement_lines_sale_s1,
@@ -1038,7 +1031,8 @@ class account_intrastat_statement_sale_section1(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(round(
+                inv_intra_line.amount_euro) or 0, company_id),
             'transation_nature_id': (
                 inv_intra_line.transation_nature_id and
                 inv_intra_line.transation_nature_id.id) or (
@@ -1051,9 +1045,10 @@ class account_intrastat_statement_sale_section1(models.Model):
                 inv_intra_line.additional_units and
                 round(inv_intra_line.additional_units) or 0,
             'statistic_amount_euro':
-                round(inv_intra_line.statistic_amount_euro) or
-                (company_id.intrastat_sale_statistic_amount and
-                 round(inv_intra_line.amount_euro)) or 0,
+                self.statement_id.round_min_amount(
+                    round(inv_intra_line.statistic_amount_euro) or
+                    (company_id.intrastat_sale_statistic_amount and
+                    round(inv_intra_line.amount_euro)) or 0, company_id),
             'delivery_code_id': (
                 inv_intra_line.delivery_code_id and
                 inv_intra_line.delivery_code_id.id) or (
@@ -1190,7 +1185,8 @@ class account_intrastat_statement_sale_section2(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(
+                round(inv_intra_line.amount_euro) or 0, company_id),
             'sign_variation': sign_variation,
             'transation_nature_id': (
                 inv_intra_line.transation_nature_id and
@@ -1200,9 +1196,11 @@ class account_intrastat_statement_sale_section2(models.Model):
                 False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
             'statistic_amount_euro':
-                round(inv_intra_line.statistic_amount_euro) or
-                (company_id.intrastat_sale_statistic_amount and
-                 round(inv_intra_line.amount_euro)) or 0,
+                self.statement_id.round_min_amount(
+                    round(inv_intra_line.statistic_amount_euro) or
+                    (
+                        company_id.intrastat_sale_statistic_amount and
+                        round(inv_intra_line.amount_euro)) or 0, company_id),
         }
         return res
 
@@ -1317,7 +1315,9 @@ class account_intrastat_statement_sale_section3(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(
+                round(inv_intra_line.amount_euro) or 0,
+                inv_intra_line.invoice_id.company_id),
             'invoice_number': inv_intra_line.invoice_number or False,
             'invoice_date': inv_intra_line.invoice_date or False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
@@ -1436,7 +1436,9 @@ class account_intrastat_statement_sale_section4(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(
+                round(inv_intra_line.amount_euro) or 0,
+                inv_intra_line.invoice_id.company_id),
             'invoice_number': inv_intra_line.invoice_number or False,
             'invoice_date': inv_intra_line.invoice_date or False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
@@ -1613,7 +1615,8 @@ class account_intrastat_statement_purchase_section1(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(
+                round(inv_intra_line.amount_euro) or 0, company_id),
             'amount_currency':
                 # >> da valorizzare solo per operazione Paesi non Euro
                 not inv_intra_line.invoice_id.company_id.currency_id.id
@@ -1634,9 +1637,11 @@ class account_intrastat_statement_purchase_section1(models.Model):
                 inv_intra_line.additional_units and \
                 round(inv_intra_line.additional_units) or 0,
             'statistic_amount_euro':
-                round(inv_intra_line.statistic_amount_euro) or
-                (company_id.intrastat_purchase_statistic_amount and
-                 round(inv_intra_line.amount_euro)) or 0,
+                self.statement_id.round_min_amount(
+                    round(inv_intra_line.statistic_amount_euro) or
+                    (
+                        company_id.intrastat_purchase_statistic_amount and
+                        round(inv_intra_line.amount_euro)) or 0, company_id),
             'delivery_code_id': (
                 inv_intra_line.delivery_code_id and
                 inv_intra_line.delivery_code_id.id) or (
@@ -1784,7 +1789,8 @@ class account_intrastat_statement_purchase_section2(models.Model):
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
             'sign_variation': sign_variation,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(
+                round(inv_intra_line.amount_euro) or 0, company_id),
             'amount_currency': round(inv_intra_line.amount_currency) or 0,
             'transation_nature_id': (
                 inv_intra_line.transation_nature_id and
@@ -1794,9 +1800,11 @@ class account_intrastat_statement_purchase_section2(models.Model):
                 False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
             'statistic_amount_euro':
-                round(inv_intra_line.statistic_amount_euro) or
-                (company_id.intrastat_purchase_statistic_amount and
-                 round(inv_intra_line.amount_euro)) or 0,
+                self.statement_id.round_min_amount(
+                    round(inv_intra_line.statistic_amount_euro) or
+                    (
+                        company_id.intrastat_purchase_statistic_amount and
+                        round(inv_intra_line.amount_euro)) or 0, company_id),
         }
         return res
 
@@ -1918,7 +1926,9 @@ class account_intrastat_statement_purchase_section3(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(
+                round(inv_intra_line.amount_euro) or 0,
+                inv_intra_line.invoice_id.company_id),
             'amount_currency':
                 # >> da valorizzare solo per operazione Paesi non Euro
                 not inv_intra_line.invoice_id.company_id.currency_id.id
@@ -2053,7 +2063,9 @@ class account_intrastat_statement_purchase_section4(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': round(inv_intra_line.amount_euro) or 0,
+            'amount_euro': self.statement_id.round_min_amount(
+                round(inv_intra_line.amount_euro) or 0,
+                inv_intra_line.invoice_id.company_id),
             'amount_currency': round(inv_intra_line.amount_currency) or 0,
             'invoice_number': inv_intra_line.invoice_number or False,
             'invoice_date': inv_intra_line.invoice_date or False,
