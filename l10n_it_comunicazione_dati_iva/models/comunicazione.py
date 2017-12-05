@@ -73,6 +73,11 @@ class ComunicazioneDatiIva(models.Model):
         default=_default_company)
     identificativo = fields.Integer(string='Identificativo',
                                     default=_get_identificativo)
+    id_comunicazione = fields.Char(
+        string='Id Comunicazione',
+        help='Identificativo fornito dall\'Agenzia delle Entrate '
+             'nel momento in cui si effettua la comunicazione '
+             'mediante file XML')
     name = fields.Char(string='Name', compute="_compute_name")
     declarant_fiscalcode = fields.Char(
         string='Codice Fiscale Dichiarante',
@@ -90,8 +95,9 @@ class ComunicazioneDatiIva(models.Model):
     fatture_emesse = fields.Boolean(string="Fatture Emesse")
     fatture_ricevute = fields.Boolean(string="Fatture Ricevute")
     dati_trasmissione = fields.Selection(
-        [('DTE', 'Fatture Emesse'), ('DTR', 'Fatture Ricevute'),
-         ('ANN', 'Annullamento dai inviati in precedenza')],
+        [('DTE', 'Fatture Emesse'),
+         ('DTR', 'Fatture Ricevute'),
+         ('ANN', 'Annullamento dati inviati in precedenza')],
         string='Trasmissione dati', required=True)
     # Cedente
     partner_cedente_id = fields.Many2one('res.partner', string='Partner')
@@ -1916,20 +1922,24 @@ class ComunicazioneDatiIva(models.Model):
         x_4_1_id_file = etree.SubElement(
             x_4_ann,
             etree.QName("IdFile"))
-        x_4_1_id_file.text = str(self.identificativo)
+        x_4_1_id_file.text = self.id_comunicazione
         # ----- 4.2 - Posizione
+        '''
+        If this node is empty, cancel all invoices of previous comunication
         x_4_2_posizione = etree.SubElement(
             x_4_ann,
             etree.QName("Posizione"))
+        '''
         return x_4_ann
 
     @api.multi
     def get_export_xml_filename(self):
         self.ensure_one()
-        filename = '{id}_{type}_{number}.{ext}'.format(
+        filename = '{id}_{type}_{ann}{number}.{ext}'.format(
             id=self.company_id.vat or '',
             type='DF',
-            number=str(self.identificativo or 0).rjust(5, '0'),
+            ann='A' if self.dati_trasmissione == 'ANN' else '0',
+            number=str(self.identificativo or 0).rjust(4, '0'),
             ext='xml',
         )
         return filename
@@ -1941,18 +1951,19 @@ class ComunicazioneDatiIva(models.Model):
         # ----- 0 - Dati Fattura
         x_0_dati_fattura = self._export_xml_get_dati_fattura()
         # ----- 1 - Dati Fattura header
-        x_1_dati_fattura_header = self._export_xml_get_dati_fattura_header()
-        x_0_dati_fattura.append(x_1_dati_fattura_header)
+        if self.dati_trasmissione in ('DTE', 'DTR'):
+            x_1_dati_fattura_header = self._export_xml_get_dati_fattura_header()
+            x_0_dati_fattura.append(x_1_dati_fattura_header)
+        # ----- 2 - DTE
         if self.dati_trasmissione == 'DTE':
-            # ----- 2 - DTE
             x_2_dte = self._export_xml_get_dte()
             x_0_dati_fattura.append(x_2_dte)
+        # ----- 3 - DTR
         elif self.dati_trasmissione == 'DTR':
-            # ----- 3 - DTR
             x_3_dtr = self._export_xml_get_dtr()
             x_0_dati_fattura.append(x_3_dtr)
+        # ----- 4 - ANN
         elif self.dati_trasmissione == 'ANN':
-            # ----- 4 - ANN
             x_4_ann = self._export_xml_get_ann()
             x_0_dati_fattura.append(x_4_ann)
         # ----- Remove empty nodes
