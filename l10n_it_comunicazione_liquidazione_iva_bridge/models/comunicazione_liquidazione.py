@@ -82,11 +82,15 @@ class ComunicazioneLiquidazioneVp(models.Model):
                 # Credito anno precedente (NON GESTITO)
                 # Versamenti auto UE (NON GESTITO)
                 # Crediti d’imposta (NON GESTITO)
-
-                # Interessi dovuti per liquidazioni trimestrali
-                interessi_dovuti = 0
-                if interests_account_id:
-                    for line in liq.generic_vat_account_line_ids:
-                        if line.account_id.id == interests_account_id:
-                            interessi_dovuti += (-1 * line.amount)
-                quadro.interessi_dovuti += interessi_dovuti
+                # Da altri crediti e debiti calcolo:
+                # 1 - Interessi dovuti per liquidazioni trimestrali
+                # 2 - Decremento iva esigibile con righe positive
+                # 3 - Decremento iva detratta con righe negative
+                for line in liq.generic_vat_account_line_ids:
+                    if interests_account_id and \
+                            (line.account_id.id == interests_account_id):
+                        quadro.interessi_dovuti += (-1 * line.amount)
+                    elif line.amount > 0:
+                        quadro.iva_esigibile -= line.amount
+                    else:
+                        quadro.iva_detratta += line.amount
