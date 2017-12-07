@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data noupdate="1">
+
+    <record id="seq_type_dichiarazione_intento" model="ir.sequence.type">
+        <field name="name">Dichiarazione Intento</field>
+        <field name="code">dichiarazione.intento.seq</field>
+    </record>
+
+    <record id="seq_dichiarazione_intento" model="ir.sequence">
+        <field name="name">Dichiarazione Intento sequence</field>
+        <field name="code">dichiarazione.intento.seq</field>
+        <field eval="1" name="number_next"/>
+        <field eval="1" name="number_increment"/>
+    </record>
+
+</data>
+</openerp>
