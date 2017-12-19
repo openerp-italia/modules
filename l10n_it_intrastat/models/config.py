@@ -1,40 +1,20 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#    
+#
 #    Author: Alessandro Camilli (a.camilli@openforce.it)
 #    Copyright (C) 2015
 #    Apulia Software srl - info@apuliasoftware.it - www.apuliasoftware.it
 #    Openforce di Camilli Alessandro - www.openforce.it
 #
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as published
-#    by the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
 from openerp import models, fields, api
 
 
 class res_company(models.Model):
     _inherit = 'res.company'
-    
+
     intrastat_uom_kg_id = fields.Many2one(
         'product.uom', string="Unit of measure for Kg",
         )
-    intrastat_weight_from_product = fields.Selection([
-        ('none', 'None'),
-        ('gross', 'Gross weight'),
-        ('net', 'Net weight'),
-        ], 'Weight from Product', default='net', required=True)
     intrastat_additional_unit_from = fields.Selection(
         [('quantity', 'Quantity'),('weight', 'Weight'),('none', 'None')],
         string='Additional Unit of Measure FROM', default='weight')
@@ -68,3 +48,8 @@ class res_company(models.Model):
         'account.intrastat.transport', string='Transport')
     intrastat_purchase_province_destination_id = fields.Many2one(
         'res.country.state', string='Province Destination')
+    intrastat_min_amount = fields.Float(
+        string="Min amount", help="In case of invoices < 'min amount', use min"
+                                  " amount in intrastat statement",
+        default=1
+    )

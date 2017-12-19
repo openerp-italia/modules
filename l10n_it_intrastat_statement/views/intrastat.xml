@@ -2,7 +2,7 @@
 <openerp>
     <data>
 
-        <!-- 
+        <!--
         STATEMENT
          -->
         <record id="account_intrastat_statement_tree_view" model="ir.ui.view">
@@ -14,14 +14,14 @@
                 </tree>
             </field>
         </record>
-        
+
         <record id="account_intrastat_statement_form_view" model="ir.ui.view">
             <field name="name">account.intrastat.statement.form.view</field>
             <field name="model">account.intrastat.statement</field>
             <field name="arch" type="xml">
                 <form string="INTRASTAT Statement">
                 	<h2>
-                	Richiedi i dati per la preparazione, compilazione ed export della dichiarazione 
+                	Richiedi i dati per la preparazione, compilazione ed export della dichiarazione
                 	per l'agenzia delle dogane
                 	</h2>
                 	<field name="vat_delegate" invisible="1"/>
@@ -29,7 +29,7 @@
                 </form>
             </field>
         </record>
-        
+
         <record id="view_search_account_intrastat_statement" model="ir.ui.view">
             <field name="name">view.search.account.intrastat.statement</field>
             <field name="model">account.intrastat.statement</field>
@@ -39,14 +39,14 @@
                     <filter icon="terp-purchase" string="Purchase" domain="[('purchase','=',True)]"/>
                     <field name="company_id" groups="base.group_multi_company"></field>
                     <group expand="0" string="Group By">
-                        <filter string="Year" icon="terp-folder-orange" domain="" context="{'group_by':'fiscalyear_id'}"/>
+                        <filter string="Year" icon="terp-folder-orange" domain="" context="{'group_by':'fiscalyear'}"/>
                         <filter string="Sale" icon="terp-stock_symbol-selection" domain="" context="{'group_by':'sale'}"/>
                         <filter string="Purchase" icon="terp-stock_symbol-selection" domain="" context="{'group_by':'purchase'}"/>
                     </group>
                 </search>
             </field>
         </record>
-        
+
         <record id="account_intrastat_statement_action" model="ir.actions.act_window">
             <field name="name">Intrastat Statements</field>
             <field name="type">ir.actions.act_window</field>
@@ -57,11 +57,12 @@
             <field name="help"></field>
             <field name="search_view_id" ref="view_search_account_intrastat_statement" />
         </record>
-                
-        <menuitem action="account_intrastat_statement_action" id="menu_account_intrastat_statement" 
-            parent="account.menu_account_end_year_treatments" sequence="100"/>
-            
-        <!-- 
+
+        <menuitem id="menu_account_intrastat_statement"
+            action="account_intrastat_statement_action"
+            parent="account.menu_finance_entries" sequence="100"/>
+
+        <!--
         STATEMENT - Sale section 1
          -->
         <record id="view_tree_statement_sale_section1" model="ir.ui.view">
@@ -118,7 +119,7 @@
 	        	</form>
             </field>
         </record>
-        <!-- 
+        <!--
         STATEMENT - Sale section 2
          -->
         <record id="view_tree_statement_sale_section2" model="ir.ui.view">
@@ -171,7 +172,7 @@
 	        	</form>
             </field>
         </record>
-        <!-- 
+        <!--
         STATEMENT - Sale section 3
          -->
         <record id="view_tree_statement_sale_section3" model="ir.ui.view">
@@ -221,7 +222,7 @@
 	        	</form>
             </field>
         </record>
-        <!-- 
+        <!--
         STATEMENT - Sale section 4
          -->
         <record id="view_tree_statement_sale_section4" model="ir.ui.view">
@@ -276,8 +277,8 @@
 	        	</form>
             </field>
         </record>
-        
-        <!-- 
+
+        <!--
         STATEMENT - Purchase section 1
          -->
         <record id="view_tree_statement_purchase_section1" model="ir.ui.view">
@@ -338,7 +339,7 @@
 	        	</form>
             </field>
         </record>
-        <!-- 
+        <!--
         STATEMENT - Purchase section 2
          -->
         <record id="view_tree_statement_purchase_section2" model="ir.ui.view">
@@ -392,7 +393,7 @@
 	        	</form>
             </field>
         </record>
-        <!-- 
+        <!--
         STATEMENT - Purchase section 3
          -->
         <record id="view_tree_statement_purchase_section3" model="ir.ui.view">
@@ -443,7 +444,7 @@
 	        	</form>
             </field>
         </record>
-        <!-- 
+        <!--
         STATEMENT - Purchase section 4
          -->
         <record id="view_tree_statement_purchase_section4" model="ir.ui.view">
@@ -499,7 +500,7 @@
 	        	</form>
             </field>
         </record>
-    
+
         <!--
         CUSTOM
         -->
@@ -515,7 +516,7 @@
                 </tree>
             </field>
         </record>
-        
+
         <record id="account_intrastat_custom_view_form" model="ir.ui.view">
             <field name="name">account.intrastat.custom.view.form</field>
             <field name="model">account.intrastat.custom</field>
@@ -534,15 +535,5 @@
                 </form>
             </field>
         </record>
-        
-        <record id="action_account_intrastat_custom" model="ir.actions.act_window">
-            <field name="name">Customs</field>
-            <field name="res_model">account.intrastat.custom</field>
-            <field name="view_id" ref="account_intrastat_custom_view_tree"/>
-        </record>
-        
-        <menuitem id="menu_account_intrastat_custom" name="Customs" 
-            action="action_account_intrastat_custom" parent="l10n_it_intrastat.menu_account_intrastat_configuration" sequence="10"/>
-
     </data>
 </openerp>
