@@ -453,6 +453,8 @@ class ComunicazioneLiquidazioneVp(models.Model):
         for quadro in self:
             quadro.iva_da_versare = 0
             quadro.iva_a_credito = 0
+            if quadro.quarter == 5:
+                continue
             debito = quadro.iva_dovuta_debito + quadro.debito_periodo_precedente\
                 + quadro.interessi_dovuti
             credito = quadro.iva_dovuta_credito \
