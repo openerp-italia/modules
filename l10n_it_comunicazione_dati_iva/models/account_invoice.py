@@ -35,9 +35,10 @@ class account_invoice(models.Model):
             kind_id = tax.kind_id.id
             payability = tax.payability
             imposta = tax_line.amount
+            base = tax_line.base
             if tax.id not in tax_grouped:
                 tax_grouped[tax.id] = {
-                    'ImponibileImporto': 0.0,
+                    'ImponibileImporto': base,
                     'Imposta': imposta,
                     'Aliquota': aliquota,
                     'Natura_id': kind_id,
@@ -46,24 +47,23 @@ class account_invoice(models.Model):
                 }
             else:
                 tax_grouped[tax.id]['Imposta'] += imposta
+                tax_grouped[tax.id]['ImponibileImporto'] += base
 
         for tax_id in tax_grouped:
             tax = tax_model.browse(tax_id)
             vals = tax_grouped[tax_id]
-            vals['ImponibileImporto'] = (
-                vals['Imposta'] * (
-                    1 / (vals['Aliquota'] / 100.0)
-                )
-            )
             if tax.children_tax_ids:
                 parte_detraibile = 0.0
                 for child_tax in tax.children_tax_ids:
                     if child_tax.account_id:
                         parte_detraibile = child_tax.amount
                         break
-                vals['Detraibile'] = (
-                    100 / (vals['Aliquota'] / parte_detraibile)
-                )
+                if vals['Aliquota'] and parte_detraibile:
+                    vals['Detraibile'] = (
+                        100 / (vals['Aliquota'] / parte_detraibile)
+                    )
+                else:
+                    vals['Detraibile'] = 0.0
             vals = self._check_tax_comunicazione_dati_iva(tax, vals)
             fattura._compute_taxes_in_company_currency(vals)
             tax_lines.append((0, 0, vals))
