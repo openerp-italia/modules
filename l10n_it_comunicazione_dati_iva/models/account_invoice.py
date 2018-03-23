@@ -47,7 +47,6 @@ class account_invoice(models.Model):
                 }
             else:
                 tax_grouped[tax.id]['Imposta'] += imposta
-                tax_grouped[tax.id]['ImponibileImporto'] += base
 
         for tax_id in tax_grouped:
             tax = tax_model.browse(tax_id)
