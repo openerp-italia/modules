@@ -138,10 +138,17 @@ class AccountInvoiceLine(models.Model):
     @api.multi
     def _compute_tax_id(self):
         for line in self:
+            invoice_type = line.invoice_id.type
             fpos = line.invoice_id.fiscal_position_id or \
-                   line.invoice_id.partner_id.property_account_position_id
+                line.invoice_id.partner_id.property_account_position_id
             # If company_id is set, always filter taxes by the company
-            taxes = line.product_id.taxes_id.filtered(
+            if invoice_type.startswith('out_'):
+                product_taxes = line.product_id.taxes_id
+            elif invoice_type.startswith('in_'):
+                product_taxes = line.product_id.supplier_taxes_id
+            else:
+                return
+            taxes = product_taxes.filtered(
                 lambda r: not line.company_id or
                 r.company_id == line.company_id)
             line.invoice_line_tax_ids = fpos.map_tax(
