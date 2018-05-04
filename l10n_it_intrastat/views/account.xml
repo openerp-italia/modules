@@ -223,11 +223,6 @@
             action="view_invoice_intrastat_report_action" id="report_intrastat.menu_report_intrastat_all"
             parent="account.menu_finance_reports" sequence="4"/>
 
-         <!-- Hide standard menu intrastat report -->
-        <record model="ir.ui.menu" id="stock.menu_warehouse_report">
-           <field name="active">False</field>
-        </record>
-
         <!--
         Payment Terms
         -->
