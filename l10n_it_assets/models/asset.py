@@ -25,6 +25,8 @@ from openerp.exceptions import except_orm
 import openerp.addons.decimal_precision as dp
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from openerp.addons.account_asset_management.account_asset import dummy_fy
+import calendar
 
 
 class account_asset_category(models.Model):
