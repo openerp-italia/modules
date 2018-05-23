@@ -18,6 +18,7 @@
     'data': [
         'views/account_view.xml',
         'views/dichiarazione_intento_view.xml',
+        'views/company_view.xml',
         'views/account_invoice_view.xml',
         'data/sequence.xml',
         'security/ir.model.access.csv',

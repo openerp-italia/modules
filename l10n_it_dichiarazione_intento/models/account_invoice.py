@@ -18,7 +18,9 @@ class AccountInvoice(models.Model):
         for invoice in self:
             if invoice.partner_id and invoice.date_invoice:
                 dichiarazioni = self.env['dichiarazione.intento'].get_valid(
-                    invoice.partner_id.id, invoice.date_invoice)
+                    invoice.type.split('_')[0],
+                    invoice.partner_id.id,
+                    invoice.date_invoice)
                 if dichiarazioni:
                     invoice.fiscal_position_id = \
                         dichiarazioni.fiscal_position_id.id
@@ -53,14 +55,16 @@ class AccountInvoice(models.Model):
         for invoice in self:
             dichiarazioni = dichiarazione_model.with_context(
                 ignore_state=True if invoice.type.endswith('_refund')
-                else False).get_valid(partner_id=invoice.partner_id.id,
+                else False).get_valid(type=invoice.type.split('_')[0],
+                                      partner_id=invoice.partner_id.id,
                                       date=invoice.date_invoice)
             # ----- If partner hasn't dichiarazioni, do nothing
             if not dichiarazioni:
                 continue
+            sign = 1 if invoice.type.startswith('out_') else -1
             dichiarazioni_amounts = {}
             for tax_line in invoice.tax_line_ids:
-                amount = tax_line.base
+                amount = sign * tax_line.base
                 for dichiarazione in dichiarazioni:
                     if dichiarazione.id not in dichiarazioni_amounts:
                         dichiarazioni_amounts[dichiarazione.id] = \
@@ -79,19 +83,21 @@ class AccountInvoice(models.Model):
         for invoice in self:
             dichiarazioni = dichiarazione_model.with_context(
                 ignore_state=True if invoice.type.endswith('_refund')
-                else False).get_valid(partner_id=invoice.partner_id.id,
+                else False).get_valid(type=invoice.type.split('_')[0],
+                                      partner_id=invoice.partner_id.id,
                                       date=invoice.date_invoice)
             # ----- If partner hasn't dichiarazioni, do nothing
             if not dichiarazioni:
                 continue
             # ----- Get only lines with taxes
             lines = invoice.move_id.line_ids.filtered(
-                    lambda l: l.tax_ids)
+                lambda l: l.tax_ids)
             if not lines:
                 continue
             # ----- Group lines for tax
             grouped_lines = {}
-            sign = 1 if invoice.type.endswith('_refund') else -1
+            sign = -1 if invoice.type.endswith('_refund') else 1
+            # sign = 1 if invoice.type in ('in_invoice', 'out_refund') else -1
             for line in lines:
                 tax = line.tax_ids[0]
                 if tax not in grouped_lines.keys():
@@ -105,7 +111,7 @@ class AccountInvoice(models.Model):
                     dichiarazione.line_ids = [(0, 0, {
                         'taxes_ids': [(6, 0, [tax.id, ])],
                         'move_line_ids': [(6, 0, [l.id for l in lines])],
-                        'amount': sum([sign * l.balance for l in lines]),
+                        'amount': sum([sign * abs(l.balance) for l in lines]),
                         'invoice_id': invoice.id,
                         'base_amount': invoice.amount_untaxed,
                         'currency_id': invoice.currency_id.id,

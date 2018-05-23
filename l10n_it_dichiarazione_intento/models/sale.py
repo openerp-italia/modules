@@ -14,7 +14,9 @@ class SaleOrder(models.Model):
         for sale in self:
             if sale.partner_id and sale.date_order:
                 dichiarazioni = self.env['dichiarazione.intento'].get_valid(
-                    sale.partner_id.id, sale.date_order)
+                    'out',
+                    sale.partner_id.id,
+                    sale.date_order)
                 if dichiarazioni:
                     sale.fiscal_position_id = \
                         dichiarazioni.fiscal_position_id.id
