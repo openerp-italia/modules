@@ -14,7 +14,7 @@ class SaleOrder(models.Model):
         res = self.onchange_partner_id(part=partner_id)
         if partner_id and date_order:
             dichiarazioni = self.env['dichiarazione.intento'].get_valid(
-                partner_id, date_order)
+                'out', partner_id,  date_order)
             if dichiarazioni:
                 res['value']['fiscal_position'] = \
                     dichiarazioni.fiscal_position_id.id

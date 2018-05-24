@@ -17,12 +17,16 @@
                                        'readonly':[('state','!=','valid')]}"/>
                     </h1>
                     <group col="4">
+                        <field name="type"
+                               attrs="{'readonly':[('state','!=','valid')]}"
+                               colspan="2"/>
                         <field name="partner_id" options="{'no_create': True}"
                                attrs="{'readonly':[('state','!=','valid')]}"
                                colspan="2"/>
+                    </group>
+                    <group>
                         <field name="partner_document_number"
-                               attrs="{'readonly':[('state','!=','valid')]}"
-                               colspan="2"/>
+                               attrs="{'readonly':[('state','!=','valid')]}"/>
                     </group>
                     <group col="5">
                         <field name="date"
@@ -55,8 +59,8 @@
                     </div>
                     <notebook>
                         <page string="Details">
-                            <field name="line_ids" attrs="{'readonly':[('state','!=','valid')]}">
-                                <tree>
+                            <field name="line_ids" readonly="1">
+                                <tree editable="top">
                                     <field name="invoice_id"/>
                                     <field name="taxes_ids" widget="many2many_tags"/>
                                     <field name="base_amount"/>
@@ -89,6 +93,7 @@
         <field name="model">dichiarazione.intento</field>
         <field name="arch" type="xml">
             <search>
+                <field name="type"/>
                 <field name="number"/>
                 <field name="partner_document_number"/>
                 <field name="date"/>
@@ -108,6 +113,7 @@
         <field name="model">dichiarazione.intento</field>
         <field name="arch" type="xml">
             <tree decoration-info="state == 'valid'" decoration-muted="state == 'close'" >
+                <field name="type"/>
                 <field name="number"/>
                 <field name="date"/>
                 <field name="partner_id"/>

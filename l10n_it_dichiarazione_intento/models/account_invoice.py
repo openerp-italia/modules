@@ -20,9 +20,11 @@ class AccountInvoice(models.Model):
         res = super(AccountInvoice, self).onchange_partner_id(
             type, partner_id, date_invoice, payment_term, partner_bank_id,
             company_id)
-        if partner_id and date_invoice:
+        if partner_id and date_invoice and type:
             dichiarazioni = self.env['dichiarazione.intento'].get_valid(
-                partner_id, date_invoice)
+                type.split('_')[0],
+                partner_id,
+                date_invoice)
             if dichiarazioni:
                 if not res:
                     res = {}
@@ -55,11 +57,13 @@ class AccountInvoice(models.Model):
         for invoice in self:
             dichiarazioni = dichiarazione_model.with_context(
                 ignore_state=True if invoice.type.endswith('_refund')
-                else False).get_valid(partner_id=invoice.partner_id.id,
+                else False).get_valid(type=invoice.type.split('_')[0],
+                                      partner_id=invoice.partner_id.id,
                                       date=invoice.date_invoice)
             # ----- If partner hasn't dichiarazioni, do nothing
             if not dichiarazioni:
                 continue
+            sign = 1 if invoice.type.startswith('out_') else -1
             # ----- Get only lines with taxes
             lines = invoice.move_id.line_id.filtered(lambda l: l.tax_code_id)
             if not lines:
@@ -83,7 +87,7 @@ class AccountInvoice(models.Model):
                 grouped_lines[tax].append(line)
             # ----- Create a detail in dichiarazione for every tax group
             for tax, tax_lines in grouped_lines.iteritems():
-                total_tax_amount = sum([t.tax_amount for t in tax_lines])
+                total_tax_amount = sign * sum([t.tax_amount for t in tax_lines])
                 for dichiarazione in dichiarazioni:
                     if total_tax_amount <= dichiarazione.available_amount:
                         amount_value = total_tax_amount

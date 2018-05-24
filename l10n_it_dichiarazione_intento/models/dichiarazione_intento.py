@@ -8,6 +8,28 @@ from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT
 from openerp.exceptions import Warning as UserError, ValidationError
 
 
+class DichiarazioneIntentoYearlyLimit(models.Model):
+
+    _name = 'dichiarazione.intento.yearly.limit'
+    _description = 'Yearly limit for dichiarazioni'
+    _order = 'company_id, year desc'
+    _rec_name = 'year'
+
+    company_id = fields.Many2one('res.company', string='Company')
+    year = fields.Char(required=True)
+    limit_amount = fields.Float()
+    used_amount = fields.Float(compute='_compute_used_amount')
+
+    @api.multi
+    def _compute_used_amount(self):
+        for record in self:
+            dichiarazioni = self.env['dichiarazione.intento'].search([
+                ('date_start', '>=', '01-01-%s' % record.year),
+                ('date_end', '<=', '31-12-%s' % record.year),
+                ('type', '=', 'out'), ])
+            record.used_amount = sum([d.limit_amount for d in dichiarazioni])
+
+
 class DichiarazioneIntento(models.Model):
 
     _name = 'dichiarazione.intento'
@@ -20,11 +42,13 @@ class DichiarazioneIntento(models.Model):
         return self.env.user.company_id.currency_id
 
     display_name = fields.Char(compute='_compute_display_name', store=True)
-    number = fields.Char()
+    number = fields.Char(copy=False)
     date = fields.Date(required=True, string='Document Date',
                        help='Date of partner\'s document')
     date_start = fields.Date(required=True)
     date_end = fields.Date(required=True)
+    type = fields.Selection([('in', 'Suppliers'), ('out', 'Customers')],
+                            requited=True, default='in')
     partner_id = fields.Many2one('res.partner', string='Partner',
                                  required=True)
     partner_document_number = fields.Char(
@@ -48,11 +72,39 @@ class DichiarazioneIntento(models.Model):
 
     @api.model
     def create(self, values):
+        # ----- Check if yearly platfond is enough
+        #       to create an out dichiarazione
+        if values['type'] == 'out':
+            year = datetime.strptime(
+                values['date_start'], '%Y-%m-%d').strftime('%Y')
+            platfond = self.env.user.company_id.dichiarazione_yearly_limit_ids.\
+                filtered(lambda r: r.year == year)
+            if not platfond:
+                raise UserError(
+                    _('Define a yearly platfond for out documents'))
+            dichiarazioni = self.search([
+                ('date_start', '>=', '01-01-%s' % year),
+                ('date_end', '<=', '31-12-%s' % year),
+                ('type', '=', 'out'),
+                ])
+            actual_limit_total = sum([d.limit_amount for d in dichiarazioni]) \
+                + values['limit_amount']
+            if actual_limit_total > platfond.limit_amount:
+                raise UserError(
+                    _('Total of documents exceed yearly limit'))
         # ----- Assign a number to dichiarazione
         if values and not values.get('number', ''):
             values['number'] = self.env['ir.sequence'].next_by_code(
                 'dichiarazione.intento.seq')
         return super(DichiarazioneIntento, self).create(values)
+
+    @api.multi
+    def unlink(self):
+        for record in self:
+            if record.line_ids:
+                raise UserError(
+                    _('Impossible to delete a document with linked invoices'))
+        return super(DichiarazioneIntento, self).unlink()
 
     @api.constrains('fiscal_position_id', 'taxes_ids')
     @api.multi
@@ -119,14 +171,12 @@ class DichiarazioneIntento(models.Model):
                 state = 'valid'
             record.state = state
 
-    def get_valid(self, partner_id=False, date=False):
-        if not partner_id:
+    def get_valid(self, type=None, partner_id=False, date=False):
+        if not partner_id or not type or not date:
             return False
         # ----- return valid documents for partner
-        domain = [('partner_id', '=', partner_id)]
-        if date:
-            domain.append(('date_start', '<=', date))
-            domain.append(('date_end', '>=', date))
+        domain = [('partner_id', '=', partner_id), ('type', '=', type),
+                  ('date_start', '<=', date), ('date_end', '>=', date)]
         ignore_state = self.env.context.get('ignore_state', False)
         if not ignore_state:
             domain.append(('state', '!=', 'close'), )
