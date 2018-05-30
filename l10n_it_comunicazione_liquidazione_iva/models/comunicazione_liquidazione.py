@@ -39,12 +39,16 @@ class ComunicazioneLiquidazione(models.Model):
 
     @api.multi
     def _compute_name(self):
-        name = ""
         for dich in self:
+            name = ""
             for quadro in dich.quadri_vp_ids:
                 if not name:
-                    name += '{} {}'.format(str(dich.year),
-                                           quadro.period_type)
+                    period_type = ''
+                    if quadro.period_type == 'month':
+                        period_type = _('month')
+                    else:
+                        period_type = _('quarter')
+                    name += '{} {}'.format(str(dich.year), period_type)
                 if quadro.period_type == 'month':
                     name += ', {}'.format(str(quadro.month))
                 else:
@@ -223,7 +227,8 @@ class ComunicazioneLiquidazione(models.Model):
         # Codice Fornitura
         x1_1_1_CodiceFornitura = etree.SubElement(
             x1_1_Intestazione, etree.QName(NS_IV, "CodiceFornitura"))
-        x1_1_1_CodiceFornitura.text = unicode('IVP17')
+        code = str(self.year)[-2:]
+        x1_1_1_CodiceFornitura.text = unicode('IVP{}'.format(code))
         # Codice Fiscale Dichiarante
         if self.declarant_fiscalcode:
             x1_1_2_CodiceFiscaleDichiarante = etree.SubElement(
