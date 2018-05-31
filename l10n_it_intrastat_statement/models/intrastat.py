@@ -198,6 +198,8 @@ class account_intrastat_statement(models.Model):
         help="Values accepted:\
         - Month : From 1 to 12 \
         - Quarterly: From 1 to 4", required=True)
+    date_start = fields.Date(string='Date Start')
+    date_stop = fields.Date(string='Date Stop')
     content_type = fields.Selection([
         ('0', 'Normal Period'),
         ('8', 'Change Period in quarterly: only first month operations'),
@@ -348,6 +350,52 @@ class account_intrastat_statement(models.Model):
             res.update({'month' : date_obj.month})
         
         return res
+
+    @api.onchange('fiscalyear_id', 'period_type', 'period_number')
+    def onchange_period(self):
+        for statement in self:
+            if not statement.fiscalyear_id \
+                or not statement.period_type\
+                or not statement.period_number:
+                continue
+            period_statement_ids = []
+            date_start_year = datetime.strptime(statement.fiscalyear_id.date_start,
+                                                '%Y-%m-%d')
+            if statement.period_type == 'M':
+                period_date_start = datetime(date_start_year.year,
+                                             statement.period_number,
+                                             1)
+                # Last date of month
+                if not statement.period_number == 12:
+                    period_date_work = datetime(date_start_year.year,
+                                                statement.period_number + 1,
+                                                1)
+                    period_date_stop = period_date_work - timedelta(days = 1)
+                else:
+                    period_date_stop = datetime(date_start_year.year, 12, 31)
+                # Period compentence
+                period_statement_ids.append(
+                    self.env['account.period'].find(period_date_start).id)
+            else:
+                if statement.period_number == 1:
+                    period_date_start = datetime(date_start_year.year, 1, 1)
+                    period_date_medium = datetime(date_start_year.year, 2, 1)
+                    period_date_stop = datetime(date_start_year.year, 3, 31)
+                elif statement.period_number == 2:
+                    period_date_start = datetime(date_start_year.year, 4, 1)
+                    period_date_medium = datetime(date_start_year.year, 5, 1)
+                    period_date_stop = datetime(date_start_year.year, 6, 30)
+                elif statement.period_number == 3:
+                    period_date_start = datetime(date_start_year.year, 7, 1)
+                    period_date_medium = datetime(date_start_year.year, 8, 1)
+                    period_date_stop = datetime(date_start_year.year, 9, 30)
+                elif statement.period_number == 4:
+                    period_date_start = datetime(date_start_year.year, 10, 1)
+                    period_date_medium = datetime(date_start_year.year, 11, 1)
+                    period_date_stop = datetime(date_start_year.year, 12, 31)
+            statement.date_start = period_date_start
+            statement.date_stop = period_date_stop
+
 
     @api.one
     def _normalize_statement(self):
@@ -696,52 +744,9 @@ class account_intrastat_statement(models.Model):
     def compute_statement(self):
         # Unlink existing lines
         self._unlink_sections()
-        # Setting period
-        period_statement_ids = []
-        date_start_year = datetime.strptime(self.fiscalyear_id.date_start, 
-                                            '%Y-%m-%d')
-        if self.period_type == 'M':
-            period_date_start = datetime(date_start_year.year, 
-                                         self.period_number, 
-                                         1)
-            # Last date of month
-            if not self.period_number == 12:
-                period_date_work = datetime(date_start_year.year, 
-                                            self.period_number + 1, 
-                                            1)
-                period_date_stop = period_date_work - timedelta(days = 1)
-            else:
-                period_date_stop = datetime(date_start_year.year, 12, 31)
-            # Period compentence 
-            period_statement_ids.append(
-                self.env['account.period'].find(period_date_start).id)
-        else:
-            if self.period_number == 1:
-                period_date_start = datetime(date_start_year.year, 1, 1)
-                period_date_medium = datetime(date_start_year.year, 2, 1)
-                period_date_stop = datetime(date_start_year.year, 3, 31)
-            elif self.period_number == 2:
-                period_date_start = datetime(date_start_year.year, 4, 1)
-                period_date_medium = datetime(date_start_year.year, 5, 1)
-                period_date_stop = datetime(date_start_year.year, 6, 30)
-            elif self.period_number == 3:
-                period_date_start = datetime(date_start_year.year, 7, 1)
-                period_date_medium = datetime(date_start_year.year, 8, 1)
-                period_date_stop = datetime(date_start_year.year, 9, 30)
-            elif self.period_number == 4:
-                period_date_start = datetime(date_start_year.year, 10, 1)
-                period_date_medium = datetime(date_start_year.year, 11, 1)
-                period_date_stop = datetime(date_start_year.year, 12, 31)
-            # Period compentence
-            period_statement_ids.append(
-                self.env['account.period'].find(period_date_start).id)
-            period_statement_ids.append(
-                self.env['account.period'].find(period_date_medium).id)
-            period_statement_ids.append(
-                self.env['account.period'].find(period_date_stop).id)
         # Search intrastat lines
-        domain = [('move_id.date', '>=', period_date_start),
-                  ('move_id.date', '<=', period_date_stop),
+        domain = [('move_id.date', '>=', self.date_start),
+                  ('move_id.date', '<=', self.date_stop),
                   ('intrastat', '=', True)]
         # ... sale - purchase
         inv_type = []
