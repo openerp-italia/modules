@@ -17,12 +17,22 @@ class ComunicazioneDatiIvaRicalcoloTipoDocumentoFiscale(models.TransientModel):
                 domain = [('comunicazione_dati_iva_escludi', '=', True)]
                 no_journal_ids = self.env['account.journal'].search(domain).ids
                 domain = [
+                    '&',
+                    '&',
                     ('move_id', '!=', False),
+                    '&',
                     ('comunicazione_dati_iva_escludi', '!=', True),
+                    '&',
                     ('move_id.journal_id', 'not in', no_journal_ids),
                     ('company_id', '>=', comunicazione.company_id.id),
+                    '|',
+                    '&',
                     ('date_invoice', '>=', comunicazione.date_start),
-                    ('date_invoice', '<=', comunicazione.date_end)]
+                    ('date_invoice', '<=', comunicazione.date_end),
+                    '&',
+                    ('registration_date', '>=', comunicazione.date_start),
+                    ('registration_date', '<=', comunicazione.date_end)
+                ]
                 fatture = self.env['account.invoice'].search(domain)
                 for fattura in fatture:
                     fattura.fiscal_document_type_id =\
