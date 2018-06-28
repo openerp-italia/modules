@@ -38,8 +38,7 @@
     'name': 'Account - Intrastat',
     'version': '10.0.1.0.1',
     'category': 'Account',
-    'author': 'Openforce di Alessandro Camilli per Apulia Software srl'
-              ', Lara baggio per Link IT srl',
+    'author': 'Odoo Italia Network',
     'website': 'https://www.odoo-italia.net/',
     'license': 'Other proprietary',
     "depends": [
