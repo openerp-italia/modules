@@ -75,8 +75,8 @@ class DichiarazioneIntento(models.Model):
     @api.model
     def create(self, values):
         # ----- Check if yearly platfond is enough
-        #       to create an out dichiarazione
-        if values['type'] == 'out':
+        #       to create an in dichiarazione
+        if values['type'] == 'in':
             year = datetime.strptime(
                 values['date_start'], '%Y-%m-%d').strftime('%Y')
             platfond = self.env.user.company_id.dichiarazione_yearly_limit_ids.\
@@ -87,7 +87,7 @@ class DichiarazioneIntento(models.Model):
             dichiarazioni = self.search([
                 ('date_start', '>=', '%s-01-01' % year),
                 ('date_end', '<=', '%s-12-31' % year),
-                ('type', '=', 'out'),
+                ('type', '=', 'in'),
                 ])
             actual_limit_total = sum([d.limit_amount for d in dichiarazioni]) \
                 + values['limit_amount']
