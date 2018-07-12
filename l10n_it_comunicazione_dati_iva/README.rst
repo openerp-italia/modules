@@ -1,8 +1,14 @@
-======================
-Comunicazione dati IVA
-======================
+.. figure:: /l10n_it_comunicazione_dati_iva/static/description/logo_oin.png
+   :alt: Odoo Italia Network
+   :align: center
 
-Gestione Comunicazione dati IVA ed export file xml conforme alle specifiche dell''Agenzia delle Entrate
+==========================
+Comunicazione dati Fatture
+==========================
+
+Gestione Comunicazione dati Fatture ("nuovo spesometro") ed export file xml conforme alle specifiche dell'Agenzia delle Entrate
+
+Rif https://www.agenziaentrate.gov.it/wps/content/nsilib/nsi/schede/comunicazioni/dati+fatture+%28c.d.+nuovo+spesometro%29/scheda+informativa+dati+fatture+c.d.+nuovo+spesometro
 
 Credits
 =======
