@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
+from audioop import avg
 
 
 class ComunicazioneLiquidazioneVp(models.Model):
@@ -58,14 +59,14 @@ class ComunicazioneLiquidazioneVp(models.Model):
 
                     # Operazioni passive
                     credit_taxes = self.env['account.tax']
-                    for credit in liq.debit_vat_account_line_ids:
+                    for credit in liq.credit_vat_account_line_ids:
                         credit_taxes |= credit.tax_id
                     for credit_tax in credit_taxes:
                         tax = credit_taxes.with_context({
                             'from_date': period.date_start,
                             'to_date': period.date_end,
                         }).browse(credit_tax.id)
-                        quadro.imponibile_operazioni_passive += (
+                        quadro.imponibile_operazioni_passive += abs(
                             tax.base_balance)
 
                 # Iva esigibile
