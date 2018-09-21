@@ -32,7 +32,7 @@
 
 {
     'name': 'Comunicazione dati IVA',
-    'version': '10.0.1.0.0',
+    'version': '10.0.1.0.1',
     'category': 'Account',
     'author': "Openforce di Camilli Alessandro",
     'website': 'http://www.odoo-italia.net',
