@@ -15,6 +15,8 @@ class account_invoice(models.Model):
         exchange_rate = (
             self.amount_total_signed /
             self.amount_total_company_signed)
+        if not exchange_rate:
+            exchange_rate = 1
         vals['ImponibileImporto'] = vals['ImponibileImporto'] / exchange_rate
         vals['Imposta'] = vals['Imposta'] / exchange_rate
 
