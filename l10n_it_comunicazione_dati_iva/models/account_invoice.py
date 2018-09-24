@@ -12,11 +12,12 @@ class account_invoice(models.Model):
         string='Escludi dalla dichiarazione IVA', default=False)
 
     def _compute_taxes_in_company_currency(self, vals):
-        exchange_rate = (
-            self.amount_total_signed /
-            self.amount_total_company_signed)
-        if not exchange_rate:
+        if not self.amount_total_company_signed:
             exchange_rate = 1
+        else:
+            exchange_rate = (
+                self.amount_total_signed /
+                self.amount_total_company_signed)
         vals['ImponibileImporto'] = vals['ImponibileImporto'] / exchange_rate
         vals['Imposta'] = vals['Imposta'] / exchange_rate
 
