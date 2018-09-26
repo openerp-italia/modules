@@ -33,7 +33,7 @@ class account_invoice(models.Model):
                     kind_id = tax.kind_id.id
                     payability = tax.payability
                 vals_tax_line = \
-                    fattura._get_tax_comunicazione_dati_iva_tax_line_amount(
+                    self._get_tax_comunicazione_dati_iva_tax_line_amount(
                         tax_line)
                 val = {
                     'ImponibileImporto': vals_tax_line['base'],
@@ -82,7 +82,7 @@ class account_invoice(models.Model):
             'amount': abs(tax_line.tax_amount)
         }
         # Gestione righe negative
-        if tax_line.base < 0 or 'refund' in self.type:
+        if tax_line.base < 0:
             vals['base'] = vals['base'] * -1
             vals['amount'] = vals['amount'] * -1
         return vals
@@ -115,8 +115,8 @@ class account_invoice(models.Model):
             args = {}
 
         if 'tot_imponibile' in args:
-            if not abs(round(self.amount_untaxed, 2)) ==\
-                    abs(round(args['tot_imponibile'], 2)):
+            if not round(self.amount_untaxed, 2) ==\
+                    round(args['tot_imponibile'], 2):
                 raise ValidationError(
                     _("Imponibile ft {} del partner {} non congruente. \
                     Verificare dettaglio sezione imposte della fattura (\
