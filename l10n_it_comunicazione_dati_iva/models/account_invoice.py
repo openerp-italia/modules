@@ -33,15 +33,17 @@ class account_invoice(models.Model):
             aliquota = tax.amount
             parent = tax_model.search([('children_tax_ids', 'in', [tax.id])])
             if parent:
-                tax = parent
+                main_tax = parent
                 aliquota = parent.amount
-            kind_id = tax.kind_id.id
-            payability = tax.payability
+            else:
+                main_tax = tax
+            kind_id = main_tax.kind_id.id
+            payability = main_tax.payability
             imposta = tax_line.amount
             base = tax_line.base
-            if tax.id not in tax_grouped:
-                tax_grouped[tax.id] = {
-                    'ImponibileImporto': base,
+            if main_tax.id not in tax_grouped:
+                tax_grouped[main_tax.id] = {
+                    'ImponibileImporto': 0,
                     'Imposta': imposta,
                     'Aliquota': aliquota,
                     'Natura_id': kind_id,
@@ -49,7 +51,12 @@ class account_invoice(models.Model):
                     'Detraibile': 0.0,
                 }
             else:
-                tax_grouped[tax.id]['Imposta'] += imposta
+                tax_grouped[main_tax.id]['Imposta'] += imposta
+            if tax.account_id:
+                # account_id è valorizzato per la parte detraibile dell'imposta
+                # In questa tax_line è presente il totale dell'imponibile
+                # per l'imposta corrente
+                tax_grouped[main_tax.id]['ImponibileImporto'] += base
 
         for tax_id in tax_grouped:
             tax = tax_model.browse(tax_id)
