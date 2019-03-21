@@ -313,8 +313,7 @@ class account_intrastat_statement(models.Model):
         self.recompute_sequence_lines()
         return res;
 
-    @api.model
-    def _get_period_ref(self, invoice_line):
+    def _get_period_ref(self):
         res = {
             'year_id' : False,
             'quarterly' : False,
@@ -698,6 +697,7 @@ class account_intrastat_statement(models.Model):
     def compute_statement(self):
         # Unlink existing lines
         self._unlink_sections()
+        statement_id = self
         # Setting period
         period_statement_ids = []
 
@@ -776,7 +776,7 @@ class account_intrastat_statement(models.Model):
                 if inv_intra_line.statement_section == 'sale_s1':
                     st_line = \
                         self.env['account.intrastat.statement.sale.section1']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_sale_s1):
                             st_line['sequence'] = \
@@ -788,7 +788,7 @@ class account_intrastat_statement(models.Model):
                 elif inv_intra_line.statement_section == 'sale_s2':
                     st_line = \
                         self.env['account.intrastat.statement.sale.section2']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_sale_s2):
                             st_line['sequence'] = \
@@ -800,7 +800,7 @@ class account_intrastat_statement(models.Model):
                 elif inv_intra_line.statement_section == 'sale_s3':
                     st_line = \
                         self.env['account.intrastat.statement.sale.section3']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_sale_s3):
                             st_line['sequence'] = \
@@ -812,7 +812,7 @@ class account_intrastat_statement(models.Model):
                 elif inv_intra_line.statement_section == 'sale_s4':
                     st_line = \
                         self.env['account.intrastat.statement.sale.section4']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_sale_s4):
                             st_line['sequence'] = \
@@ -825,7 +825,7 @@ class account_intrastat_statement(models.Model):
                     st_line = \
                         self.env[
                             'account.intrastat.statement.purchase.section1']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_purchase_s1):
                             st_line['sequence'] = \
@@ -838,7 +838,7 @@ class account_intrastat_statement(models.Model):
                     st_line = \
                         self.env[
                             'account.intrastat.statement.purchase.section2']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_purchase_s2):
                             st_line['sequence'] = \
@@ -851,7 +851,7 @@ class account_intrastat_statement(models.Model):
                     st_line = \
                         self.env[
                             'account.intrastat.statement.purchase.section3']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_purchase_s3):
                             st_line['sequence'] = \
@@ -864,7 +864,7 @@ class account_intrastat_statement(models.Model):
                     st_line = \
                         self.env[
                             'account.intrastat.statement.purchase.section4']\
-                        ._prepare_statement_line(inv_intra_line)
+                        ._prepare_statement_line(inv_intra_line, statement_id)
                     if st_line:
                         if len(statement_lines_purchase_s4):
                             st_line['sequence'] = \
@@ -907,7 +907,7 @@ class account_intrastat_statement(models.Model):
         Refund line into sale if period ref si the same of the statemnt
         '''
         to_refund = False
-        if line.year_id.id == self.fiscalyear:
+        if line.year_id == self.fiscalyear:
             if self.period_type == 'M' \
                 and line.month == self.period_number:
                 to_refund = True
@@ -1020,8 +1020,7 @@ class account_intrastat_statement_sale_section1(models.Model):
             'weight':
             self.additional_units = self.weight_kg
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         company_id = self._context.get(
             'company_id', self.env.user.company_id)
         res = {
@@ -1032,7 +1031,7 @@ class account_intrastat_statement_sale_section1(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': self.statement_id.round_min_amount(round(
+            'amount_euro': statement_id.round_min_amount(round(
                 inv_intra_line.amount_euro) or 0, company_id),
             'transation_nature_id': (
                 inv_intra_line.transation_nature_id and
@@ -1046,7 +1045,7 @@ class account_intrastat_statement_sale_section1(models.Model):
                 inv_intra_line.additional_units and
                 round(inv_intra_line.additional_units) or 0,
             'statistic_amount_euro':
-                self.statement_id.round_min_amount(
+                statement_id.round_min_amount(
                     round(inv_intra_line.statistic_amount_euro) or
                     (company_id.intrastat_sale_statistic_amount and
                     round(inv_intra_line.amount_euro)) or 0, company_id),
@@ -1160,8 +1159,7 @@ class account_intrastat_statement_sale_section2(models.Model):
             self.country_partner_id = data['country_partner_id']
             self.vat_code = data['vat_code']
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         company_id = self._context.get(
             'company_id', self.env.user.company_id)
         # sign_variation
@@ -1173,8 +1171,7 @@ class account_intrastat_statement_sale_section2(models.Model):
         # ref_period = self.statement_id._get_period_ref(
         #     inv_intra_line.invoice_id.intrastat_refund_period_id)
         #=======================================================================
-        ref_period = self.statement_id._get_period_ref(
-            inv_intra_line.invoice_id)
+        ref_period = statement_id._get_period_ref()
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'month' : ref_period and ref_period['month'] or False,
@@ -1186,7 +1183,7 @@ class account_intrastat_statement_sale_section2(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': self.statement_id.round_min_amount(
+            'amount_euro': statement_id.round_min_amount(
                 round(inv_intra_line.amount_euro) or 0, company_id),
             'sign_variation': sign_variation,
             'transation_nature_id': (
@@ -1197,7 +1194,7 @@ class account_intrastat_statement_sale_section2(models.Model):
                 False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
             'statistic_amount_euro':
-                self.statement_id.round_min_amount(
+                statement_id.round_min_amount(
                     round(inv_intra_line.statistic_amount_euro) or
                     (
                         company_id.intrastat_sale_statistic_amount and
@@ -1306,8 +1303,7 @@ class account_intrastat_statement_sale_section3(models.Model):
             self.country_partner_id = data['country_partner_id']
             self.vat_code = data['vat_code']
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
@@ -1316,7 +1312,7 @@ class account_intrastat_statement_sale_section3(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': self.statement_id.round_min_amount(
+            'amount_euro': statement_id.round_min_amount(
                 round(inv_intra_line.amount_euro) or 0,
                 inv_intra_line.invoice_id.company_id),
             'invoice_number': inv_intra_line.invoice_number or False,
@@ -1416,15 +1412,13 @@ class account_intrastat_statement_sale_section4(models.Model):
             self.country_partner_id = data['country_partner_id']
             self.vat_code = data['vat_code']
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         # Period Ref
         #=======================================================================
         # ref_period = self.statement_id._get_period_ref(
         #     inv_intra_line.invoice_id.intrastat_refund_period_id)
         #=======================================================================
-        ref_period = self.statement_id._get_period_ref(
-            inv_intra_line.invoice_id)
+        ref_period = statement_id._get_period_ref()
 
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
@@ -1437,7 +1431,7 @@ class account_intrastat_statement_sale_section4(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': self.statement_id.round_min_amount(
+            'amount_euro': statement_id.round_min_amount(
                 round(inv_intra_line.amount_euro) or 0,
                 inv_intra_line.invoice_id.company_id),
             'invoice_number': inv_intra_line.invoice_number or False,
@@ -1604,8 +1598,7 @@ class account_intrastat_statement_purchase_section1(models.Model):
             self.country_origin_id = data['country_origin_id']
             self.country_good_origin_id = data['country_good_origin_id']
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         company_id = self._context.get(
             'company_id', self.env.user.company_id)
         res = {
@@ -1616,7 +1609,7 @@ class account_intrastat_statement_purchase_section1(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': self.statement_id.round_min_amount(
+            'amount_euro': statement_id.round_min_amount(
                 round(inv_intra_line.amount_euro) or 0, company_id),
             'amount_currency':
                 # >> da valorizzare solo per operazione Paesi non Euro
@@ -1638,7 +1631,7 @@ class account_intrastat_statement_purchase_section1(models.Model):
                 inv_intra_line.additional_units and \
                 round(inv_intra_line.additional_units) or 0,
             'statistic_amount_euro':
-                self.statement_id.round_min_amount(
+                statement_id.round_min_amount(
                     round(inv_intra_line.statistic_amount_euro) or
                     (
                         company_id.intrastat_purchase_statistic_amount and
@@ -1763,8 +1756,7 @@ class account_intrastat_statement_purchase_section2(models.Model):
             self.country_partner_id = data['country_partner_id']
             self.vat_code = data['vat_code']
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         company_id = self._context.get(
             'company_id', self.env.user.company_id)
         # sign_variation
@@ -1776,8 +1768,7 @@ class account_intrastat_statement_purchase_section2(models.Model):
         # ref_period = self.statement_id._get_period_ref(
         #     inv_intra_line.invoice_id.intrastat_refund_period_id)
         #=======================================================================
-        ref_period = self.statement_id._get_period_ref(
-            inv_intra_line.invoice_id)
+        ref_period = statement_id._get_period_ref()
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
@@ -1790,7 +1781,7 @@ class account_intrastat_statement_purchase_section2(models.Model):
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
             'sign_variation': sign_variation,
-            'amount_euro': self.statement_id.round_min_amount(
+            'amount_euro': statement_id.round_min_amount(
                 round(inv_intra_line.amount_euro) or 0, company_id),
             'amount_currency': round(inv_intra_line.amount_currency) or 0,
             'transation_nature_id': (
@@ -1801,7 +1792,7 @@ class account_intrastat_statement_purchase_section2(models.Model):
                 False,
             'intrastat_code_id': inv_intra_line.intrastat_code_id.id or False,
             'statistic_amount_euro':
-                self.statement_id.round_min_amount(
+                statement_id.round_min_amount(
                     round(inv_intra_line.statistic_amount_euro) or
                     (
                         company_id.intrastat_purchase_statistic_amount and
@@ -1917,8 +1908,7 @@ class account_intrastat_statement_purchase_section3(models.Model):
             self.country_partner_id = data['country_partner_id']
             self.vat_code = data['vat_code']
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
@@ -1927,7 +1917,7 @@ class account_intrastat_statement_purchase_section3(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': self.statement_id.round_min_amount(
+            'amount_euro': statement_id.round_min_amount(
                 round(inv_intra_line.amount_euro) or 0,
                 inv_intra_line.invoice_id.company_id),
             'amount_currency':
@@ -2044,15 +2034,13 @@ class account_intrastat_statement_purchase_section4(models.Model):
             self.country_partner_id = data['country_partner_id']
             self.vat_code = data['vat_code']
 
-    @api.model
-    def _prepare_statement_line(self, inv_intra_line):
+    def _prepare_statement_line(self, inv_intra_line, statement_id):
         # Period Ref
         #=======================================================================
         # ref_period = self.statement_id._get_period_ref(
         #     inv_intra_line.invoice_id.intrastat_refund_period_id)
         #=======================================================================
-        ref_period = self.statement_id._get_period_ref(
-            inv_intra_line.invoice_id)
+        ref_period = statement_id._get_period_ref()
         res = {
             'invoice_id' : inv_intra_line.invoice_id.id or False,
             'partner_id' : inv_intra_line.invoice_id.partner_id.id or False,
@@ -2064,7 +2052,7 @@ class account_intrastat_statement_purchase_section4(models.Model):
                 inv_intra_line.invoice_id.partner_id.vat \
                 and inv_intra_line.invoice_id.partner_id.vat[2:] \
                 or False,
-            'amount_euro': self.statement_id.round_min_amount(
+            'amount_euro': statement_id.round_min_amount(
                 round(inv_intra_line.amount_euro) or 0,
                 inv_intra_line.invoice_id.company_id),
             'amount_currency': round(inv_intra_line.amount_currency) or 0,
