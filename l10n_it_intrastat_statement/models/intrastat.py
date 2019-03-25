@@ -1236,8 +1236,9 @@ class account_intrastat_statement_sale_section2(models.Model):
         # Anno periodo di ref da modificare
         date_start_year = False
         if self.year_id:
-            date_start_year = datetime.strptime(self.year_id.date_start,
-                                            '%Y-%m-%d')
+            day = self.env.user.company_id.fiscalyear_last_day
+            month = self.env.user.company_id.fiscalyear_last_month
+            date_start_year = date(self.year_id, month, day)
         rcd += '{:2s}'.format(
             date_start_year and str(date_start_year.year)[2:] or '')
         # Codice dello Stato membro dell’acquirente
@@ -1489,8 +1490,9 @@ class account_intrastat_statement_sale_section4(models.Model):
         # dichiarazione da rettificare
         rcd += '{:6s}'.format(self.custom_id and self.custom_id.code or '')
         # Anno di registrazione della dichiarazione da rettificare
-        date_start_year = datetime.strptime(self.year_id.date_start,
-                                            '%Y-%m-%d')
+        day = self.env.user.company_id.fiscalyear_last_day
+        month = self.env.user.company_id.fiscalyear_last_month
+        date_start_year = date(self.year_id, month, day)
         rcd += '{:2s}'.format(
             date_start_year and str(date_start_year.year)[2:] or '')
         # Protocollo della dichiarazione da rettificare
@@ -1831,8 +1833,9 @@ class account_intrastat_statement_purchase_section2(models.Model):
         # Trimestre di riferimento del riepilogo da rettificare
         rcd += '{:1s}'.format(str(self.quarterly).zfill(1))
         # Anno periodo di ref da modificare
-        date_start_year = datetime.strptime(self.year_id.date_start,
-                                            '%Y-%m-%d')
+        day = self.env.user.company_id.fiscalyear_last_day
+        month = self.env.user.company_id.fiscalyear_last_month
+        date_start_year = date(self.year_id, month, day)
         rcd += '{:2s}'.format(
             date_start_year and str(date_start_year.year)[2:] or '')
         # Codice dello Stato membro del fornitore
@@ -2111,8 +2114,9 @@ class account_intrastat_statement_purchase_section4(models.Model):
         # dichiarazione da rettificare
         rcd += '{:6s}'.format(self.custom_id and self.custom_id.code or '')
         # Anno di registrazione della dichiarazione da rettificare
-        date_start_year = datetime.strptime(self.year_id.date_start,
-                                            '%Y-%m-%d')
+        day = self.env.user.company_id.fiscalyear_last_day
+        month = self.env.user.company_id.fiscalyear_last_month
+        date_start_year = date(self.year_id, month, day)
         rcd += '{:2s}'.format(
             date_start_year and str(date_start_year.year)[2:] or '')
         # Protocollo della dichiarazione da rettificare
