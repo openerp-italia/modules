@@ -24,8 +24,8 @@ class DichiarazioneIntentoYearlyLimit(models.Model):
     def _compute_used_amount(self):
         for record in self:
             dichiarazioni = self.env['dichiarazione.intento'].search([
-                ('date_start', '>=', '01-01-%s' % record.year),
-                ('date_end', '<=', '31-12-%s' % record.year),
+                ('date_start', '>=', '%s-01-01' % record.year),
+                ('date_end', '<=', '%s-12-31' % record.year),
                 ('type', '=', 'out'), ])
             record.used_amount = sum([d.limit_amount for d in dichiarazioni])
 
@@ -83,8 +83,8 @@ class DichiarazioneIntento(models.Model):
                 raise UserError(
                     _('Define a yearly platfond for out documents'))
             dichiarazioni = self.search([
-                ('date_start', '>=', '01-01-%s' % year),
-                ('date_end', '<=', '31-12-%s' % year),
+                ('date_start', '>=', '%s-01-01' % year),
+                ('date_end', '<=', '%s-12-31' % year),
                 ('type', '=', 'out'),
                 ])
             actual_limit_total = sum([d.limit_amount for d in dichiarazioni]) \
