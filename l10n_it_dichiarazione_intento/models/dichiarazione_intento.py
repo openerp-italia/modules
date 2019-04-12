@@ -121,8 +121,8 @@ class DichiarazioneIntento(models.Model):
                             'All taxes in dichiarazione intento must be used '
                             'in fiscal position taxes'))
 
-    @api.constrains('limit_amount', 'used_amount', 'line_ids',
-                    'line_ids.amount')
+    @api.constrains('limit_amount', 'used_amount', 'line_ids', 
+                    'available_amount')
     @api.multi
     def _check_available_amount(self):
         for dichiarazione in self:
