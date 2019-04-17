@@ -34,12 +34,13 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def onchange_payment_term_date_invoice_with_partner(
-            self, payment_term_id, date_invoice, partner_id):
+            self, payment_term_id, date_invoice, partner_id, type):
         res = self.onchange_payment_term_date_invoice(
             payment_term_id, date_invoice)
-        if partner_id and date_invoice:
+        if partner_id and date_invoice and type:
+            type = 'out' if 'out' in type else 'in'
             dichiarazioni = self.env['dichiarazione.intento'].get_valid(
-                partner_id, date_invoice)
+                type, partner_id, date_invoice)
             if dichiarazioni:
                 if not res:
                     res = {}
