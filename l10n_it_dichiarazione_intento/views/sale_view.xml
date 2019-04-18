@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+    <record id="dichiarazione_intento_view_order_form" model="ir.ui.view">
+        <field name="name">dichiarazione.intento.sale.order.form</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="attributes">
+                <attribute name="on_change">onchange_partner_id_with_date(partner_id, date_order)</attribute>
+            </field>
+            <field name="date_order" position="attributes">
+                <attribute name="on_change">onchange_partner_id_with_date(partner_id, date_order)</attribute>
+            </field>
+        </field>
+    </record>
+
+</data>
+</openerp>
