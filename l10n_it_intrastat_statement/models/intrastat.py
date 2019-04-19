@@ -522,12 +522,8 @@ class account_intrastat_statement(models.Model):
         else:
             rcd += '{:1s}'.format("C")
         # Anno
-        day = self.env.user.company_id.fiscalyear_last_day
-        month = self.env.user.company_id.fiscalyear_last_month
-        date_start_year = date(self.fiscalyear, month, day)
-        #date_start_year = datetime.strptime(self.fiscalyear_id.date_start,
-        #                                    '%Y-%m-%d')
-        rcd += '{:2s}'.format(str(date_start_year.year)[2:])
+        date_start_year = self.fiscalyear
+        rcd += '{:2s}'.format(str(date_start_year)[2:])
         # Periodicità
         rcd += '{:1s}'.format(self.period_type)
         # Periodo
@@ -701,8 +697,6 @@ class account_intrastat_statement(models.Model):
         # Setting period
         period_statement_ids = []
 
-        #date_start_year = datetime.strptime(self.fiscalyear_id.date_start,
-        #                                    '%Y-%m-%d')
         day = self.env.user.company_id.fiscalyear_last_day
         month = self.env.user.company_id.fiscalyear_last_month
         date_start_year = date(self.fiscalyear, month, day)
@@ -1234,11 +1228,7 @@ class account_intrastat_statement_sale_section2(models.Model):
         # Trimestre di riferimento del riepilogo da rettificare
         rcd += '{:1s}'.format(str(self.quarterly).zfill(1))
         # Anno periodo di ref da modificare
-        date_start_year = False
-        if self.year_id:
-            day = self.env.user.company_id.fiscalyear_last_day
-            month = self.env.user.company_id.fiscalyear_last_month
-            date_start_year = date(self.year_id, month, day)
+        date_start_year = self.year_id
         rcd += '{:2s}'.format(
             date_start_year and str(date_start_year.year)[2:] or '')
         # Codice dello Stato membro dell’acquirente
@@ -1490,9 +1480,7 @@ class account_intrastat_statement_sale_section4(models.Model):
         # dichiarazione da rettificare
         rcd += '{:6s}'.format(self.custom_id and self.custom_id.code or '')
         # Anno di registrazione della dichiarazione da rettificare
-        day = self.env.user.company_id.fiscalyear_last_day
-        month = self.env.user.company_id.fiscalyear_last_month
-        date_start_year = date(self.year_id, month, day)
+        date_start_year = self.year_id
         rcd += '{:2s}'.format(
             date_start_year and str(date_start_year.year)[2:] or '')
         # Protocollo della dichiarazione da rettificare
@@ -1833,11 +1821,9 @@ class account_intrastat_statement_purchase_section2(models.Model):
         # Trimestre di riferimento del riepilogo da rettificare
         rcd += '{:1s}'.format(str(self.quarterly).zfill(1))
         # Anno periodo di ref da modificare
-        day = self.env.user.company_id.fiscalyear_last_day
-        month = self.env.user.company_id.fiscalyear_last_month
-        date_start_year = date(self.year_id, month, day)
+        date_start_year = self.year_id
         rcd += '{:2s}'.format(
-            date_start_year and str(date_start_year.year)[2:] or '')
+            date_start_year and str(date_start_year)[2:] or '')
         # Codice dello Stato membro del fornitore
         self.country_partner_id.with_context(control_ISO_code=True).\
             intrastat_validate()
@@ -2114,11 +2100,9 @@ class account_intrastat_statement_purchase_section4(models.Model):
         # dichiarazione da rettificare
         rcd += '{:6s}'.format(self.custom_id and self.custom_id.code or '')
         # Anno di registrazione della dichiarazione da rettificare
-        day = self.env.user.company_id.fiscalyear_last_day
-        month = self.env.user.company_id.fiscalyear_last_month
-        date_start_year = date(self.year_id, month, day)
+        date_start_year = self.year_id
         rcd += '{:2s}'.format(
-            date_start_year and str(date_start_year.year)[2:] or '')
+            date_start_year and str(date_start_year)[2:] or '')
         # Protocollo della dichiarazione da rettificare
         rcd += '{:6s}'.format(self.protocol and str(self.protocol).zfill(6) \
                 or '')
